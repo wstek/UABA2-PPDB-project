@@ -1,0 +1,16 @@
+[Unit]
+Description=Gunicorn instance to serve Programming project databases
+After=network.target
+
+[Service]
+User=app
+
+Group=www-data
+
+WorkingDirectory=/home/app/Programming-project-databases/src
+Environment="PATH=/home/app/Programming-project-databases/env/bin"
+ExecStart=/home/app/Programming-project-databases/env/bin/gunicorn --workers 3 --bind unix:webapp.sock -m 007 wsgi:app
+Restart=on-failure
+
+[Install]
+WantedBy=multie-user.target

@@ -1,0 +1,15 @@
+server {
+    listen 80;
+    server_name 34.76.219.133 team[6].ua-ppdb.me;
+
+    # Webhook reverse proxy
+    location /hooks/ {
+      proxy_pass http://127.0.0.1:9000/hooks/;
+    }
+
+    # Webapp reverse proxy
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/app/PPDB-Template-App/src/ProgDBTutor/webapp.sock;
+    }
+}
