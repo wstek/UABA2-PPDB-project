@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name 34.76.219.133 team[6].ua-ppdb.me;
+    server_name 34.76.219.133 team6.ua-ppdb.me;
 
     # Webhook reverse proxy
     location /hooks/ {
