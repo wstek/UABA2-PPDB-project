@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Next Website</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='home.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!--Header-->
+    <nav class="navbar">
+        <div class="navbar__container">
+            <a href="{{ url_for('main') }}" id="navbar__logo">
+            <img class = logo src="{{ url_for('static', filename='Image1.png') }}" alt="pic"></a>
+            <div class="navbar__toggle" id="mobile-menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+            <ul class="navbar__menu">
+                <li class="navbar__btn">
+                    <a href="{{ url_for('sign_in') }}" class="button">Log in</a>
+                </li>
+                <li class="navbar__btn">
+                    <a href="{{ url_for('sign_up') }}" class="button">Sign Up</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+<!--Footer-->
+    <div class="footer">
+        <li  class = contact>
+            <a href="{{ url_for('contact') }}" class = contact_links>Contact</a>
+        </li>
+        <p class="names">Said Yandarbiev, Mohammed Shakleya, William Steklein, Sam Roggeman, Jorden Van Handenhoven </p>
+    </div>
+    <img class="image" src="{{ url_for('static', filename='Image2.png') }}" alt="pic" id="footer">
+
+<!--Home page-->
+    <div class="home">
+
+        <img class="image1" src="{{ url_for('static', filename='mountain.png') }}" alt="Italian Trulli" style="width:500px;height:300px;">
+
+
+        <label class="about">About</label>
+        <label class="abouttext">
+        We are second year students at the university of Antwerp and for the course <br>
+        Programming project databases . We had to make an webapplication that <br>
+        compares 2 feedback collaborative filtering recommendation algoritmes for a  <br>
+        certain dataset and simulates this. This will give a statistic overview for <br>
+        the user that will visualize what algoritm is better to use for <br>
+        recommending items to the simulated customers.<br>
+        <br>
+        We will answer these questions: How many active users are there on a certain <br>
+        day? What will happen if we show people just the popular items that will change <br>
+        every week or month what period is better?
+        </label>
+
+
+        <label class="setuptext">
+        Our webapplication offers a way to commpare two recommendation <br>
+        algorithms with each other, Start now!
+        </label>
+
+        <a href="{{ url_for('sign_in') }}" class="button1">setup</a>
+    </div>
+
+
+    <script src = "app.js"></script>
+</body>
+</html>
