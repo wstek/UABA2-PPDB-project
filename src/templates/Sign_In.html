@@ -40,8 +40,8 @@
 <!--Sign_Up-->
     <div class="Big_Rectangle" style="width:350px;height:325px;border:1px solid #000;">
         <label class="login">Login</label>
-        <input class="text1" type="text" placeholder="Username" id="fname1" name="fname1"><br><br>
-        <input class="text2" type="password" id="myInput"  placeholder="Password" name="myInput"><br><br>
+        <input class="text1" type="text" placeholder="Username" id="fname1" name="username"><br><br>
+        <input class="text2" type="password" id="myInput"  placeholder="Password" name="password"><br><br>
         <div class="checkboxes">
             <input class="checkbox1" type="checkbox" onclick="myFunction()">Show password<br><br>
             <input class="checkbox2" type="checkbox" >Remember me<br><br>
@@ -51,7 +51,7 @@
             <a href="{{ url_for('sign_up') }}">Sign Up!</a>
         </div>
         <li class="login__button">
-            <a href="Sign_In.html" class="button1">Log in</a>
+            <a href="{{ url_for('sign_in') }}" class="button1">Log in</a>
         </li>
 
     </div>

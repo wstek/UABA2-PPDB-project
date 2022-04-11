@@ -42,12 +42,17 @@
 <!--Sign_Up-->
     <div class="Big_Rectangle" style="width:350px;height:375px;border:1px solid #000;">
         <label class="sign_up">Sign up</label>
-        <div class="boxes">
-            <input class="text1" style="width:250px;height:30px;" type="text" placeholder="Username" ><br><br>
-            <input class="text2" style="width:250px;height:30px;" type="email"   placeholder="Email" ><br><br>
-            <input class="text3" id="myInput" style="width:250px;height:30px;" type="password" placeholder="Password"  ><br><br>
-            <input class="text4" id="myInput1" style="width:250px;height:30px;" type="password" placeholder="Rewrite password" ><br><br>
-        </div>
+            <form action="{{ url_for('sign_up') }}" method="post" autocomplete="off">
+                <div class="boxes">
+                    <input name="username" class="text1" style="width:250px;height:30px;" type="text" placeholder="Username" required><br><br>
+                    <input name="email" class="text2" style="width:250px;height:30px;" type="email"   placeholder="Email" required><br><br>
+                    <input name="password" class="text3" id="myInput" style="width:250px;height:30px;" type="password" placeholder="Password" required ><br><br>
+                    <input name="rewrite_password" class="text4" id="myInput1" style="width:250px;height:30px;" type="password" placeholder="Rewrite password" required><br><br>
+                </div>
+                <li class="sign_up__button" >
+                    <a href="{{ url_for('sign_up') }}" class="button1">Sign up</a>
+                </li>
+            </form>
         <div class="checkboxes">
             <input class="checkbox1" type="checkbox" onclick="myFunction()">Show password<br><br>
         </div>
@@ -56,9 +61,7 @@
             <a href="{{ url_for('sign_in') }}">Sign In!</a>
         </div>
 
-        <li class="sign_up__button">
-            <a href="Sign_Up.html" class="button1">Sign up</a>
-        </li>
+
     </div>
 
     <script src = "app.js"></script>

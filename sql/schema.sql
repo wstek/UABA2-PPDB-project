@@ -14,3 +14,16 @@ INSERT INTO Quote(text,author) VALUES('Not everyone will understand your journey
 INSERT INTO Quote(text,author) VALUES('One must have enough self-confidence and immunity to peer pressure to break the grip of standard paradigms.', 'Marvin Minsky');
 INSERT INTO Quote(text,author) VALUES('Everyone you meet is fighting a battle you know nothing about. Be kind. Always.', 'Robin Williams');
 INSERT INTO Quote(text,author) VALUES('[...] it is usual to have the polite convention that everyone thinks.', 'Alan Turing');
+
+
+
+
+CREATE TABLE IF NOT EXISTS Users(
+    id SERIAL PRIMARY KEY ,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR (100) NOT NULL,
+    created_at DATE DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO Users (id,username,password,email,created_at) VALUES(1,'test','test','test@test.com',CURRENT_TIMESTAMP);
