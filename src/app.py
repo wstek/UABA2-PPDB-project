@@ -22,6 +22,7 @@ app.secret_key = '*^*(*&)(*)(*afafafaSDD47j\3yX R~X@H!jmM]Lwf/,?KT'
 app_data = dict()
 app_data['app_name'] = config_data['app_name']
 
+
 # connection = DBConnection(dbname=config_data['dbname'], dbuser=config_data['dbuser'])
 # quote_data_access = QuoteDataAccess(connection)
 
@@ -61,6 +62,7 @@ HOST = "127.0.0.1" if DEBUG else "0.0.0.0"
 
 
 # VIEW
+
 @app.route("/")
 def main():
     return render_template('home.html', app_data=app_data)
@@ -105,7 +107,7 @@ def sign_up():
         usernamedata = db.execute("SELECT username FROM users WHERE username =:username", {"username":username}).fetchone()
         if usernamedata == None:
             if password == rewrite_password:
-                db.execute("INSERT INTO users(name,username,password) VALUES(:name,:username,:password)",
+                db.execute("INSERT INTO users(username,password,email,CURRENT_DATE) VALUES(:username,:password,:email_address,:created_at)",
                 {"username":username,"password":password, "email":email})
                 db.commit()
                 flash("You are registered and can now login", "success")
