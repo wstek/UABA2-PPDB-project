@@ -7,6 +7,7 @@ from flask import request, session, jsonify
 from config import config_data
 from quote_data_access import Quote, DBConnection, QuoteDataAccess
 
+
 # INITIALIZE SINGLETON SERVICES
 app = Flask('Tutorial ')
 app.secret_key = '*^*(*&)(*)(*afafafaSDD47j\3yX R~X@H!jmM]Lwf/,?KT'
@@ -22,7 +23,8 @@ HOST = "127.0.0.1" if DEBUG else "0.0.0.0"
 # REST API
 # See https://www.ibm.com/developerworks/library/ws-restful/index.html
 @app.route('/quotes', methods=['GET'])
-def get_quotes(): 
+def get_quotes():
+
     # Lookup row in table Quote, e.g. 'SELECT ID,TEXT FROM Quote'
     quote_objects = quote_data_access.get_quotes()
     # Translate to json
@@ -54,6 +56,10 @@ def add_quote():
 @app.route("/")
 def main():
     return render_template('index.html', app_data=app_data)
+# VIEW
+@app.route("/ABTest/input")
+def show_inputpage():
+    return render_template('input.html', app_data=app_data)
 
 
 @app.route("/show_quotes")

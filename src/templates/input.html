@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <title>{{app_data['app_name']}}</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='bootstrap-4.0.0.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='mystyle.css') }}">
+
+    <script src="{{ url_for('static',filename='jquery-3.2.1.js') }}"></script>
+    <script src="{{ url_for('static',filename='bootstrap-4.0.0.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='functions.js') }}"></script>
+
+    <script src="https://unpkg.com/react@^16/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+</head>
+
+
+
+<body>
+{% include 'header.html' %}
+
+
+<!--<form>-->
+
+
+<div class="container-fluid" id='algorithms'>
+    <!--    <button id='remove_algorithm' onclick="removeAlgorithm()">remove algorithm</button>-->
+    <div class="col-12 text-center">
+        <button class="btn btn-secondary btn-lg" type="reset">Reset</button>
+        <button class="btn btn-success btn-lg" type="submit">Start</button>
+    </div>
+    <div class="row text-center align-items-center offset-lg-1">
+
+
+        <div class="col-6">
+            <label for="start">Start:</label>
+            <input type="date" class="form-control" id="start" placeholder="Enter Start">
+        </div>
+        <div class="col-6">
+            <label for="end">End:</label>
+            <input type="date" class="form-control" id="end" placeholder="Enter End">
+        </div>
+    <div class="col-12">
+        <label for="topk">Top-K:</label>
+        <input type="number" class="form-control" id="topk" min="1"
+               placeholder="Enter trainings-interval">
+    </div>
+    </div>
+    <div class="row text-center align-items-center offset-lg-1">
+        <div class="col-6">
+            <label for="interval">Interval:</label>
+            <input type="number" class="form-control" id="interval" placeholder="Enter interval">
+        </div>
+    </div>
+    <div class="col-6">
+        <label for="stepsize">Step size:</label>
+        <input type="number" class="form-control" id="stepsize" min="1"
+               placeholder="Enter stepsize">
+    </div>
+
+
+    <div class="algorithm">
+        <strong>Algorithm</strong>
+        <div class="col-6">
+            <label for="TrainingsInterval">TrainingsInterval</label>
+            <input type="number" class="form-control" id="TrainingsInterval" min="1"
+                   placeholder="Enter trainings-interval">
+        </div>
+
+        <div class="row text-center align-items-center offset-lg-1">
+            <div class="col-6">
+                <div class="form-group">
+                    <label for="algorithmname">Algorithm</label>
+                    <select class="form-control" id="algorithmname">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!--<button type="button" onclick="myFunction()" class="btn"><i class="material-icons">dark_mode</i></button>-->
+
+
+    <br><br>
+
+
+</div>
+<button id='add_algorithm' onclick="addAlgorithm()">add algorithm</button>
+
+{% include 'footer.html' %}
+
+</body>
+
+</html>
+
