@@ -94,8 +94,13 @@ def sign_in():
 
     return render_template('Sign_In.html', app_data=app_data)
 
-@app.route("/Sign_Up", methods=["GET","POST"])
+@app.route("/InputParameters", methods=["GET", "POST"])
+def input():
 
+    return render_template('InputPage.html', app_data=app_data)
+
+
+@app.route("/Sign_Up", methods=["GET", "POST"])
 def sign_up():
     if request.method == 'POST':
         username = request.form.get('username')
