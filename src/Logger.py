@@ -1,6 +1,6 @@
 import logging
 import datetime
-from src.config.config import configLogger
+from config import configLogger
 
 CONFIG_FILE = "./config/logger.ini"
 

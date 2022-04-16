@@ -1,6 +1,6 @@
 import psycopg2
-from src.config.config import configDatabase
-from src.Logger import Logger
+from config import configDatabase
+from Logger import Logger
 
 
 class DatabaseConnection:
@@ -56,6 +56,6 @@ class DatabaseConnection:
 
 if __name__ == '__main__':
     db_con = DatabaseConnection()
-    db_con.connect(filename="../config/database.ini")
+    db_con.connect(filename="config/database.ini")
     db_con.logVersion()
     db_con.disconnect()

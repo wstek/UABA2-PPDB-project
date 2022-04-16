@@ -1,5 +1,5 @@
 from flask import Flask
-from src.database.database_access import DatabaseConnection
+from database_access import DatabaseConnection
 import time
 
 app = Flask(__name__)
