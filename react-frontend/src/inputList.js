@@ -28,7 +28,6 @@ const InputList = ({page,abs_algorithms}) => {
     }
     useEffect(() => {
         resetInput()
-        console.log("hi")
         // console.log("algorithm" + id)
         // console.log(con_algorithms);
     }, []);
