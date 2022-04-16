@@ -1,5 +1,5 @@
 import psycopg2
-from src.config.config import configDatabase
+from src.config import configDatabase
 from src.Logger import Logger
 
 
@@ -8,7 +8,8 @@ class DatabaseConnection:
         self.connection = None
 
     def __del__(self):
-        self.disconnect()
+        # self.disconnect()
+        pass
 
     def connect(self, filename='database.ini', section='postgresql'):
         try:
@@ -56,6 +57,6 @@ class DatabaseConnection:
 
 if __name__ == '__main__':
     db_con = DatabaseConnection()
-    db_con.connect(filename="../config/database.ini")
+    db_con.connect(filename="config/database.ini")
     db_con.logVersion()
     db_con.disconnect()
