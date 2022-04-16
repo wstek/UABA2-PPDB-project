@@ -1,5 +1,6 @@
 import logging
 import datetime
+import os
 from config import configLogger
 
 CONFIG_FILE = "./config/logger.ini"
@@ -21,6 +22,11 @@ class Logger:
 
     @classmethod
     def __logFile(cls, message):
+        path = "../logs"
+        isExist = os.path.exists(path)
+        if not isExist:
+            # Create a new directory because it does not exist
+            os.makedirs(path)
         currtime = datetime.datetime.now()
         f = open("../logs/" + "log_" + currtime.strftime('%Y-%m-%d'), 'a')
         f.write(currtime.strftime("%H:%M:%S") + " " + message + '\n')
@@ -37,7 +43,7 @@ class Logger:
     @classmethod
     def logError(cls, message, exception=False):
         if cls.log_to_file:
-            cls.__logFile("ERROR: " + message)
+            cls.__logFile("ERROR: " + str(message))
 
         if not cls.silence_log_error_console and not exception:
             logging.error(message)
