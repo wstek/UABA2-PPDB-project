@@ -1,20 +1,9 @@
-import header_logo from './Image1.png';
-import footer_logo from './Image2.png';
-
 import "./index.css"
 
-function clickNavbar(){
-    const menu = document.querySelector('#mobile-menu');
-    const menuLinks = document.querySelector('.navbar__menu');
-    menu.addEventListener('click',function () {
-        menu.classList.toggle('is-active');
-        menuLinks.classList.toggle('active');
-    })
-}
+
 
 function Account() {
   return (
-
       <div className="Contact">
         <label className="info">Info</label>
         <div className="Account_Rectangle" >
