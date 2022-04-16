@@ -298,7 +298,24 @@
     height:50px;
     border-radius: 10px;
 }
-
+.button2{
+    display:flex;
+    position: fixed;
+    justify-content: space-around;
+    text-decoration: none;
+    text-align:center;
+    border: none;
+    outline: none;
+    background: rgba(119,52,231);
+    color: #fff;
+    left: 71%;
+    top:45%;
+    font-size: 20px;
+    padding: 10px 20px;
+    width:120px;
+    height:50px;
+    border-radius: 10px;
+}
 .button1:hover{
     background: #cc4f0e;
     transition: all 0.3s ease;
