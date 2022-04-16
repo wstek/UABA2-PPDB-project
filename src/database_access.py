@@ -8,7 +8,8 @@ class DatabaseConnection:
         self.connection = None
 
     def __del__(self):
-        self.disconnect()
+        # self.disconnect()
+        pass
 
     def connect(self, filename='database.ini', section='postgresql'):
         try:
