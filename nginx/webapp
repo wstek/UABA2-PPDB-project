@@ -2,14 +2,25 @@ server {
     listen 80;
     server_name 34.76.219.133 team6.ua-ppdb.me;
 
-    # Webhook reverse proxy
-    location /hooks/ {
-      proxy_pass http://127.0.0.1:9000/hooks/;
+    # Frontend React webapp
+    location / {
+        try_files $uri $uri/ =404;
+        add_header Cache-Control "no-cache";
     }
 
-    # Webapp reverse proxy
-    location / {
+    location /static {
+        expires 1y;
+        add_header Cache-Control "public";
+    }
+
+    # Backend Python Flask micro web framework
+    location /api/ {
         include proxy_params;
         proxy_pass http://unix:/home/app/Programming-project-databases/src/webapp.sock;
+    }
+
+    # GitHub CI/CD webhook
+    location /hooks/ {
+        proxy_pass http://127.0.0.1:9000/hooks/;
     }
 }

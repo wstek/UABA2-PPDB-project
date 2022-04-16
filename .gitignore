@@ -1,0 +1,12 @@
+# config files
+src/config/*
+!src/config/__init__.py
+!src/config.py
+!src/config/logger.ini
+
+# logs
+logs
+
+# react
+react-frontend/node_modules
+react-frontend/build
