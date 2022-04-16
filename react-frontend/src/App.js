@@ -1,4 +1,4 @@
-import "./Sign_Up.css"
+import "./App.css"
 import Sign_In from "./Sign_In";
 import Sign_Up from "./Sign_Up";
 import Navbar from "./Navbar";
@@ -7,6 +7,7 @@ import {useState} from "react"
 import Home from "./Home"
 import Contact from "./Contact"
 import Account from "./Account"
+import InputPage from "./inputPage";
 
 
 function State(){
@@ -22,7 +23,6 @@ function State(){
 function App() {
 
   const [page, setPage] = useState( State());
-  console.log(State())
 
 
   function pageSwitch(){
@@ -45,12 +45,18 @@ function App() {
     else if(page === "account"){
       return(<Account setPage = {setPage}/>)
     }
+    else if(page === "abtest_setup"){
+      return( <InputPage page={page}/>)
+    }
   }
 
   return(
       <div className="Page">
+
         <Navbar setPage = {setPage}/>
+        <br/>
         {pageSwitch()}
+        <br/>
         <Footer setPage = {setPage}/>
       </div>
 

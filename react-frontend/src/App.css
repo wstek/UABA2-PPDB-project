@@ -36,3 +36,10 @@
     transform: rotate(360deg);
   }
 }
+
+.green_onhover:hover{
+  background-color: green;
+}
+.red_onhover:hover{
+  background-color: red;
+}
