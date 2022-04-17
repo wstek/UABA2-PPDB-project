@@ -1,11 +1,11 @@
-Click>=7.0
-Flask>=1.1.1
+Click==8.1.2
+Flask==2.1.1
 gunicorn>=20.0.4
-itsdangerous>=1.1.0
-Jinja2>=2.11.1
+itsdangerous==2.1.2
+Jinja2==3.1.1
 MarkupSafe>=1.1.1
 nose>=1.3.7
 psycopg2-binary>=2.8.4
-Werkzeug>=0.16.1
-flask-sqlalchemy>=2.5.1
+Werkzeug==2.1.1
+sqlalchemy
 passlib>=1.7.4
