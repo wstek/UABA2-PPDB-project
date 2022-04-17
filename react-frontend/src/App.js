@@ -16,12 +16,10 @@ function App() {
             <header className="App-header">
                 <img src={logo} className="App-logo" alt="logo"/>
                 <p>
-                    Recommendation Algorithms
+                    Recommendation Algorithms<br/>
+                    Under construction
                 </p>
 
-                <h6>Under construction</h6>
-
-                <h6>The current time is {currentTime}.</h6>
             </header>
         </div>
     );
