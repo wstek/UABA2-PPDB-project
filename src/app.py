@@ -4,9 +4,9 @@ import time
 
 app = Flask(__name__)
 
-# db_engine = DatabaseEngine()
-# db_engine.connect(filename="config/database.ini")
-# db_engine.logVersion()
+db_engine = DatabaseEngine()
+db_engine.connect(filename="config/database.ini")
+db_engine.logVersion()
 
 
 @app.route('/api/time')

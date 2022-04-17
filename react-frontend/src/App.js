@@ -19,7 +19,9 @@ function App() {
                     Recommendation Algorithms
                 </p>
 
-                <p>The current time is {currentTime}.</p>
+                <h6>Under construction</h6>
+
+                <h6>The current time is {currentTime}.</h6>
             </header>
         </div>
     );
