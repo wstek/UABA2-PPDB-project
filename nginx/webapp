@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name 34.140.180.2;
+    server_name 34.76.219.133 team6.ua-ppdb.me;
     root /home/app/Programming-project-databases/react-frontend/build;
     index index.html;
 
