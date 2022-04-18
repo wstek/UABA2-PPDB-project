@@ -32,8 +32,10 @@ CREATE TABLE "dataset" (
 );
 
 CREATE TABLE "customer" (
-  "customer_id" nat_int primary key,
-  "dataset_name" varchar NOT NULL references dataset(name) on update cascade on delete cascade
+  "customer_id" nat_int,
+  "dataset_name" varchar NOT NULL references dataset(name) on update cascade on delete cascade,
+  primary key (customer_id,dataset_name)
+
 );
 
 CREATE TABLE "ABTest" (
@@ -50,29 +52,39 @@ CREATE TABLE "ABTest" (
 
 
 CREATE TABLE "article" (
-  "article_id" nat_int primary key ,
-  "dataset_name" varchar NOT NULL references dataset(name) on update cascade on delete cascade
+  "article_id" nat_int,
+  "dataset_name" varchar NOT NULL references dataset(name) on update cascade on delete cascade,
+   primary key (article_id,dataset_name)
+
 );
 create table "article_attribute"(
   "attribute" varchar not null,
   "value" varchar not null,
+  "dataset_name" varchar not null,
 
-  "article_id" nat_int not null references article(article_id) on update cascade on delete cascade,
-  primary key ("attribute","article_id")
+  "article_id" nat_int not null,
+  foreign key (article_id,dataset_name) references article(article_id,dataset_name) on update cascade on delete cascade,
+  primary key ("attribute","article_id", dataset_name)
 );
 create table "customer_attribute"(
+  "dataset_name" varchar not null references dataset(name),
+
   "attribute" varchar not null,
   "value" varchar not null,
-  "customer_id" nat_int not null references customer(customer_id) on update cascade on delete cascade,
-  primary key ("attribute","customer_id")
+  "customer_id" nat_int not null,
+    foreign key (customer_id,dataset_name) references customer(customer_id,dataset_name) on update cascade on delete cascade,
+
+  primary key ("attribute","customer_id",dataset_name)
 );
 CREATE TABLE "purchase" (
-  "dataset_name" varchar not null references dataset(name) on update cascade on delete cascade,
-  "customer_id" nat_int NOT NULL references customer(customer_id) on update cascade on delete cascade,
-  article_id nat_int NOT NULL references article(article_id) on update cascade on delete cascade,
+  "dataset_name" varchar not null,
+  "customer_id" nat_int NOT NULL,
+  article_id nat_int NOT NULL,
   "timestamp" timestamp not null,
   "price" double precision NOT NULL,
-  PRIMARY KEY  ("dataset_name", "customer_id", "article_id", "timestamp")
+    foreign key (article_id,dataset_name) references article(article_id,dataset_name) on update cascade on delete cascade,
+  foreign key (customer_id,dataset_name) references customer(customer_id,dataset_name) on update cascade on delete cascade,
+PRIMARY KEY  ("dataset_name", "customer_id", "article_id", "timestamp")
 );
 
 CREATE TABLE "algorithm" (
@@ -98,15 +110,21 @@ CREATE TABLE "statistics" (
   foreign key (algorithm_id,abtest_id) references algorithm(algorithm_id,abtest_id) on update cascade on delete cascade
 );
 CREATE TABLE "customer_specific" (
-  "customer_id" nat_int NOT NULL references customer(customer_id) on update cascade on delete cascade,
+  "customer_id" nat_int NOT NULL,
+
   "statistics_id" nat_int NOT NULL references statistics(statistics_id) on update cascade on delete cascade,
+  "dataset_name" varchar not null,
+  foreign key (customer_id,dataset_name) references customer(customer_id,dataset_name) on update cascade on delete cascade,
   PRIMARY KEY ("customer_id", "statistics_id")
 );
+
 CREATE TABLE "recommendation" (
   "recomendation_id" nat_int not null,
-  "article_id" nat_int NOT NULL references article(article_id) on update cascade on delete cascade,
   "customer_id" nat_int not null,
   "statistics_id" nat_int not null,
+  "dataset_name" varchar not null,
+  "article_id" nat_int NOT NULL,
+  foreign key (article_id,dataset_name) references article(article_id,dataset_name) on update cascade on delete cascade,
   foreign key (customer_id,statistics_id) references customer_specific(customer_id,statistics_id) on update cascade on delete cascade,
   PRIMARY KEY ("recomendation_id", "customer_id", "statistics_id")
 );
