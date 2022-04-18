@@ -1,435 +1,799 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+
+/* base styles */
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Kumbh Sans', sans-serif;
+  margin: 0;
+  font-family: "Quicksand";
+  color: #333;
+}
+.navbar {
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  border-bottom: 1px solid #f2f2f2;
+}
+.navbar h1 {
+  color: #292929eb;
+  padding: 3px;
+  border-radius: 12px;
+  font-family: 'Kumbh Sans', sans-serif;
+  background-color: #f1356d;
+}
+.navbar .links {
+  margin-left: auto;
+}
+.navbar a {
+  margin-left: 16px;
+  text-decoration: none;
+  padding: 6px;
+}
+.navbar a:hover {
+  color: #f1356d;
+}
+.content {
+  max-width: 1500px;
+  margin: 20px auto;
+  padding: 20px;
 }
 
-.flexible {
-    display: flex;
-    margin-right: 10px;
+/* blog previews / list */
+.blog-preview {
+  padding: 10px 16px;
+  margin: 20px 0;
+  border-bottom: 1px solid #fafafa;
+}
+.blog-preview:hover {
+  box-shadow: 1px 3px 5px rgba(0,0,0,0.1);
+}
+.blog-preview h2 {
+  font-size: 20px;
+  color: #f1356d;
+  margin-bottom: 8px;
+}
+.blog-preview a{
+  text-decoration: none;
 }
 
-.button-purple{
-    background: rgba(119,52,231);
-    color: #fff;
-    justify-content: space-around;
-    text-decoration: none;
-    padding: 10px 20px;
-    text-align:center;
-    border: none;
-    outline: none;
-    border-radius: 10px;
+/* blog details page */
+.blog-details h2 {
+  font-size: 20px;
+  color: #f1356d;
+  margin-bottom: 10px;
+}
+.blog-details div {
+  margin: 20px 0;
+}
+.blog-details button {
+  background: #f1356d;
+  color: #fff;
+  border: 0;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
+/* create new blog form */
+.create {
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+}
+.create label {
+  text-align: left;
+  display: block;
+}
+.create h2 {
+  font-size: 20px;
+  color: #f1356d;
+  margin-bottom: 30px;
+}
+.create input, .create textarea, .create select {
+  width: 100%;
+  padding: 6px 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  display: block;
+}
+.create button {
+  background: #f1356d;
+  color: #fff;
+  border: 0;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 
-.button-purple:hover{
-    background: #cc4f0e;
-    transition: all 0.3s ease;
-}
 
-.bg-purple {
-    background: rgba(216,196,252,1);
-}
 
-.footer {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    background: rgba(216,196,252,1);
-    text-align: center;
-}
-.contact{
-    padding:1px 20px 2px 10px;
-    margin:0px;
-    text-align:right;
-    list-style: none;
-    color: #12375c;
-    bottom: 5px
-}
 
-.contact_links{
-    text-decoration: none;
-    color: #12375c;
-}
 
-.footer-image{
-    max-width: 100%;
-    max-height: 35px;
+
+
+
+
+
+    a {
+      text-decoration:none;
+    }
+    * {
+      outline:0;
+      
+    }
+    .home .body1 {
+      margin-top:40px;
+      /* background:#111; */
+      font-size:11px;
+      align-items: center;
+      color:#aaa;
+      font-family:"Poppins", sans-serif;
+    }
+    
+    .container  {
+      max-width:1140px;
+      margin:0 auto; 
+      display:block;
+    }
+    .row  {
+      display:flex;
+      align-items:center
+    }
+    
+    .thumb-box {
+      display:flex;
+      max-width:33.3333%;
+      margin:0 15px;
+      position:relative;
+    }
+    
+    
+    .thumb-box a {
+      padding:0;
+      position: relative;
+        width: 100%;
+        height: 100%;
+      z-index:9997;
+    }
+    
+    .thumb-box img {
+    
+        width:100%;
+        height:280px;
+        float:left;
+      }
+    
+    .overlay-box {
+      position:absolute;
+      bottom:0;
+      width:90%;
+      z-index:9998;
+      left:0;
+      padding:5%;
+          background-image: linear-gradient(to bottom, transparent, rgba(0,0,0,0.75));
+    }
+    
+    .meta {
+      font-size:14px;
+      display:block;
+      
+    }
+    
+    .main-title {
+      font-size:19px;
+      display:block;
+      font-weight:700;
+      color:#f1356d7e;
+      text-shadow:0 0 1px rgba(0,0,0,0.5);
+    }
+    
+    
+    .description {
+      color:#ccc;
+      font-size:13px;
+      margin-top:5px; 
+      display:block;
+      color: #ccc;
+        max-height: 0;
+        line-height: 18px;
+        overflow: hidden;
+        opacity: 0;
+        transition: opacity 0.4s ease-out, max-height 0.4s ease-out, margin 0.4s;
+    }
+    
+    .thumb-box a:hover .description {
+        opacity:1;
+            max-height: 100px;
+            margin-top: 5px;
+            transition: opacity 0.4s ease-out, max-height 0.9s ease-out
+    }
+    
+    .thumb-box a:hover .overlay-box {
+      background-image: linear-gradient(to bottom, transparent, rgba(0,0,0, 1));
+    
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Kumbh Sans', sans-serif;
+  }
+  
+  .flexible {
+      display: flex;
+      margin-right: 10px;
+  }
+  
+  .button-purple{
+      background: rgba(119,52,231);
+      color: #fff;
+      justify-content: space-around;
+      text-decoration: none;
+      padding: 10px 20px;
+      text-align:center;
+      border: none;
+      outline: none;
+      border-radius: 10px;
+  
+  }
+  
+  
+  .button-purple:hover{
+      background: #cc4f0e;
+      transition: all 0.3s ease;
+  }
+  
+  .bg-purple {
+      background: rgba(216,196,252,1);
+  }
+  
+  .footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: rgba(216,196,252,1);
+      text-align: center;
+  }
+  .contact{
+      padding:1px 20px 2px 10px;
+      /* margin-left: auto;
+      margin:0px; */
+      position: fixed;
+      right: 0;
+      text-align:right;
+      list-style: none;
+      color: #12375c;
+      bottom: 7px
+  }
+  
+  .contact_links{
+      text-decoration: none;
+      color: #12375c;
+  }
+  
+  .footer-image{
+      max-width: 100%;
+      max-height: 35px;
+      width: auto;
+      height: auto;
+  }
+  .names{
+      position: absolute;
+      left: 120px;
+      bottom: 5px;
+      padding:1px 20px 2px 10px;
+      margin:0px;
+      text-align:right;
+      list-style: none;
+      color: #12375c;
+  
+  }
+  
+  /*Contact*/
+  .Contact_Rectangle{
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(119,52,231,.3);
+      border-radius: 15px;
+      list-style-type: none;
+      align-items: center;
+      justify-content: center;
+      width:350px;
+      height:400px;
+      border:1px solid #000;
+  }
+  
+  .Contact_us{
+      position: fixed;
+      top: 5%;
+      left:28%;
+      color: #12375c;
+      font-size: 1.6rem;
+      align-items: center;
+      justify-content: center;
+      display: flex;
+  }
+  .contact_name{
+      position: fixed;
+      transform: translate(20%, 250%);
+      height: 30px;
+      width: 250px;
+      resize: both;
+      align-items: center;
+      justify-content: center;
+      display: flex;
+      padding: 0 1rem;
+  }
+  
+  .contact_email{
+      position: fixed;
+      transform: translate(20%, 400%);
+      height: 30px;
+      width: 250px;
+      resize: both;
+      align-items: center;
+      justify-content: center;
+      display: flex;
+      padding: 0 1rem;
+  }
+  .contact_text{
+      position: fixed;
+      transform: translate(20%, 170%);
+      height: 100px;
+      width: 250px;
+      align-items: center;
+      justify-content: center;
+      display: flex;
+      padding: 0 1rem;
+      resize: none;
+  
+  }
+  
+  .contact-Submit-btn{
+      position: fixed;
+      top: 85%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+  }
+  
+  /*Login*/
+  .Sign_In_Rectangle{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-60%, -50%);
+      background-color:  rgba(255, 255, 255, 0.3);
+      border-radius: 15px;
+      list-style-type: none;
+      align-items: center;
+      justify-content: center;
+      width:350px;height:325px;border:1px solid #f1356d;
+  }
+  
+  .login{
+      position: fixed;
+      left: 40%;
+      top: 5%;
+      font-size: 25px;
+      color: #12375c;
+  }
+  
+  .Sign_In_username{
+      position: fixed;
+      transform: translate(20%, 250%);
+      height: 30px;
+      width: 250px;
+      resize: both;
+      align-items: center;
+      justify-content: center;
+      display: flex;
+      padding: 0 1rem;
+  }
+  
+  .Sign_In_password{
+      position: fixed;
+      transform: translate(20%, 400%);
+      height: 30px;
+      width: 250px;
+      resize: both;
+      align-items: center;
+      justify-content: center;
+      display: flex;
+      padding: 0 1rem;
+  }
+  
+  .Sign_In_checkboxes{
+      position: fixed;
+      top:55%;
+      left:15%;
+      text-decoration: none;
+      font-size: 15px;
+      list-style: none;
+  }
+  
+  .Sign_In_noacc{
+      position: fixed;
+      top:75%;
+      left:28%;
+      text-decoration: none;
+      font-size: 10px;
+  }
+  
+  .login__button{
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 1rem;
+      width: 100%;
+      top:82%;
+  }
+  
+  .Log_In{
+      display: flex;
+      justify-content: space-around;
+      text-decoration: none;
+      padding: 10px 20px;
+      text-align:center;
+      width:100px;
+      height:45px;
+      border: none;
+      outline: none;
+      border-radius: 10px;
+      background: #f1356d;
+      color: #fff;
+  }
+  
+  .Log_In:hover{
+      background: #0f0c0b;
+      transition: all 0.3s ease;
+  }
+  
+  .blue-small-text{
+      position: relative;
+      left: 10px;
+      font-size: 15px;
+      color: #12375c;
+  }
+  
+  
+  
+  .setup:hover{
+      background: #0f0c0b;
+      transition: all 0.3s ease;
+  }
+  
+  .image1{
+      object-fit: contain;
+  
+    display: block;
+    max-width:100%;
+    max-height:100%;
     width: auto;
     height: auto;
-}
-.names{
-    position: absolute;
-    left: 120px;
-    bottom: 5px;
-    padding:1px 20px 2px 10px;
-    margin:0px;
-    text-align:right;
-    list-style: none;
-    color: #12375c;
+  
+  }
+  
+  /*Sign_Up*/
+  
+  .Sign_Up_Rectangle{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-60%, -50%);
+      background-color:  rgb(255, 255, 255);
+      border-radius: 15px;
+      list-style-type: none;
+      align-items: center;
+      justify-content: center;
+      width:350px;height:375px;border:1px solid #f1356d;
+  }
+  .text{
+      width:250px;height:30px;
+  }
+  
+  .sign_up{
+      position: fixed;
+      left: 38%;
+      top: 5%;
+      font-size: 25px;
+      color: #12375c;
+  }
+  
+  .boxes{
+      position: absolute;
+      left: 15%;
+      top: 17%;
+  }
+  
+  .checkboxes{
+      position: fixed;
+      top:70%;
+      left:15%;
+      text-decoration: none;
+      font-size: 15px;
+  }
+  
+  .noacc{
+      position: fixed;
+      top:80%;
+      left:28%;
+      text-decoration: none;
+      font-size: 10px;
+  }
+  
+  .sign_up__button{
+      position: fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 1rem;
+      width: 100%;
+      top:85%;
+  }
+  
+  .Sign_Up{
+      display: flex;
+      justify-content: space-around;
+      text-decoration: none;
+      padding: 10px 20px;
+      text-align:center;
+      width:100px;
+      height:45px;
+      border: none;
+      outline: none;
+      border-radius: 10px;
+      background: #f1356d;
+      color: #fff;
+  }
+  
+  .Sign_Up:hover{
+      background: #0f0c0b;
+      transition: all 0.3s ease;
+  }
+  
+  /*Account*/
+  
+  .Account_Rectangle{
+      position: absolute;
+      top: 35%;
+      left: 13%;
+      transform: translate(-50%, -50%);
+      background: rgba(119,52,231,.3);
+      border-radius: 15px;
+      list-style-type: none;
+      align-items: center;
+      justify-content: center;
+      width:250px;
+      height:130px;
+      border:1px solid #000;
+  }
+  
+  .info{
+      position: absolute;
+      left: 5%;
+      top: 20%;
+      font-size: 30px;
+      color: #12375c;
+  
+  }
+  
+  .Fn{
+      position: fixed;
+      left: 10%;
+      top: 15%;
+      color: #12375c;
+  }
+  
+  .Ln{
+      position: fixed;
+      left: 10%;
+      top: 35%;
+      color: #12375c;
+  }
+  
+  .Email{
+      position: fixed;
+      left: 10%;
+      top: 55%;
+      color: #12375c;
+  }
+  
+  .Change_Info{
+      display:flex;
+      position: absolute;
+      justify-content: space-around;
+      text-decoration: none;
+      padding: 10px 20px;
+      text-align:center;
+      width:150px;
+      height:45px;
+      border: none;
+      outline: none;
+      border-radius: 15px;
+      background: rgba(119,52,231);
+      color: #fff;
+      left: 5%;
+      top:45%;
+  }
+  
+  .Log_Out{
+      display:flex;
+      position: absolute;
+      justify-content: space-around;
+      text-decoration: none;
+      padding: 10px 20px;
+      text-align:center;
+      width:150px;
+      height:45px;
+      border: none;
+      outline: none;
+      border-radius: 15px;
+      background: rgba(119,52,231);
+      color: #fff;
+      left: 5%;
+      top:55%;
+  }
+  
+  .Change_Info:hover{
+      background: #0f0c0b;
+      transition: all 0.3s ease;
+  }
+  
+  .Log_Out:hover{
+      background: #0f0c0b;
+      transition: all 0.3s ease;
+  }
+  .navbar-toggler-dark{
+      background-color: black;
+      color: black;
+      accent-color: black;
+      solid-color: black;
+  }
+  .whaty {
+    font-size: 16px;
+    cursor: pointer;
+  }
 
-}
 
-/*Contact*/
-.Contact_Rectangle{
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(119,52,231,.3);
-    border-radius: 15px;
-    list-style-type: none;
-    align-items: center;
-    justify-content: center;
-    width:350px;
-    height:400px;
-    border:1px solid #000;
-}
 
-.Contact_us{
-    position: fixed;
-    top: 5%;
-    left:28%;
-    color: #12375c;
-    font-size: 1.6rem;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-}
-.contact_name{
-    position: fixed;
-    transform: translate(20%, 250%);
-    height: 30px;
+
+  body, html {
+    font-family: 'Karla', sans-serif;
+  }
+  
+  .message-container {
     width: 250px;
-    resize: both;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    padding: 0 1rem;
-}
-
-.contact_email{
-    position: fixed;
-    transform: translate(20%, 400%);
-    height: 30px;
-    width: 250px;
-    resize: both;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    padding: 0 1rem;
-}
-.contact_text{
-    position: fixed;
-    transform: translate(20%, 170%);
-    height: 100px;
-    width: 250px;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    padding: 0 1rem;
-    resize: none;
-
-}
-
-.contact-Submit-btn{
-    position: fixed;
-    top: 85%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-/*Login*/
-.Sign_In_Rectangle{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-60%, -50%);
-    background-color:  rgba(119,52,231,.3);
-    border-radius: 15px;
-    list-style-type: none;
-    align-items: center;
-    justify-content: center;
-    width:350px;height:325px;border:1px solid #000;
-}
-
-.login{
-    position: fixed;
-    left: 40%;
-    top: 5%;
-    font-size: 25px;
-    color: #12375c;
-}
-
-.Sign_In_username{
-    position: fixed;
-    transform: translate(20%, 250%);
-    height: 30px;
-    width: 250px;
-    resize: both;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    padding: 0 1rem;
-}
-
-.Sign_In_password{
-    position: fixed;
-    transform: translate(20%, 400%);
-    height: 30px;
-    width: 250px;
-    resize: both;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    padding: 0 1rem;
-}
-
-.Sign_In_checkboxes{
-    position: fixed;
-    top:55%;
-    left:15%;
-    text-decoration: none;
+  }
+  
+  .message-container--error {
+    background-color: rgba(255, 0, 0, 0.5);
+    border-radius: 8px;
+    padding: 5px;
+  }
+  
+  .message {
+    font-size: 20px;
+    padding: 5px;
+    font-weight: 700;
+    color: #000000;
+    text-align: center;
+  }
+  .message2 {
     font-size: 15px;
-    list-style: none;
-}
-
-.Sign_In_noacc{
-    position: fixed;
-    top:75%;
-    left:28%;
-    text-decoration: none;
-    font-size: 10px;
-}
-
-.login__button{
-    position: absolute;
+    padding: 3px;
+    font-weight: 100;
+    color: #000000;
+    text-align: center;
+  }
+  
+  .form-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0 1rem;
-    width: 100%;
-    top:82%;
-}
-
-.Log_In{
-    display: flex;
-    justify-content: space-around;
-    text-decoration: none;
-    padding: 10px 20px;
-    text-align:center;
-    width:100px;
-    height:45px;
-    border: none;
-    outline: none;
-    border-radius: 10px;
-    background: rgba(119,52,231);
-    color: #fff;
-}
-
-.Log_In:hover{
-    background: #cc4f0e;
-    transition: all 0.3s ease;
-}
-
-.blue-small-text{
-    font-size: 15px;
-    color: #12375c;
-}
-
-
-
-.setup:hover{
-    background: #cc4f0e;
-    transition: all 0.3s ease;
-}
-
-.image1{
-    object-fit: contain;
-
-  display: block;
-  max-width:100%;
-  max-height:100%;
-  width: auto;
-  height: auto;
-
-}
-
-/*Sign_Up*/
-
-.Sign_Up_Rectangle{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-60%, -50%);
-    background-color:  rgba(119,52,231,.3);
-    border-radius: 15px;
-    list-style-type: none;
+    flex-direction: column;
+    width: 420px;
+    height: 400px;
+    margin: 30px auto;
     align-items: center;
     justify-content: center;
-    width:350px;height:375px;border:1px solid #000;
-}
-.text{
-    width:250px;height:30px;
-}
-
-.sign_up{
-    position: fixed;
-    left: 38%;
-    top: 5%;
-    font-size: 25px;
-    color: #12375c;
-}
-
-.boxes{
-    position: absolute;
-    left: 15%;
-    top: 17%;
-}
-
-.checkboxes{
-    position: fixed;
-    top:70%;
-    left:15%;
-    text-decoration: none;
-    font-size: 15px;
-}
-
-.noacc{
-    position: fixed;
-    top:80%;
-    left:28%;
-    text-decoration: none;
-    font-size: 10px;
-}
-
-.sign_up__button{
-    position: fixed;
+    background-color: rgb(228, 225, 225);
+    border-radius: 30px;
+  }
+  
+  .inputs-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0 1rem;
-    width: 100%;
-    top:85%;
-}
-
-.Sign_Up{
+    flex-direction: column;
+  }
+  
+  .input {
+    width: 270px;
+    height: 35px;
+    margin: 10px;
+    font-size: 16px;
+    border: 1px solid #d0d7e0;
+    border-radius: 3px;
+    text-indent: 10px;
+  }
+  
+  .input:focus {
+    text-indent: 10px;
+    outline: none;
+    transition: 0.2s linear;
+    box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.15); 
+  }
+  
+  .input::placeholder {
+    color: #b8bec6;
+    text-indent: 10px;
+  }
+  
+  .input::placeholder-shown {
+    text-indent: 10px;
+  }
+  
+  .input:nth-child(1) {
+    margin-top: 20px;
+  }
+  
+  .buttons-container {
     display: flex;
-    justify-content: space-around;
-    text-decoration: none;
-    padding: 10px 20px;
-    text-align:center;
-    width:100px;
-    height:45px;
+    flex-direction: row;
+  }
+  
+  .option {
+    width: 125px;
+    height: 40px;
+    margin: 10px;
     border: none;
-    outline: none;
-    border-radius: 10px;
-    background: rgba(119,52,231);
-    color: #fff;
-}
-
-.Sign_Up:hover{
-    background: #cc4f0e;
-    transition: all 0.3s ease;
-}
-
-/*Account*/
-
-.Account_Rectangle{
-    position: absolute;
-    top: 35%;
-    left: 13%;
-    transform: translate(-50%, -50%);
-    background: rgba(119,52,231,.3);
     border-radius: 15px;
-    list-style-type: none;
-    align-items: center;
-    justify-content: center;
-    width:250px;
-    height:130px;
-    border:1px solid #000;
-}
-
-.info{
-    position: absolute;
-    left: 5%;
-    top: 20%;
-    font-size: 30px;
-    color: #12375c;
-
-}
-
-.Fn{
-    position: fixed;
-    left: 10%;
-    top: 15%;
-    color: #12375c;
-}
-
-.Ln{
-    position: fixed;
-    left: 10%;
-    top: 35%;
-    color: #12375c;
-}
-
-.Email{
-    position: fixed;
-    left: 10%;
-    top: 55%;
-    color: #12375c;
-}
-
-.Change_Info{
-    display:flex;
-    position: absolute;
-    justify-content: space-around;
-    text-decoration: none;
-    padding: 10px 20px;
-    text-align:center;
-    width:150px;
-    height:45px;
-    border: none;
+    font-size: 16px;
+    background-color: #f1356d;
+    color: #ffffff;
     outline: none;
-    border-radius: 15px;
-    background: rgba(119,52,231);
+    cursor: pointer;
+  }
+  
+  .option:hover {
+    transition: 0.25s linear all;
+    background-color: #000000;
     color: #fff;
-    left: 5%;
-    top:45%;
-}
-
-.Log_Out{
-    display:flex;
-    position: absolute;
-    justify-content: space-around;
-    text-decoration: none;
-    padding: 10px 20px;
-    text-align:center;
-    width:150px;
-    height:45px;
-    border: none;
-    outline: none;
-    border-radius: 15px;
-    background: rgba(119,52,231);
-    color: #fff;
-    left: 5%;
-    top:55%;
-}
-
-.Change_Info:hover{
-    background: #cc4f0e;
-    transition: all 0.3s ease;
-}
-
-.Log_Out:hover{
-    background: #cc4f0e;
-    transition: all 0.3s ease;
-}
-.navbar-toggler-dark{
-    background-color: black;
-    color: black;
-    accent-color: black;
-    solid-color: black;
-}
+  }
+  
+  .input--error {
+    border: 1px solid red;
+    box-shadow: 0px 0px 20px 0px rgba(255,0,0,0.2);
+  }
+  
+  .i-forgot {
+    cursor: pointer;
+    text-decoration: underline;
+  }

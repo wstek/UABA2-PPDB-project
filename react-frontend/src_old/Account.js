@@ -1,5 +1,4 @@
 import "./index.css"
-import { Link } from "react-router-dom"
 
 
 
@@ -13,8 +12,8 @@ function Account() {
           <label className="Email">Email: ...</label>
         </div>
 
-        <Link to="" className="Change_Info">Change info</Link>
-        <Link to="" className="Log_Out">Log out</Link>
+        <a href="" className="Change_Info">Change info</a>
+        <a href="" className="Log_Out">Log out</a>
       </div>
 
         );

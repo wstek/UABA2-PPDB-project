@@ -1,66 +1,68 @@
-import "./App.css"
-import Sign_In from "./Sign_In";
-import Sign_Up from "./Sign_Up";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import {useState} from "react"
-import Home from "./Home"
-import Contact from "./Contact"
-import Account from "./Account"
-import InputPage from "./inputPage";
+import Navbar from './Navbar';
+import Footer from './Footer';
+import Home from './Home';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import React, {useState, useEffect} from "react";
+import Create from './Create';
+import BlogDetails from './BlogDetails';
+import NotFound from './NotFound';
+import SignUp from './SignUp';
+import Account from './Account';
+import SignIn from './SignIn';
+import Contact from './Contact';
+import Auth from 'auth';
 
-
-function State(){
-  var val = localStorage.getItem('page');
-  if (!val){
-    localStorage.setItem('page',"home")
-    return "home"
-  }
-  else{
-    return val
-  }
-}
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const [page, setPage] = useState( State());
+  // useEffect(() => {
+  //   onLoad();
+  // }, []);
 
-
-  function pageSwitch(){
-    localStorage.setItem('page',page)
-    if (page === "sign_in"){
-      return(<Sign_In setPage = {setPage}/>)}
-
-    else if(page === "sign_up"){
-      return(<Sign_Up setPage = {setPage}/>)
-    }
-
-    else if(page === "home"){
-      return(<Home setPage = {setPage}/>)
-    }
-
-    else if(page === "contact"){
-      return(<Contact setPage = {setPage}/>)
-    }
-
-    else if(page === "account"){
-      return(<Account setPage = {setPage}/>)
-    }
-    else if(page === "abtest_setup"){
-      return( <InputPage page={page}/>)
-    }
-  }
-
-  return(
-      <div className="Page">
-
-        <Navbar setPage = {setPage}/>
-        <br/>
-        {pageSwitch()}
-        <br/>
-        <Footer setPage = {setPage}/>
+  // async function onLoad() {
+  //   try {
+  //     await Auth.currentSession();
+  //     setIsAuthenticated(true);
+  //   } catch (e) {
+  //     alert(e);
+  //   }
+  // }
+  return (
+    <Router>
+      <div className="App">
+        <Navbar />
+        <div className="content">
+          <Switch>
+            <Route exact path="/">
+              <Home />
+            </Route>
+            <Route path="/account">
+              <Account />
+            </Route>
+            <Route path="/sign_in">
+              <SignIn />
+            </Route>
+            <Route path="/sign_up">
+              <SignUp />
+            </Route>
+            <Route path="/contact">
+              <Contact />
+            </Route>
+            <Route path="/create">
+              <Create />
+            </Route>
+            <Route path="/blogs/:id">
+              <BlogDetails />
+            </Route>
+            <Route path="*">
+              <NotFound />
+            </Route>
+          </Switch>
+        </div>
+        <Footer />
       </div>
-
-  )
+    </Router>
+  );
 }
 
 export default App;

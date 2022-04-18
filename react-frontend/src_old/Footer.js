@@ -1,9 +1,8 @@
 import "./index.css"
 import React, {useState, useEffect} from "react";
 import ua_logo from "./ua_logo.png"
-import { Link } from "react-router-dom";
 
-function Footer() {
+function Footer({setPage}) {
     const [isMobile, setIsMobile] = useState(false)
     //choose the screen size
     const handleResize = () => {
@@ -31,7 +30,7 @@ function Footer() {
                     </div>
                     <div className="col-2">
                         <li className="contact">
-                            <Link to="/contact" className="">Contact</Link>
+                            <a onClick={() => setPage("contact")} className="">Contact</a>
                         </li>
                     </div>
                 </div>
