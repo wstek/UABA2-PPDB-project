@@ -141,98 +141,98 @@
     transform: translate(-50%, -50%);
 }
 
-/*Login*/
-.Sign_In_Rectangle{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-60%, -50%);
-    background-color:  rgba(119,52,231,.3);
-    border-radius: 15px;
-    list-style-type: none;
-    align-items: center;
-    justify-content: center;
-    width:350px;height:325px;border:1px solid #000;
-}
+/*!*Login*!*/
+/*.Sign_In_Rectangle{*/
+/*    position: absolute;*/
+/*    top: 50%;*/
+/*    left: 50%;*/
+/*    transform: translate(-60%, -50%);*/
+/*    background-color:  rgba(119,52,231,.3);*/
+/*    border-radius: 15px;*/
+/*    list-style-type: none;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    width:350px;height:325px;border:1px solid #000;*/
+/*}*/
 
-.login{
-    position: fixed;
-    left: 40%;
-    top: 5%;
-    font-size: 25px;
-    color: #12375c;
-}
+/*.login{*/
+/*    position: fixed;*/
+/*    left: 40%;*/
+/*    top: 5%;*/
+/*    font-size: 25px;*/
+/*    color: #12375c;*/
+/*}*/
 
-.Sign_In_username{
-    position: fixed;
-    transform: translate(20%, 250%);
-    height: 30px;
-    width: 250px;
-    resize: both;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    padding: 0 1rem;
-}
+/*.Sign_In_username{*/
+/*    position: fixed;*/
+/*    transform: translate(20%, 250%);*/
+/*    height: 30px;*/
+/*    width: 250px;*/
+/*    resize: both;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    display: flex;*/
+/*    padding: 0 1rem;*/
+/*}*/
 
-.Sign_In_password{
-    position: fixed;
-    transform: translate(20%, 400%);
-    height: 30px;
-    width: 250px;
-    resize: both;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    padding: 0 1rem;
-}
+/*.Sign_In_password{*/
+/*    position: fixed;*/
+/*    transform: translate(20%, 400%);*/
+/*    height: 30px;*/
+/*    width: 250px;*/
+/*    resize: both;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    display: flex;*/
+/*    padding: 0 1rem;*/
+/*}*/
 
-.Sign_In_checkboxes{
-    position: fixed;
-    top:55%;
-    left:15%;
-    text-decoration: none;
-    font-size: 15px;
-    list-style: none;
-}
+/*.Sign_In_checkboxes{*/
+/*    position: fixed;*/
+/*    top:55%;*/
+/*    left:15%;*/
+/*    text-decoration: none;*/
+/*    font-size: 15px;*/
+/*    list-style: none;*/
+/*}*/
 
-.Sign_In_noacc{
-    position: fixed;
-    top:75%;
-    left:28%;
-    text-decoration: none;
-    font-size: 10px;
-}
+/*.Sign_In_noacc{*/
+/*    position: fixed;*/
+/*    top:75%;*/
+/*    left:28%;*/
+/*    text-decoration: none;*/
+/*    font-size: 10px;*/
+/*}*/
 
-.login__button{
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0 1rem;
-    width: 100%;
-    top:82%;
-}
+/*.login__button{*/
+/*    position: absolute;*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    padding: 0 1rem;*/
+/*    width: 100%;*/
+/*    top:82%;*/
+/*}*/
 
-.Log_In{
-    display: flex;
-    justify-content: space-around;
-    text-decoration: none;
-    padding: 10px 20px;
-    text-align:center;
-    width:100px;
-    height:45px;
-    border: none;
-    outline: none;
-    border-radius: 10px;
-    background: rgba(119,52,231);
-    color: #fff;
-}
+/*.Log_In{*/
+/*    display: flex;*/
+/*    justify-content: space-around;*/
+/*    text-decoration: none;*/
+/*    padding: 10px 20px;*/
+/*    text-align:center;*/
+/*    width:100px;*/
+/*    height:45px;*/
+/*    border: none;*/
+/*    outline: none;*/
+/*    border-radius: 10px;*/
+/*    background: rgba(119,52,231);*/
+/*    color: #fff;*/
+/*}*/
 
-.Log_In:hover{
-    background: #cc4f0e;
-    transition: all 0.3s ease;
-}
+/*.Log_In:hover{*/
+/*    background: #cc4f0e;*/
+/*    transition: all 0.3s ease;*/
+/*}*/
 
 .blue-small-text{
     font-size: 15px;
@@ -289,13 +289,13 @@
     top: 17%;
 }
 
-.checkboxes{
-    position: fixed;
-    top:70%;
-    left:15%;
-    text-decoration: none;
-    font-size: 15px;
-}
+/*.checkboxes{*/
+/*    position: fixed;*/
+/*    top:70%;*/
+/*    left:15%;*/
+/*    text-decoration: none;*/
+/*    font-size: 15px;*/
+/*}*/
 
 .noacc{
     position: fixed;

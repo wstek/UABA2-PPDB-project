@@ -13,3 +13,4 @@ react-frontend/build
 
 # datasets
 datasets
+/react-frontend/.eslintcache

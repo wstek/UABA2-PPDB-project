@@ -1,31 +1,63 @@
+import mountain from './mountain.png';
+import tree from './tree.jpg';
+import "./index.css"
+import {ColoredLine} from "./coloredLine";
 import useFetch from "./useFetch";
 import { Link } from "react-router-dom";
 
-const Home = () => {
-  const { error, isPending, data: blogs } = useFetch('http://localhost:8000/blogs')
+function Home({setPage}) { // begin van de app wow
+    return (
+        <div className="container-fluid pt-2 pb-5 pl-2 pr-2" id='homepage'>
+                <div className="row text-center align-items-center">
 
-  return (
-    <div className="home">
+                    <div className="col-12 col-xm-12 col-md-6 col-lg-6 col-xl-6 align-items-center">
+                        <div className="row text-center align-items-center">
+                            <div>
+                                <img src={mountain} className="image1" alt="Italian Trulli"/>
+                            </div>
+                        </div>
+                        <div className="row text-center align-items-center mt-2">
+                            <h3>About:</h3>
+                            <div className="blue-small-text">
+                                We are second year students at the university of Antwerp and for the course
+                                Programming project databases. We had to make an webapplication that
+                                compares 2 feedback collaborative filtering recommendation algoritmes for a
+                                certain dataset and simulates this. This will give a statistic overview for
+                                the user that will visualize what algoritm is better to use for
+                                recommending items to the simulated customers.
 
-    <div className="container">
-    <div className="body1">
-    <div className="row">
-      <div className="thumb-box">
-      <Link to="/abtest">
-        <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/53819/divinity-medium.png" alt="" />
-        <span className="overlay-box">
-        <span className="meta">Feb 20, 2019</span>
-        <span className="main-title">A/B TEST</span>
-        <span className="description">Perfom tests between recomondation algorithms...</span>
-          </span>
-      </Link>
-    </div>
-    </div>
-    </div>
-    </div>
+                                We will answer these questions: How many active users are there on a certain
+                                day? What will happen if we show people just the popular items that will change
+                                every week or month what period is better?
+                            </div>
+                                                        {<ColoredLine color="purple"/>}
 
-    </div>
-  );
+                        </div>
+                    </div>
+
+                    <div className="col-12 col-xm-12 col-md-6 col-lg-6 col-xl-6 align-items-center mt-1 mb-1">
+                                                    {<ColoredLine color="purple"/>}
+
+                        <h3>Setup</h3>
+                        <div className="blue-small-text">
+                            Our webapplication offers a way to commpare two recommendation algorithms with each
+                            other, Start now!
+                        </div>
+                        <br/>
+                        <div>
+                            <Link to="/abtest/setup" className="button-purple ">Start</Link>
+
+                        </div>
+
+                        <div className="row text-center align-items-center mt-4">
+                            <div>
+                                <img src={tree} className="image1" alt="Italian Trulli"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    );
 }
- 
-export default Home;
+
+export default Home

@@ -52,14 +52,12 @@ function App() {
 
   return(
       <div className="Page">
-
         <Navbar setPage = {setPage}/>
         <br/>
         {pageSwitch()}
         <br/>
         <Footer setPage = {setPage}/>
       </div>
-
   )
 }
 
