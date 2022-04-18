@@ -10,3 +10,6 @@ logs
 # react
 react-frontend/node_modules
 react-frontend/build
+
+# datasets
+datasets
