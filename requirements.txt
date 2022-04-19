@@ -13,6 +13,5 @@ python-dotenv
 flask-bcrypt
 flask-session
 flask-sqlalchemy
-sqlalchemy
 flask-cors
 redis
