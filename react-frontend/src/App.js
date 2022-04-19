@@ -11,7 +11,7 @@ import Contact from './Contact';
 import InputPage from "./inputPage";
 import Dashboard from './Dashboard';
 import ProtectedRoute from './ProtectedRoute';
-import { useEffect, useState } from 'react';
+
 function App() {
   // const [isAuthenticated, setIsAuthenticated] = useState(false);
   return (
