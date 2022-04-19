@@ -12,25 +12,10 @@ function POST(path, data) {
     })
 }
 
-
 function SignIn() {
-  const togglePassword = () => {
-    // When the handler is invoked
-    // inverse the boolean state of passwordShown
-    setPasswordShown(!passwordShown);
-  };
-
-    const handleLogin = e => {
-        e.preventDefault();
-        var username = document.getElementById("Sign_In_username").value;
-        var password = document.getElementById("Sign_In_password").value;
-        POST('/logging_in', {username: username, password: password})
-    }
-
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-  const [passwordShown, setPasswordShown] = useState(false);
-
+    const [passwordShown, setPasswordShown] = useState(false);
     // const [rememberMe, setRememberMe] = useState(false);
     const [isPending, setIsPending] = useState(false);
     const [error, setError] = useState(null);
@@ -38,26 +23,33 @@ function SignIn() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const login_try = {username, password};
-
+        const login_try = { username, password};
+  
         setIsPending(true);
-
-        fetch('/api/sign_in', {
-            method: 'POST', headers: {"Content-Type": "application/json"}, body: JSON.stringify(login_try)
-        }).then((res) => {
-            if (!res.ok) {
-                throw Error('could not sign in');
-            }
+  
+        fetch('http://127.0.0.1:5000/api/login', {
+          method: 'POST',
+          headers: { "Content-Type": "application/json" },
+          credentials: 'include',
+          body: JSON.stringify(login_try)
+        }).then((res) => res.json()
+        ).then((data) => {
+          if (data.error) {
+            throw Error(data.error);
+          }
+        //   } else if (res.status == 200) {
             // history.go(-1);
-            setIsPending(false);
-            history.push('/');
-            setError(null);
+        setIsPending(false);
+        setError(null);
+        history.push('/dashboard');
+        //   }
         })
-            .catch((err) => {
-                setIsPending(false);
-                setError(err.message);
-            })
-    }
+        .catch((err) => {
+          setIsPending(false);
+          setError(err.message);
+          console.log(err);
+        })
+        }
 
     return (
         <div className="container my-auto">
@@ -70,19 +62,19 @@ function SignIn() {
                     <form>
                     <div className="row mx-auto maxwidth-250 mb-2">
 
-                        <input required className="" type="text" placeholder="Username" id="username"
+                        <input required className="" type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" id="username"
                                name="username"/>
                      </div>
 
                      <div className="row mx-auto maxwidth-250 mb-2">
-                       <input required className="" type={passwordShown ? "text" : "password"} id="password" placeholder="Password"
+                       <input required className="" type={passwordShown ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} id="password" placeholder="Password"
                                name="password"/>
                      </div>
                     </form>
                     <div className="row mb-0">
                         <div className="form-group">
 
-                            <input className="" id="show_pw_checkbox" type="checkbox" onClick={togglePassword}/>
+                            <input className="" id="show_pw_checkbox" type="checkbox" onClick={() => setPasswordShown(!passwordShown)}/>
                             <label htmlFor="show_pw_checkbox"> Show Password</label>
                         </div>
                     </div>
@@ -100,7 +92,8 @@ function SignIn() {
                             <Link to="/signup">Sign Up!</Link></div>
                     </div>
                     <div className="row mb-0 maxwidth-250 mx-auto">
-                        <button className="button-purple" onClick={handleLogin}>Log in</button>
+                        { !isPending && <button className="button-purple" onClick={handleSubmit}>Log in</button> }
+                        { isPending && <button disabled className="button-purple">Logging in...</button> }
                     </div>
                 </div>
             </div>
