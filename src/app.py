@@ -1,12 +1,12 @@
 from flask import Flask
-from database_access import DatabaseEngine
+from database_access import Database
 import time
 
 app = Flask(__name__)
 
-db_engine = DatabaseEngine()
-db_engine.connect(filename="config/database.ini")
-db_engine.logVersion()
+db = Database()
+db.connect(filename="config/database.ini")
+db.logVersion()
 
 
 @app.route('/api/time')

@@ -23,10 +23,12 @@ class Logger:
     @classmethod
     def __logFile(cls, message):
         path = "../logs"
-        isExist = os.path.exists(path)
-        if not isExist:
-            # Create a new directory because it does not exist
+
+        # create a new directory if it does not exist
+        exists = os.path.exists(path)
+        if not exists:
             os.makedirs(path)
+
         currtime = datetime.datetime.now()
         f = open("../logs/" + "log_" + currtime.strftime('%Y-%m-%d'), 'a')
         f.write(currtime.strftime("%H:%M:%S") + " " + message + '\n')
