@@ -11,13 +11,10 @@ function POST(path, data) {
 }
 
 function SignUp({setPage}) {
-    const togglePassword = () => {
-        // When the handler is invoked
-        // inverse the boolean state of passwordShown
-        setPasswordShown(!passwordShown);
-    };
     const [passwordShown, setPasswordShown] = useState(false);
-
+    const [firstname, setFirstname] = useState('');
+    const [lastname, setLastname] = useState('');
+    const [birthdate, setBirthdate] = useState('');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -29,30 +26,36 @@ function SignUp({setPage}) {
     const handleRegister = (e) => {
         e.preventDefault();
         setError(null);
-        if (!username || !email || !password || !repassword) {
-            setError('Please fill in all the fields');
+        if (!firstname || !lastname || !birthdate || !username || !email || !password || !repassword) {
+          throw Error('Please fill in all the fields');
         } else if (password !== repassword) {
-            setError('Passwords dont match, please try again');
+          throw Error('Passwords dont match, please try again');
         } else {
-            const signup_try = {username, email, password};
-            setIsPending(true);
-            fetch('/api/sign_up', {
-                method: 'POST', headers: {"Content-Type": "application/json"}, body: JSON.stringify(signup_try)
-            }).then((res) => {
-                if (!res.ok) {
-                    throw Error('could not sign in');
-                }
-                // history.go(-1);
-                setIsPending(false);
-                setError(null);
-                history.push('/');
-            })
-                .catch((err) => {
-                    setIsPending(false);
-                    setError(err.message);
-                })
+          const signup_try = { username, email, password, firstname, lastname, birthdate};
+          setIsPending(true);
+          fetch('http://127.0.0.1:5000/api/register', {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            credentials: 'include',
+            SameSite: 'None',
+            body: JSON.stringify(signup_try)
+          }).then((res) => res.json())
+          .then((data) => {
+            if (data.error) {
+                throw Error(data.error);
+            }
+            // history.go(-1);
+            setIsPending(false);
+            setError(null);
+            history.push('/dashboard');
+          })
+          .catch((err) => {
+            setIsPending(false);
+            setError(err.message);
+            console.log(err.message);
+          })
+          }
         }
-    }
 
     return (<div className="container my-auto">
             <div className="row justify-content-center">
@@ -65,43 +68,43 @@ function SignUp({setPage}) {
                     <form>
                         <div className="row mx-auto maxwidth-250 mb-2">
 
-                            <input required className="" type="text" placeholder="Username" id="username"
+                            <input required className="" type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" id="username"
                                    name="username"/>
                         </div>
                         <div className="row mx-auto maxwidth-250 mb-2">
 
-                            <input required className="" type="text" placeholder="First Name" id="first_name"
+                            <input required className="" type="text" value={firstname} onChange={(e) => setFirstname(e.target.value)} placeholder="First Name" id="first_name"
                                    name="first_name"/>
                         </div>
                         <div className="row mx-auto maxwidth-250 mb-2">
 
-                            <input required className="" type="text" placeholder="Last Name" id="last_name"
+                            <input required className="" type="text" value={lastname} onChange={(e) => setLastname(e.target.value)} placeholder="Last Name" id="last_name"
                                    name="last_name"/>
                         </div>
                         <div className="row mx-auto maxwidth-250 mb-2">
 
-                            <input required className="" type="email" placeholder="Email-Address" id="emailaddress"
+                            <input required className="" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email-Address" id="emailaddress"
                                    name="emailaddress"/>
                         </div>
                         <div className="row mx-auto maxwidth-250 mb-2">
 
-                            <input required className="" type="date" placeholder="Birthdate" id="birth_date"
+                            <input required className="" type="date" value={birthdate} onChange={(e) => setBirthdate(e.target.value)} placeholder="Birthdate" id="birth_date"
                                    name="birth_date"/>
                         </div>
                         <div className="row mx-auto maxwidth-250 mb-2">
-                            <input required className="" type={passwordShown ? "text" : "password"} id="password"
+                            <input required className="" type={passwordShown ? "text" : "password"} onChange={(e) => setPassword(e.target.value)} id="password"
                                    placeholder="Password"
                                    name="password"/>
                         </div>
                         <div className="row mx-auto maxwidth-250 mb-2">
-                            <input required className="" type={passwordShown ? "text" : "password"} id="rewrite-password"
+                            <input required className="" type={passwordShown ? "text" : "password"} onChange={(e) => setRePassword(e.target.value)} id="rewrite-password"
                                    placeholder="Rewrite Password"
                                    name="password"/>
                         </div>
                     </form>
                     <div className="row mb-1">
                         <div className="form-group">
-                            <input className="" id="show_pw_checkbox" type="checkbox" onClick={togglePassword}/>
+                            <input className="" id="show_pw_checkbox" type="checkbox" onClick={() => setPasswordShown(!passwordShown)}/>
                             <label htmlFor="show_pw_checkbox"> Show Password</label>
                         </div>
                     </div>
@@ -112,7 +115,8 @@ function SignUp({setPage}) {
                         </div>
                     </div>
                     <div className="row mb-0 maxwidth-250 mx-auto">
-                        <button className="button-purple" onClick={handleRegister}>Log in</button>
+                        { !isPending && <button className="button-purple" onClick={handleRegister}>Sign up</button> }
+                        { isPending && <button disabled className="button-purple">Signing up...</button> }
                     </div>
                 </div>
             </div>

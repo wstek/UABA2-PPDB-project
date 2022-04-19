@@ -3,17 +3,17 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import Home from './Home';
-import Create from './Create';
 import NotFound from './NotFound';
 import SignUp from './SignUp';
 import Account from './Account';
 import SignIn from './SignIn';
 import Contact from './Contact';
 import InputPage from "./inputPage";
+import Dashboard from './Dashboard';
+import ProtectedRoute from './ProtectedRoute';
 
 function App() {
   // const [isAuthenticated, setIsAuthenticated] = useState(false);
-
   return (
 
     <Router>
@@ -26,24 +26,22 @@ function App() {
             <Route exact path="/">
               <Home />
             </Route>
-            <Route path="/account">
+            <Route exact path="/account">
               <Account />
             </Route>
-            <Route path="/abtest/setup">
+            <Route exact path="/abtest/setup">
               <InputPage />
             </Route>
-            <Route path="/sign_in">
+            <Route exact path="/sign_in">
               <SignIn />
             </Route>
-            <Route path="/sign_up">
+            <Route exact path="/sign_up">
               <SignUp />
             </Route>
-            <Route path="/contact">
+            <Route exact path="/contact">
               <Contact />
             </Route>
-            <Route path="/create">
-              <Create />
-            </Route>
+            <ProtectedRoute exact path="/dashboard" component={Dashboard} />
             <Route path="*">
               <NotFound />
             </Route>

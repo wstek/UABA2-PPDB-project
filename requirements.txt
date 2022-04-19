@@ -9,3 +9,10 @@ psycopg2-binary>=2.8.4
 Werkzeug==2.1.1
 sqlalchemy==1.4.35
 passlib>=1.7.4
+python-dotenv
+flask-bcrypt
+flask-session
+flask-sqlalchemy
+sqlalchemy
+flask-cors
+redis

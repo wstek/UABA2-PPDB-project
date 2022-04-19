@@ -1,40 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
 
-/* base styles */
-* {
-    margin: 0;
-    font-family: "Quicksand";
-    color: #333;
-}
 
-/*.navbar {*/
-/*    text-decoration: none;*/
-/*}*/
-/*  padding: 18px;*/
-/*  display: flex;*/
-/*  align-items: center;*/
-/*  max-width: 1100px;*/
-/*  margin: 0 auto;*/
-/*  border-bottom: 1px solid #f2f2f2;*/
-/*}*/
-/*.navbar h1 {*/
-/*    color: #292929eb;*/
-/*    padding: 3px;*/
-/*    border-radius: 12px;*/
-/*    font-family: 'Kumbh Sans', sans-serif;*/
-/*    background-color: #f1356d;*/
-/*}*/
-/*.navbar .links {*/
-/*  margin-left: auto;*/
-/*}*/
-/*.navbar a {*/
-/*  margin-left: 16px;*/
-/*  text-decoration: none;*/
-/*  padding: 6px;*/
-/*}*/
-/*.navbar a:hover {*/
-/*  color: #f1356d;*/
-/*}*/
 
 
 body {
@@ -185,7 +151,6 @@ body {
     display: flex;
     padding: 0 1rem;
     resize: none;
-
 }
 
 .contact-Submit-btn {
@@ -195,206 +160,16 @@ body {
     transform: translate(-50%, -50%);
 }
 
-/*Login*/
-.Sign_In_Rectangle {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-60%, -50%);
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 15px;
-    list-style-type: none;
-    align-items: center;
-    justify-content: center;
-    width: 350px;
-    height: 325px;
-    border: 1px solid #f1356d;
-}
-
-.login {
-    position: fixed;
-    left: 40%;
-    top: 5%;
-    font-size: 25px;
-    color: #12375c;
-}
-
-.Sign_In_username {
-    position: fixed;
-    transform: translate(20%, 250%);
-    height: 30px;
-    width: 250px;
-    resize: both;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    padding: 0 1rem;
-}
-
-.Sign_In_password {
-    position: fixed;
-    transform: translate(20%, 400%);
-    height: 30px;
-    width: 250px;
-    resize: both;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    padding: 0 1rem;
-}
-
-.Sign_In_checkboxes {
-    position: fixed;
-    top: 55%;
-    left: 15%;
-    text-decoration: none;
-    font-size: 15px;
-    list-style: none;
-}
-
-.Sign_In_noacc {
-    position: fixed;
-    top: 75%;
-    left: 28%;
-    text-decoration: none;
-    font-size: 10px;
-}
-
-.login__button {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0 1rem;
-    width: 100%;
-    top: 82%;
-}
-
-.Log_In {
-    display: flex;
-    justify-content: space-around;
-    text-decoration: none;
-    padding: 10px 20px;
-    text-align: center;
-    width: 100px;
-    height: 45px;
-    border: none;
-    outline: none;
-    border-radius: 10px;
-    background: #f1356d;
-    color: #fff;
-}
-
-.Log_In:hover {
-    background: #0f0c0b;
-    transition: all 0.3s ease;
-}
-
-.blue-small-text {
-    position: relative;
-    left: 10px;
-    font-size: 15px;
-    color: #12375c;
-}
-
-
-.setup:hover {
-    background: #0f0c0b;
-    transition: all 0.3s ease;
-}
-
 .image1 {
     object-fit: contain;
-
     display: block;
     max-width: 100%;
     max-height: 100%;
     width: auto;
     height: auto;
-
 }
 
-/*Sign_Up*/
 
-.Sign_Up_Rectangle {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-60%, -50%);
-    background-color: rgb(255, 255, 255);
-    border-radius: 15px;
-    list-style-type: none;
-    align-items: center;
-    justify-content: center;
-    width: 350px;
-    height: 375px;
-    border: 1px solid #f1356d;
-}
-
-.text {
-    width: 250px;
-    height: 30px;
-}
-
-.sign_up {
-    position: fixed;
-    left: 38%;
-    top: 5%;
-    font-size: 25px;
-    color: #12375c;
-}
-
-.boxes {
-    position: absolute;
-    left: 15%;
-    top: 17%;
-}
-
-.checkboxes {
-    position: fixed;
-    top: 70%;
-    left: 15%;
-    text-decoration: none;
-    font-size: 15px;
-}
-
-.noacc {
-    position: fixed;
-    top: 80%;
-    left: 28%;
-    text-decoration: none;
-    font-size: 10px;
-}
-
-.sign_up__button {
-    position: fixed;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0 1rem;
-    width: 100%;
-    top: 85%;
-}
-
-.Sign_Up {
-    display: flex;
-    justify-content: space-around;
-    text-decoration: none;
-    padding: 10px 20px;
-    text-align: center;
-    width: 100px;
-    height: 45px;
-    border: none;
-    outline: none;
-    border-radius: 10px;
-    background: #f1356d;
-    color: #fff;
-}
-
-.Sign_Up:hover {
-    background: #0f0c0b;
-    transition: all 0.3s ease;
-}
 
 /*Account*/
 
@@ -487,6 +262,19 @@ body {
 .Log_Out:hover {
     background: #0f0c0b;
     transition: all 0.3s ease;
+}
+
+
+
+/*
+mohammed zijn troep
+ */
+
+/* base styles */
+* {
+    margin: 0;
+    font-family: "Quicksand";
+    color: #333;
 }
 
 .whaty {
@@ -613,85 +401,9 @@ body, html {
     max-width: 250px;
 }
 
-/*Login*/
-
-.login {
-    position: fixed;
-    left: 40%;
-    top: 5%;
-    font-size: 25px;
-    color: #12375c;
-}
-
-.Sign_In_username {
-    position: fixed;
-    transform: translate(20%, 250%);
-    height: 30px;
-    width: 250px;
-    resize: both;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    padding: 0 1rem;
-}
-
-.Sign_In_password {
-    position: fixed;
-    transform: translate(20%, 400%);
-    height: 30px;
-    width: 250px;
-    resize: both;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    padding: 0 1rem;
-}
-/*.Sign_In_checkboxes {*/
-/*    position: fixed;*/
-/*    top: 55%;*/
-/*    left: 15%;*/
-/*    text-decoration: none;*/
-/*    font-size: 15px;*/
-/*    list-style: none;*/
-/*}*/
-
-.Sign_In_noacc {
-    position: fixed;
-    top: 75%;
-    left: 28%;
-    text-decoration: none;
-    font-size: 10px;
-}
-
-.login__button {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0 1rem;
-    width: 100%;
-    top: 82%;
-}
-
-.Log_In {
-    display: flex;
-    justify-content: space-around;
-    text-decoration: none;
-    padding: 10px 20px;
-    text-align: center;
-    width: 100px;
-    height: 45px;
-    border: none;
-    outline: none;
-    border-radius: 10px;
-    background: rgba(119, 52, 231);
-    color: #fff;
-}
-
-.Log_In:hover {
-    background: #cc4f0e;
-    transition: all 0.3s ease;
-}
+/*
+gedaan met mohammed zijn troep
+ */
 
 .clear {
     clear: both;

@@ -23,7 +23,7 @@ function Navbar() {
                     </ul>
                     <ul className="navbar-nav w-100 justify-content-center ">
                         <li className="nav-item">
-                            <Link to="sign_in" className="flexible button-purple">Log in
+                            <Link to="/sign_in" className="flexible button-purple">Log in
                             </Link>
                         </li>
                         <li className="nav-item">
