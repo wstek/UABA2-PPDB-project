@@ -1,5 +1,6 @@
 from flask import Flask, request, session, render_template
-from database_access import DatabaseEngine
+import time
+from database_access import Database
 from flask_session import Session
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
@@ -15,28 +16,31 @@ app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_REDIS'] = redis.from_url('redis://localhost:6379')
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "None"
-app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(minutes=1)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=1)
 app.config['SESSION_MODIFIED'] = True
-#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-#app.config['SQLALCHEMY_ECHO'] = True
-#app.config['SESSION_PERMANENT'] = False
-#app.config['SESSION_USE_SIGNER'] = True
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_ECHO'] = True
+# app.config['SESSION_PERMANENT'] = False
+# app.config['SESSION_USE_SIGNER'] = True
 
 bcrypt = Bcrypt(app)
 server_session = Session(app)
-db_engine = DatabaseEngine()
+db_engine = Database()
 db_engine.connect(filename="config/database.ini")
 db_engine.logVersion()
-cors = CORS(app, supports_credentials=True, resources={'/*':{'origins': 'http://localhost:3000'}})
+cors = CORS(app, supports_credentials=True, resources={'/*': {'origins': 'http://localhost:3000'}})
+
 
 @app.route("/")
 @cross_origin(supports_credentials=True)
 def index():
     render_template('../react-frontend/build/index.html')
 
+
 @app.route('/api/time')
 def get_current_time():
     return {'time': time.time()}
+
 
 @app.route("/api/me")
 @cross_origin(supports_credentials=True)
@@ -47,9 +51,10 @@ def get_current_user():
     if not user_id:
         return {"error": "Unauthorized"}, 401
 
-    user = db_engine.database.execute("SELECT * FROM datascientist WHERE username = :username", {"username": user_id}).fetchone()
+    user = db_engine.session.execute("SELECT * FROM datascientist WHERE username = :username",
+                                      {"username": user_id}).fetchone()
 
-    return {"username":user.username, "email":user.email_address}
+    return {"username": user.username, "email": user.email_address}
 
 
 @app.route("/api/register", methods=["POST"])
@@ -61,14 +66,19 @@ def register_user():
     email = request.json["email"]
     username = request.json["username"]
     password = request.json["password"]
-    user = db_engine.database.execute("SELECT * FROM datascientist WHERE username = :username OR email_address = :email", {"username": username, "email": email}).fetchall()
+    user = db_engine.session.execute(
+        "SELECT * FROM datascientist WHERE username = :username OR email_address = :email",
+        {"username": username, "email": email}).fetchall()
     if user:
         return {"error": "User already exists"}, 409
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    db_engine.database.execute("INSERT INTO datascientist(first_name, last_name, birthdate, email_address, username, password) VALUES(:first_name, :last_name, :birthdate, :email_address, :username, :password)", {"first_name":firstname, "last_name":lastname, "birthdate":birthdate, "email_address":email,"username":username,"password":hashed_password})
-    db_engine.database.commit()
+    db_engine.session.execute(
+        "INSERT INTO datascientist(first_name, last_name, birthdate, email_address, username, password) VALUES(:first_name, :last_name, :birthdate, :email_address, :username, :password)",
+        {"first_name": firstname, "last_name": lastname, "birthdate": birthdate, "email_address": email,
+         "username": username, "password": hashed_password})
+    db_engine.session.commit()
     session["user_id"] = username
-    return {"username":username, "email":email}
+    return {"username": username, "email": email}
 
 
 @app.route("/api/login", methods=["POST"])
@@ -76,7 +86,8 @@ def register_user():
 def login_user():
     username = request.json["username"]
     password = request.json["password"]
-    user = db_engine.database.execute("SELECT * FROM datascientist WHERE username = :username", {"username": username}).fetchone()
+    user = db_engine.session.execute("SELECT * FROM datascientist WHERE username = :username",
+                                      {"username": username}).fetchone()
     if not user:
         return {"error": "Unauthorized"}, 401
 
@@ -86,7 +97,8 @@ def login_user():
     # session.permanent = True
     session["user_id"] = user.username
 
-    return {"username":user.username, "email":user.email_address}
+    return {"username": user.username, "email": user.email_address}
+
 
 # @app.route("/api/read-cookie")
 # @cross_origin(supports_credentials=True)
@@ -97,6 +109,7 @@ def login_user():
 def logout_user():
     session.pop("user_id")
     return "200"
+
 
 # RUN DEV SERVER
 if __name__ == "__main__":
