@@ -1,3 +1,5 @@
+import sys
+
 import sqlalchemy
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.dialects.postgresql import insert
@@ -8,7 +10,7 @@ from typing import List
 import csv
 import time
 
-MAXBUFFERSIZE: int = 1000000
+MAXBUFFERSIZE: int = 500000
 
 
 class Database:
@@ -17,6 +19,8 @@ class Database:
         self.session = None
         self.meta_data = None
         self.entries_count = 0
+        self.total_lines = 0
+        self.progress = 0
 
     def connect(self, filename='database.ini', section='postgresql'):
         # read connection parameters
@@ -45,37 +49,44 @@ class Database:
         self.entries_count += 1
         # self.engine.execute(insert(table).values([values]))
         self.engine.execute(table.insert(), [values])
+        self.updateProgress()
 
     def insertRows(self, table, values: List[dict]):
         self.entries_count += len(values)
         # self.engine.execute(insert(table).values(values))
         self.engine.execute(table.insert(), values)
+        self.updateProgress()
 
     def insertRowNoConflict(self, table, values: dict):
         self.entries_count += 1
         self.engine.execute(insert(table).values([values]).on_conflict_do_nothing())
+        self.updateProgress()
         # self.engine.execute(table.insert(), [values])
 
     def insertRowsNoConflict(self, table, values: List[dict]):
         self.entries_count += len(values)
         self.engine.execute(insert(table).values(values).on_conflict_do_nothing())
         # self.engine.execute(table.insert(), values)
+        self.updateProgress()
 
     def addDataset(self, dataset_name: str, uploader_name: str, purchase_data_filename: str, article_data_filename: str,
                    customer_data_filename: str):
         self.meta_data.reflect()
 
-        # if not self.__addDatasetEntry(dataset_name, uploader_name):
-        #     return False
+        if not self.__addDatasetEntry(dataset_name, uploader_name):
+            return False
 
         # todo check if files exist
 
         # execution time measurement
         start_time = time.time()
 
-        # self.__addArticlesDataset(dataset_name, article_data_filename)
-        # self.__addCustomersDataset(dataset_name, customer_data_filename)
+        self.total_lines = sum(1 for line in open(article_data_filename)) + sum(
+            1 for line in open(customer_data_filename)) + sum(
+            1 for line in open(purchase_data_filename)) - 3
 
+        self.__addArticlesDataset(dataset_name, article_data_filename)
+        self.__addCustomersDataset(dataset_name, customer_data_filename)
         self.__addPurchasesDataset(dataset_name, purchase_data_filename)
 
         duration = time.time() - start_time
@@ -255,10 +266,15 @@ class Database:
             self.insertRowsNoConflict(purchases_table, purchase_buffer)
             purchase_buffer.clear()
 
+    def updateProgress(self):
+        self.progress = self.entries_count / self.total_lines
+        sys.stdout.write("Download progress: %d%%   \r" % (self.progress * 100))
+        sys.stdout.flush()
+
 
 if __name__ == '__main__':
     db_con = Database()
     db_con.connect(filename="config/database.ini")
-    db_con.addDataset("H_M", "William", "../datasets/H_M/purchases.csv", "../datasets/H_M/articles.csv",
+    db_con.addDataset("H_M", "xSamx33", "../datasets/H_M/purchases.csv", "../datasets/H_M/articles.csv",
                       "../datasets/H_M/customers.csv")
     # db_con.logVersion()
