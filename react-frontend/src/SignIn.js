@@ -91,7 +91,7 @@ function SignIn(props) {
                         <div className="form-group">
 
                             <label>Don't have an account? </label>
-                            <Link to="/signup">Sign Up!</Link></div>
+                            <Link to="/sign_up">Sign Up!</Link></div>
                     </div>
                     <div className="row mb-0 maxwidth-250 mx-auto">
                         { !isPending && <button className="button-purple" onClick={handleSubmit}>Log in</button> }
