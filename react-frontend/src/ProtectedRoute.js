@@ -1,38 +1,32 @@
 import { useState, useEffect } from 'react';
 import {Route} from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
+import SignUp from './SignUp';
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function firstFunction() {
-    const response = await fetch("http://127.0.0.1:5000/api/me", {
-        method: 'GET',
-        credentials: 'include'
-    })
-    return response.ok;
-};
 
-const ProtectedRoute = ({component: Component, ...rest}) => {
-    const [authed, setAuthed] = useState(false);
-
-    
-
-    // useEffect(() => {
-    //   const fetchdata = async () => {
-    //     return fetch('http://127.0.0.1:5000/api/me', {
-    //         method: 'GET',
-    //         credentials: 'include'
-    //     })
-    //     .then(res => {
-    //       console.log(res.ok)
-    //       setAuthed(res.ok ? true : false);})
-    //     }
-    //     fetchdata().catch((err) => {setAuthed(false);})
-    // }, []);
+const ProtectedRoute = ({Component: component, ...rest}) => {
+    const [auth, setAuthed] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    useEffect(() => {
+        fetch('http://127.0.0.1:5000/api/me', {
+            method: 'GET',
+            credentials: 'include'
+        }).then(res => {setAuthed(res.ok);setIsLoading(false);})
+    }, []);
+    console.log(auth);
+    console.log(rest.component.name);
+    console.log(isLoading);
+    if (isLoading) {
+        return (
+            <p>Loading...</p>
+        )
+    }
     return (
-        <Route {...rest} render={(props) => firstFunction() ? <Component {...props} /> : <Redirect to={{pathname: '/sign_in', state: {from: props.location}}} /> } />
+        <Route render={(props) => (auth ? <rest.component {...props} /> : <Redirect to={{pathname: '/sign_in', state: {from: props.location}}} /> )} />
     );
 }
  

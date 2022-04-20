@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-// import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import Navbar from './Navbar';
 import Footer from './Footer';
 import Home from './Home';
@@ -13,9 +13,22 @@ import Dashboard from './Dashboard';
 import ProtectedRoute from './ProtectedRoute';
 
 function App() {
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // const [isAuth, setIsAuth] = useState(false);
+  // useEffect(() => {
+  //       fetch('http://127.0.0.1:5000/api/me', {
+  //           method: 'GET',
+  //           credentials: 'include'
+  //       })
+  //       .then(res => {
+  //         // console.log(res.ok)
+  //         setIsAuth(res.ok);})
+  //       .catch((res) => {
+  //         setIsAuth(false);
+  //       })
+  //       // fetchdata().catch((err) => {setAuthed(false);})
+  //   }, [isAuth]);
+  //   console.log(isAuth);
   return (
-
     <Router>
       <div className="App">
         <Navbar />
@@ -26,12 +39,8 @@ function App() {
             <Route exact path="/">
               <Home />
             </Route>
-            <Route exact path="/account">
-              <Account />
-            </Route>
-            <Route exact path="/abtest/setup">
-              <InputPage />
-            </Route>
+            <ProtectedRoute component={Account} exact path="/account" />
+            <ProtectedRoute component={InputPage} exact path="/abtest/setup" />
             <Route exact path="/sign_in">
               <SignIn />
             </Route>
@@ -41,7 +50,7 @@ function App() {
             <Route exact path="/contact">
               <Contact />
             </Route>
-            <Route exact path="/dashboard" component={Dashboard} />
+            <ProtectedRoute component={Dashboard} exact path="/dashboard"/>
             <Route path="*">
               <NotFound />
             </Route>

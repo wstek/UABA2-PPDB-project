@@ -104,7 +104,7 @@ def login_user():
 # @cross_origin(supports_credentials=True)
 # def read_cookie():
 #
-@app.route("/api/logout", methods=["POST"])
+@app.route("/api/logout")
 @cross_origin(supports_credentials=True)
 def logout_user():
     session.pop("user_id")

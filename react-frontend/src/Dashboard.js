@@ -1,16 +1,21 @@
 import React, {useState, useEffect} from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 const Dashboard = () => {
     const [user, setUser] = useState(null);
+    const History = useHistory();
     const logoutUser = (e) => {
-        fetch('http://127.0.0.1:5000/api/logout')
+        fetch('http://127.0.0.1:5000/api/logout', {
+            method: 'GET',
+            credentials: 'include'
+        })
         .then((res) => {
             if (!res.ok) {
                 throw Error('could not logout');
             }
             setUser(null);
-            window.location.reload(false);
+            // History.push("/sign_in");
+            window.location.reload();
         })
         .catch((err) => {
             console.log(err);
@@ -34,26 +39,16 @@ const Dashboard = () => {
     }, [])
     return (
         <div>
-        <h1>Dashboard</h1>
         {user != null ? (
         <div>
+            <h1>Dashboard</h1>
             <h2>Logged in</h2>
             <h3>username: {user.username}</h3>
             <h3>Email: {user.email}</h3>
-
-            <Link to="/logout">
-                <button onClick={logoutUser}>Logout</button>
-            </Link>
+            <button onClick={logoutUser}>Logout</button>
         </div>
         ) : (
-        <><p>You are not logged in</p><div>
-                        <Link to="/sign_in">
-                            <button>Login</button>
-                        </Link>
-                        <Link to="/sign_up">
-                            <button>Register</button>
-                        </Link>
-                    </div></>
+        <h3>Redirecting...</h3>
         )}
         </div>
     );
