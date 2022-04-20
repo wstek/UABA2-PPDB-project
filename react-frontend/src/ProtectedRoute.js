@@ -17,16 +17,16 @@ const ProtectedRoute = ({Component: component, ...rest}) => {
             credentials: 'include'
         }).then(res => {setAuthed(res.ok);setIsLoading(false);})
     }, []);
-    console.log(auth);
-    console.log(rest.component.name);
-    console.log(isLoading);
+    // console.log(auth);
+    // console.log(rest.component.name);
+    // console.log(isLoading);
     if (isLoading) {
         return (
             <p>Loading...</p>
         )
     }
     return (
-        <Route render={(props) => (auth ? <rest.component {...props} /> : <Redirect to={{pathname: '/sign_in', state: {from: props.location}}} /> )} />
+        <Route render={(props) => (auth ? <rest.component {...props} /> : <Redirect to={{pathname: '/sign_in', state: {from: rest.path}}} /> )} />
     );
 }
  

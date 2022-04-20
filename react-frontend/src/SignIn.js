@@ -12,7 +12,9 @@ function POST(path, data) {
     })
 }
 
-function SignIn() {
+
+function SignIn(props) {
+    console.log(props);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [passwordShown, setPasswordShown] = useState(false);
@@ -41,7 +43,7 @@ function SignIn() {
             // history.go(-1);
         setIsPending(false);
         setError(null);
-        history.push('/dashboard');
+        history.push(props.location.state.from);
         //   }
         })
         .catch((err) => {

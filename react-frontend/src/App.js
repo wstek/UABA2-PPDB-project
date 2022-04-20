@@ -41,9 +41,7 @@ function App() {
             </Route>
             <ProtectedRoute component={Account} exact path="/account" />
             <ProtectedRoute component={InputPage} exact path="/abtest/setup" />
-            <Route exact path="/sign_in">
-              <SignIn />
-            </Route>
+            <Route exact path="/sign_in" render={(props) => <SignIn {...props}/>} />
             <Route exact path="/sign_up">
               <SignUp />
             </Route>
