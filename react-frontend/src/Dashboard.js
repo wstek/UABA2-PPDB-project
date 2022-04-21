@@ -1,5 +1,10 @@
 import React, {useState, useEffect} from "react";
 import { Link, useHistory } from "react-router-dom";
+// import useTimeout from "./useTimeout";
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 const Dashboard = () => {
     const [user, setUser] = useState(null);
@@ -21,24 +26,47 @@ const Dashboard = () => {
             console.log(err);
         })
     }
-
-    useEffect(() => {
+    // useEffect(() => {
+    //     setTimeout(() => {
+    //         alert("hello");
+    //     }, 3000);
+    // }, [])
+    // useEffect(() => {
+    //     setTimeout(() => {
+    //         fetch('http://127.0.0.1:5000/api/me', {
+    //         method: 'GET',
+    //         credentials: 'include'
+    //         }).then(res => res.json())
+    //         .then((data) => {
+    //         if (data.error) {
+    //             throw Error(data.error);
+    //         }
+    //         setUser(data);
+    //         }).catch((err) => {
+    //         setUser(null);
+    //         console.log(err);
+    //     })
+    //     },1000)
+    // }, [])
+    const handlea = () => {
         fetch('http://127.0.0.1:5000/api/me', {
             method: 'GET',
-            credentials: 'include'
-        }).then(res => res.json())
-        .then((data) => {
+            credentials: 'include',
+            headers: { "Content-Type": "application/json", 'Accept': 'application/json' }
+            }).then(res => res.json())
+            .then((data) => {
             if (data.error) {
                 throw Error(data.error);
             }
             setUser(data);
-        }).catch((err) => {
+            }).catch((err) => {
             setUser(null);
             console.log(err);
         })
-    }, [])
+    }
     return (
         <div>
+        <button onClick={handlea}>check</button>
         {user != null ? (
         <div>
             <h1>Dashboard</h1>

@@ -1,26 +1,26 @@
 import {useState, useEffect} from 'react';
+import { useHistory } from 'react-router-dom';
 import {ColoredLine} from "./coloredLine";
-
+import { Normalize } from './parameters';
 
 const InputList = ({abs_algorithms}) => {
-    var id = 1;
-
+    const [id, setId] = useState(1);
+    const [isPending, setIsPending] = useState(false);
+    const history = useHistory();
     const [con_algorithms, setConAlgorithm] = useState(
         []
     )
 
     const handleAddAlgorithm = () => {
         const algorithmname = document.getElementById('algorithmname').value;
-
         const algorithm = abs_algorithms.filter(algorithm => algorithm.name === algorithmname)[0];
         const inputFieldsArray = algorithm.inputFields;
+        const parametersArray = algorithm.parameters;
         const temp = con_algorithms.slice();
-        const newAlgorithm = {id: id, name: algorithmname, fields: inputFieldsArray};
-
+        var newAlgorithm = {id: id, name: algorithmname, fields: inputFieldsArray, parameters: parametersArray};
         temp.push(newAlgorithm);
         setConAlgorithm(temp);
-        id += 1;
-
+        setId(id+1);
     }
 
     const handleRemoveAlgorithm = (id) => {
@@ -32,7 +32,7 @@ const InputList = ({abs_algorithms}) => {
     }, []);
 
     const resetInput = () => {
-        id = 0;
+        setId(0);
         setConAlgorithm([])
         document.getElementById('stepsize').value = ''
         document.getElementById('interval').value = ''
@@ -59,7 +59,52 @@ const InputList = ({abs_algorithms}) => {
             </div>
         )
     }
-
+    const handleStart = async () => {
+        var algorithms_parameters = [];
+        for (let i = 0; i < con_algorithms.length; i++) {
+            var algorithmParams = {};
+            for (let k = 0; k < con_algorithms[i].parameters.length; k++) {
+                const val = document.getElementById(con_algorithms[i].parameters[k] + con_algorithms[i].id).value;
+                if (!val) {
+                    throw Error('Please fill in all the fields')
+                }
+                algorithmParams[con_algorithms[i].parameters[k]] = val;
+            }
+            algorithms_parameters.push(algorithmParams);
+        }
+        const start = document.getElementById('start').value;
+        const end = document.getElementById('end').value;
+        const topk = document.getElementById('topk').value;
+        const interval = document.getElementById('interval').value;
+        const stepsize = document.getElementById('stepsize').value;
+        if (!start || !end || !topk || !interval || !stepsize) {
+          throw Error('Please fill in all the fields');
+        } else {
+          const abtest_setup = { start, end, topk, interval, stepsize, algorithms_parameters};
+          setIsPending(true);
+          const jdata = await JSON.stringify(abtest_setup);
+          await fetch('http://127.0.0.1:5000/api/abtest_setup', {
+            method: 'POST',
+            headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
+            credentials: 'include',
+            body: jdata
+          }).then((res) => res.json())
+          .then((data) => {
+            // if (data.error) {
+            //     throw Error(data.error);
+            // }
+            // history.go(-1);
+            setIsPending(false);
+            // setError(null);
+            history.push('/dashboard');
+          })
+          .catch((err) => {
+            setIsPending(false);
+            // setError(err.message);
+            console.log(err.message);
+          })
+          }
+    }
     return (
         <div className="container-fluid pt-5 pb-5 pl-5 pr-5" id='algorithms'>
             <div className="row text-center align-items-center">
@@ -68,9 +113,10 @@ const InputList = ({abs_algorithms}) => {
                     <button className="btn-lg button-purple red_onhover" type="reset" onClick={resetInput}>Reset</button>
                 </div>
                 <div className="col-6 text-start">
-                    <button className="btn-lg button-purple green_onhover" type="submit">Start</button>
+                    <button className="btn-lg button-purple green_onhover" type="submit" onClick={handleStart}>Start</button>
                 </div>
             </div>
+            { isPending && <p>Setting up...</p>}
             <div className="row text-center align-items-center">
 
 

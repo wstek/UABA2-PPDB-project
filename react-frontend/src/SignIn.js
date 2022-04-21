@@ -14,7 +14,7 @@ function POST(path, data) {
 
 
 function SignIn(props) {
-    console.log(props);
+    // console.log(props);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [passwordShown, setPasswordShown] = useState(false);

@@ -48,7 +48,7 @@ function App() {
             <Route exact path="/contact">
               <Contact />
             </Route>
-            <ProtectedRoute component={Dashboard} exact path="/dashboard"/>
+            <Route component={Dashboard} exact path="/dashboard"/>
             <Route path="*">
               <NotFound />
             </Route>

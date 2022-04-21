@@ -1,5 +1,5 @@
+from crypt import methods
 from flask import Flask, request, session, render_template
-import time
 from database_access import Database
 from flask_session import Session
 from flask_bcrypt import Bcrypt
@@ -11,13 +11,13 @@ import redis
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "changeme"
 app.config['SESSION_TYPE'] = 'redis'
-app.config['SESSION_PERMANENT'] = True
+app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_REDIS'] = redis.from_url('redis://localhost:6379')
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "None"
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=1)
-app.config['SESSION_MODIFIED'] = True
+# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=1)
+# app.config['SESSION_MODIFIED'] = True
 # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # app.config['SQLALCHEMY_ECHO'] = True
 # app.config['SESSION_PERMANENT'] = False
@@ -31,20 +31,16 @@ db_engine.logVersion()
 cors = CORS(app, supports_credentials=True, resources={'/*': {'origins': 'http://localhost:3000'}})
 
 
-@app.route("/")
-@cross_origin(supports_credentials=True)
-def index():
-    render_template('../react-frontend/build/index.html')
+# @app.route("/")
+# @cross_origin(supports_credentials=True)
+# def index():
+#     render_template('../react-frontend/build/index.html')
 
 
-@app.route('/api/time')
-def get_current_time():
-    return {'time': time.time()}
-
-
-@app.route("/api/me")
+@app.route("/api/me", methods=['GET'])
 @cross_origin(supports_credentials=True)
 def get_current_user():
+    print('hello')
     user_id = session.get("user_id")
     print(2, user_id)
 
@@ -99,15 +95,16 @@ def login_user():
 
     return {"username": user.username, "email": user.email_address}
 
+@app.route("/api/abtest_setup", methods=["POST", "OPTIONS"])
+@cross_origin(supports_credentials=True)
+def abtest_setup():
+    return {"name":"josn"}
 
-# @app.route("/api/read-cookie")
-# @cross_origin(supports_credentials=True)
-# def read_cookie():
-#
 @app.route("/api/logout")
 @cross_origin(supports_credentials=True)
 def logout_user():
-    session.pop("user_id")
+    if "user_id" in session:
+        session.pop("user_id")
     return "200"
 
 
