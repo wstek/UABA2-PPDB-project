@@ -6,6 +6,7 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
+import base64
 import redis
 
 app = Flask(__name__)
@@ -29,6 +30,8 @@ db_engine = Database()
 db_engine.connect(filename="config/database.ini")
 db_engine.logVersion()
 cors = CORS(app, supports_credentials=True, resources={'/*': {'origins': 'http://localhost:3000'}})
+
+ab_test_id = 0
 
 
 # @app.route("/")
@@ -98,7 +101,26 @@ def login_user():
 @app.route("/api/abtest_setup", methods=["POST", "OPTIONS"])
 @cross_origin(supports_credentials=True)
 def abtest_setup():
-    return {"name":"josn"}
+    abtest_id = ab_test_id #HARDCODED FOR NOW
+    start = request.json["start"]
+    end = request.json["end"]
+    topk = request.json["topk"]
+    stepsize = request.json["stepsize"]
+    algorithms_parameters = request.json["algorithms_parameters"]
+
+    db_engine.session.execute("INSERT INTO ABTest(abtest_id, start, end, top_k, stepsize, dataset_name, created_by) VALUES(:abtest_id, :start, :end, :top_k, :stepsize, :dataset_name, :created_by)",
+    {"abtest_id":abtest_id, "start":start, "end":end, "top_k":topk, "stepsize": stepsize, "dataset_name":"mohammed", "created_by":session["user_id"]})
+    ab_test_id += 1
+    return "200"
+
+@app.route("/api/read_cvs", methods=["POST"])
+@cross_origin(supports_credentials=True)
+def read_cvs():
+    datasets = request.json
+    for i in range(len(datasets)):
+        base64_message = base64.b64decode(datasets[i]['file']).decode('utf-8').rstrip()
+        # print(base64_message)
+    return "200"
 
 @app.route("/api/logout")
 @cross_origin(supports_credentials=True)
