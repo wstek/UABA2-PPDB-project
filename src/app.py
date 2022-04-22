@@ -1,3 +1,4 @@
+from audioop import cross
 from crypt import methods
 from flask import Flask, request, session, render_template
 from database_access import Database
@@ -32,7 +33,7 @@ db_engine.logVersion()
 cors = CORS(app, supports_credentials=True, resources={'/*': {'origins': 'http://localhost:3000'}})
 
 ab_test_id = 0
-
+algorithm_id = 0
 
 # @app.route("/")
 # @cross_origin(supports_credentials=True)
@@ -101,26 +102,42 @@ def login_user():
 @app.route("/api/abtest_setup", methods=["POST", "OPTIONS"])
 @cross_origin(supports_credentials=True)
 def abtest_setup():
+    global ab_test_id
     abtest_id = ab_test_id #HARDCODED FOR NOW
     start = request.json["start"]
     end = request.json["end"]
     topk = request.json["topk"]
     stepsize = request.json["stepsize"]
+    dataset_name = request.json["dataset_name"]
     algorithms_parameters = request.json["algorithms_parameters"]
+    db_engine.session.execute('INSERT INTO "ABTest"(abtest_id, start, "end", top_k, stepsize, dataset_name, created_by) VALUES(:abtest_id, :start, :end, :top_k, :stepsize, :dataset_name, :created_by)',
+    {"abtest_id":abtest_id, "start":start, "end":end, "top_k":int(topk), "stepsize": int(stepsize), "dataset_name":dataset_name, "created_by":session["user_id"]})
+    db_engine.session.commit()
 
-    db_engine.session.execute("INSERT INTO ABTest(abtest_id, start, end, top_k, stepsize, dataset_name, created_by) VALUES(:abtest_id, :start, :end, :top_k, :stepsize, :dataset_name, :created_by)",
-    {"abtest_id":abtest_id, "start":start, "end":end, "top_k":topk, "stepsize": stepsize, "dataset_name":"mohammed", "created_by":session["user_id"]})
+    for i in range(len(algorithms_parameters)):
+        db_engine.session.execute("INSERT INTO algorithm(algorithm_id, abtest_id, algorithm_name) VALUES(:algorithm_id, :abtest_id, :algorithm_name)",
+        {"algorithm_id":algorithm_id, "abtest_id":abtest_id, "algorithm_name":algorithms_parameters[i]["name"]})
+        db_engine.session.commit()
+        algorithm_id += 1
     ab_test_id += 1
     return "200"
 
-@app.route("/api/read_cvs", methods=["POST"])
+@app.route("/api/read_csv", methods=["POST"])
 @cross_origin(supports_credentials=True)
-def read_cvs():
+def read_csv():
     datasets = request.json
     for i in range(len(datasets)):
         base64_message = base64.b64decode(datasets[i]['file']).decode('utf-8').rstrip()
-        # print(base64_message)
+        print(base64_message)
     return "200"
+
+@app.route("/api/get_datasets")
+@cross_origin(supports_credentials=True)
+def get_datasets():
+    datasets = db_engine.session.execute("SELECT * FROM dataset").fetchall()
+    for i in range(len(datasets)):
+        datasets[i] = str(datasets[i].name)
+    return {"all_datasets":datasets}
 
 @app.route("/api/logout")
 @cross_origin(supports_credentials=True)

@@ -8,6 +8,7 @@ const InputList = ({abs_algorithms}) => {
     const [id, setId] = useState(1);
     const [isPending, setIsPending] = useState(false);
     const history = useHistory();
+    const [datasetsx, setDatasetsx] = useState([]);
     const [con_algorithms, setConAlgorithm] = useState(
         []
     )
@@ -30,6 +31,15 @@ const InputList = ({abs_algorithms}) => {
     }
     useEffect(() => {
         resetInput()
+        fetch('http://127.0.0.1:5000/api/get_datasets', {
+            method: 'GET',
+            headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
+            credentials: 'include'
+        }).then((res) => res.json())
+        .then((data) => {setDatasetsx(data.all_datasets)})
+        .catch((err) => {
+          console.log(err.message);
+        })
     }, []);
 
     const resetInput = () => {
@@ -62,7 +72,7 @@ const InputList = ({abs_algorithms}) => {
     const handleStart = async () => {
         var algorithms_parameters = [];
         for (let i = 0; i < con_algorithms.length; i++) {
-            var algorithmParams = {};
+            var algorithmParams = {name : con_algorithms[i].name};
             for (let k = 0; k < con_algorithms[i].parameters.length; k++) {
                 const val = document.getElementById(con_algorithms[i].parameters[k] + con_algorithms[i].id).value;
                 if (!val) {
@@ -76,13 +86,13 @@ const InputList = ({abs_algorithms}) => {
         const end = document.getElementById('end').value;
         const topk = document.getElementById('topk').value;
         const stepsize = document.getElementById('stepsize').value;
+        const select = document.getElementById('dataset_name');
+        const dataset_name = select.options[select.selectedIndex].value;
 
-        const datasets = document.getElementById("dataset").files[0];
-        console.log(datasets)
-        if (!start || !end || !topk || !stepsize) {
+        if (!start || !end || !topk || !stepsize || !dataset_name) {
           throw Error('Please fill in all the fields');
         } else {
-          const abtest_setup = { start, end, topk, stepsize, algorithms_parameters};
+          const abtest_setup = { start, end, topk, stepsize, dataset_name, algorithms_parameters};
           setIsPending(true);
           const jdata = await JSON.stringify(abtest_setup);
           await fetch('http://127.0.0.1:5000/api/abtest_setup', {
@@ -111,13 +121,14 @@ const InputList = ({abs_algorithms}) => {
     var datasets = []
     const onGo = (dataset, finish) => {
         if (finish) {
-            const url = "http://127.0.0.1:5000/api/read_cvs";
+            const url = "http://127.0.0.1:5000/api/read_csv";
             const aret = post(url, dataset, {withCredentials: true}).then(response => console.log("response:", response));
             datasets = [];
             return aret;
         }
     }
     const onChange = (e) => {
+        console.log(document.getElementById("dataset").value)
         let files = e.target.files;
         for (let i = 0; i < files.length; i++) {
             let reader = new FileReader();
@@ -202,9 +213,14 @@ const InputList = ({abs_algorithms}) => {
                            placeholder="Enter top-k"/>
                 </div>
                 <div className="col-4">
-                <br/>
-                <input id="dataset" name="dataset" type="file" className="form-control" onChange={(e) => onChange(e)} data-show-upload="false" data-show-caption="true" multiple />
+                    <br/>
+                    <select className="selector form-control" id="dataset_name">
+                        {datasetsx.map((d) => (
+                            <option key={d} value={d}>{d}</option>
+                        ))}
+                    </select>
                 </div>
+
                 <div className="col-4 ">
                     <label htmlFor="stepsize">Step size:</label>
                     <input type="number" className="form-control" id="stepsize" min="1"
