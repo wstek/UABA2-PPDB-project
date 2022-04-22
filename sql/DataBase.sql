@@ -12,6 +12,7 @@ CREATE DOMAIN nat_int int check ( value >= 0 );
 
 CREATE TABLE "datascientist" (
   "username" varchar PRIMARY KEY,
+  datascientist_id serial unique not null,
 
   "first_name" varchar NOT NULL,
   "last_name" varchar NOT NULL,
@@ -23,6 +24,7 @@ CREATE TABLE "datascientist" (
 );
 
 CREATE TABLE "admin" (
+    admin_id serial unique not null references "datascientist" (datascientist_id),
   "username" varchar primary key references "datascientist" (username) on update cascade on delete cascade
 );
 
@@ -39,7 +41,7 @@ CREATE TABLE "customer" (
 );
 
 CREATE TABLE "ABTest" (
-  "abtest_id" nat_int primary key,
+  "abtest_id" serial primary key,
   "top_k" nat_int NOT NULL,
   "stepsize" nat_int NOT NULL,
   "start" date NOT NULL,
@@ -61,13 +63,19 @@ create table "article_attribute"(
   "attribute" varchar not null,
   "value" varchar not null,
   "dataset_name" varchar not null,
+  "type" varchar not null,
 
   "article_id" nat_int not null,
   foreign key (article_id,dataset_name) references article(article_id,dataset_name) on update cascade on delete cascade,
   primary key ("attribute","article_id", dataset_name)
 );
+
+
+
+
 create table "customer_attribute"(
-  "dataset_name" varchar not null references dataset(name),
+  "dataset_name" varchar not null,
+  "type" varchar not null,
 
   "attribute" varchar not null,
   "value" varchar not null,
@@ -88,7 +96,7 @@ PRIMARY KEY  ("dataset_name", "customer_id", "article_id", "timestamp")
 );
 
 CREATE TABLE "algorithm" (
-  "algorithm_id" nat_int not null,
+  "algorithm_id" serial not null,
   "abtest_id" nat_int not null references "ABTest"(abtest_id) on update cascade on delete cascade,
   "algorithm_name" algorythmname NOT NULL,
   PRIMARY KEY ("algorithm_id", "abtest_id")
@@ -98,15 +106,20 @@ CREATE TABLE "parameter" (
   "parametername" varchar not null,
   "algorithm_id" nat_int not null,
   "abtest_id" nat_int not null,
+  "type" varchar not null,
+
   foreign key (algorithm_id,abtest_id) references algorithm(algorithm_id, abtest_id) on update cascade on delete cascade,
   "value" varchar not null,
   PRIMARY KEY ("parametername", "algorithm_id", "abtest_id")
 );
 CREATE TABLE "statistics" (
-  "statistics_id" nat_int PRIMARY KEY,
+  "statistics_id" serial PRIMARY KEY,
   "datetime" timestamp not null,
   "algorithm_id" nat_int not null,
   "abtest_id" int not null,
+
+  unique(abtest_id,algorithm_id, datetime),
+
   foreign key (algorithm_id,abtest_id) references algorithm(algorithm_id,abtest_id) on update cascade on delete cascade
 );
 CREATE TABLE "customer_specific" (
