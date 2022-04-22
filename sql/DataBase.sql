@@ -63,7 +63,6 @@ create table "article_attribute"(
   "attribute" varchar not null,
   "value" varchar not null,
   "dataset_name" varchar not null,
-  "type" varchar not null,
 
   "article_id" nat_int not null,
   foreign key (article_id,dataset_name) references article(article_id,dataset_name) on update cascade on delete cascade,
