@@ -12,7 +12,7 @@ CREATE DOMAIN nat_int int check ( value >= 0 );
 
 CREATE TABLE "datascientist" (
   "username" varchar PRIMARY KEY,
-  datascientist_id serial unique not null,
+  "datascientist_id" serial unique not null,
 
   "first_name" varchar NOT NULL,
   "last_name" varchar NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE "datascientist" (
 );
 
 CREATE TABLE "admin" (
-    admin_id serial unique not null references "datascientist" (datascientist_id),
+  "admin_id" serial unique not null references "datascientist" (datascientist_id),
   "username" varchar primary key references "datascientist" (username) on update cascade on delete cascade
 );
 
@@ -74,8 +74,7 @@ create table "article_attribute"(
 
 
 create table "customer_attribute"(
-  "dataset_name" varchar not null,
-  "type" varchar not null,
+  "dataset_name" varchar not null references dataset(name),
 
   "attribute" varchar not null,
   "value" varchar not null,
@@ -106,7 +105,6 @@ CREATE TABLE "parameter" (
   "parametername" varchar not null,
   "algorithm_id" nat_int not null,
   "abtest_id" nat_int not null,
-  "type" varchar not null,
 
   foreign key (algorithm_id,abtest_id) references algorithm(algorithm_id, abtest_id) on update cascade on delete cascade,
   "value" varchar not null,
@@ -118,7 +116,7 @@ CREATE TABLE "statistics" (
   "algorithm_id" nat_int not null,
   "abtest_id" int not null,
 
-  unique(abtest_id,algorithm_id, datetime),
+  --unique(abtest_id,algorithm_id, datetime),
 
   foreign key (algorithm_id,abtest_id) references algorithm(algorithm_id,abtest_id) on update cascade on delete cascade
 );
