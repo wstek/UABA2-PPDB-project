@@ -70,17 +70,18 @@ const InputList = ({abs_algorithms}) => {
         )
     }
     const handleStart = async () => {
-        var algorithms_parameters = [];
+        var algorithms = [];
         for (let i = 0; i < con_algorithms.length; i++) {
-            var algorithmParams = {name : con_algorithms[i].name};
+            var algorithmParams = {name : con_algorithms[i].name, parameters : {}};
             for (let k = 0; k < con_algorithms[i].parameters.length; k++) {
                 const val = document.getElementById(con_algorithms[i].parameters[k] + con_algorithms[i].id).value;
                 if (!val) {
                     throw Error('Please fill in all the fields')
                 }
-                algorithmParams[con_algorithms[i].parameters[k]] = val;
+                algorithmParams.parameters[con_algorithms[i].parameters[k]] = val;
+                // algorithmParams.parameters[con_algorithms[i].parameters[k]] = val;
             }
-            algorithms_parameters.push(algorithmParams);
+            algorithms.push(algorithmParams);
         }
         const start = document.getElementById('start').value;
         const end = document.getElementById('end').value;
@@ -92,10 +93,10 @@ const InputList = ({abs_algorithms}) => {
         if (!start || !end || !topk || !stepsize || !dataset_name) {
           throw Error('Please fill in all the fields');
         } else {
-          const abtest_setup = { start, end, topk, stepsize, dataset_name, algorithms_parameters};
+          const abtest_setup = { start, end, topk, stepsize, dataset_name, algorithms};
           setIsPending(true);
           const jdata = await JSON.stringify(abtest_setup);
-          await fetch('http://127.0.0.1:5000/api/abtest_setup', {
+          await fetch('http://127.0.0.1:5000/api/start_simulation', {
             method: 'POST',
             headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
             credentials: 'include',
@@ -142,45 +143,6 @@ const InputList = ({abs_algorithms}) => {
                 // return post(url, formData, {withCredentials: true}).then(response => console.log("response:", response));
             }
         }
-        // console.log("hello");
-        // let files = e.target.files;
-        // console.log(document.getElementById("dataset").files[0].name)
-        // var datasets = []
-        // for (let i = 0; i < files.length; i++) {
-        //     let reader = new FileReader();
-        //     reader.readAsDataURL(files[i]);
-        //     const formData = {dataset_name : document.getElementById("dataset").files[i].name};
-        //     datasets.push(formData);
-        //     reader.onload = (e)=>{
-        //         // const formData={dataset_name : document.getElementById("dataset").files[i].name, file : e.target.result}
-        //         datasets[idx]["file"] = e.target.result;
-        //         idx += 1;
-        //         console.log("begin:",datasets[0]);
-        //     }
-        // }
-        // console.log("after:",datasets[0]);
-        // const url="http://127.0.0.1:5000/api/read_cvs";
-        // const formData={Data : datasets}
-        // console.log("form:",formData);
-        // const params = new URLSearchParams();
-        // params.append('Data', datasets);
-        // axios({
-        //     method: 'POST',
-        //     url: 'http://127.0.0.1:5000/api/read_cvs',
-        //     data: params,
-        //     withCredentials: true
-        // }).then(res => console.log("response:", res)).catch((err) => {console.log("error:",err.message)})
-        // console.log(datasets[0]);
-        // console.log(datasets.length);
-        // var formData = new FormData();
-        // formData.append('Data', datasets);
-        // fetch("http://127.0.0.1:5000/api/read_cvs", {
-        //     method: 'POST',
-        //     headers: {'Accept': 'application/json', "Content-Type": "application/json"},
-        //     credentials: 'include',
-        //     mode: 'cors',
-        //     body: JSON.stringify({formData})
-        // }).then(res => console.log("response:", res)).catch((err) => {console.log("error:",err.message)})
     }
     return (
         <div className="container-fluid pt-5 pb-5 pl-5 pr-5" id='algorithms'>

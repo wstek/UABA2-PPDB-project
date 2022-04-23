@@ -27,27 +27,33 @@ const Dashboard = () => {
         })
     }
     // useEffect(() => {
-    //     setTimeout(() => {
-    //         alert("hello");
-    //     }, 3000);
+    //     fetch('http://127.0.0.1:5000/api/logout');
     // }, [])
-    // useEffect(() => {
-    //     setTimeout(() => {
-    //         fetch('http://127.0.0.1:5000/api/me', {
-    //         method: 'GET',
-    //         credentials: 'include'
-    //         }).then(res => res.json())
-    //         .then((data) => {
-    //         if (data.error) {
-    //             throw Error(data.error);
-    //         }
-    //         setUser(data);
-    //         }).catch((err) => {
-    //         setUser(null);
-    //         console.log(err);
-    //     })
-    //     },1000)
-    // }, [])
+    useEffect(() => {
+        var cleared = false;
+        const interval = setInterval(() => {
+            fetch('http://127.0.0.1:5000/api/progress', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(res => res.json())
+            .then((data) => {
+                if (data === 100) {
+                    clearInterval(interval);
+                    cleared = true;
+                }
+                console.log(data);
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+        }, 500);
+        return () => {
+            if (!cleared) {
+                clearInterval(interval);
+            }
+        }
+    }, [])
     const handlea = () => {
         fetch('http://127.0.0.1:5000/api/me', {
             method: 'GET',

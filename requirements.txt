@@ -15,3 +15,10 @@ flask-session
 flask-sqlalchemy
 flask-cors
 redis
+pandas
+numpy
+python-dateutil
+pytz
+scipy
+six
+typer

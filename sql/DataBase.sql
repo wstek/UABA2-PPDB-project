@@ -109,16 +109,16 @@ CREATE TABLE "parameter" (
   "value" varchar not null,
   PRIMARY KEY ("parametername", "algorithm_id", "abtest_id")
 );
-CREATE TABLE "statistics" (
-  "statistics_id" serial PRIMARY KEY,
-  "datetime" timestamp not null,
-  "algorithm_id" nat_int not null,
-  "abtest_id" int not null,
+-- CREATE TABLE "statistics" (
+--   "statistics_id" serial PRIMARY KEY,
+--   "datetime" timestamp not null,
+--   "algorithm_id" nat_int not null,
+--   "abtest_id" int not null,
 
-  --unique(abtest_id,algorithm_id, datetime),
+--   --unique(abtest_id,algorithm_id, datetime),
 
-  foreign key (algorithm_id,abtest_id) references algorithm(algorithm_id,abtest_id) on update cascade on delete cascade
-);
+--   foreign key (algorithm_id,abtest_id) references algorithm(algorithm_id,abtest_id) on update cascade on delete cascade
+-- );
 CREATE TABLE "customer_specific" (
   "customer_id" nat_int NOT NULL,
 
@@ -129,10 +129,11 @@ CREATE TABLE "customer_specific" (
 );
 
 CREATE TABLE "recommendation" (
-  "recomendation_id" nat_int not null,
+  "algorithm_id" nat_int not null,
+  "datetime" timestamp not null,
+  "rank" nat_int not null
   "customer_id" nat_int not null,
-  "statistics_id" nat_int not null,
-  "dataset_name" varchar not null,
+  -- "statistics_id" nat_int not null,
   "article_id" nat_int NOT NULL,
   foreign key (article_id,dataset_name) references article(article_id,dataset_name) on update cascade on delete cascade,
   foreign key (customer_id,statistics_id) references customer_specific(customer_id,statistics_id) on update cascade on delete cascade,
