@@ -15,3 +15,13 @@ react-frontend/build
 datasets
 /react-frontend/.eslintcache
 /react-frontend/package-lock.json
+.DS_Store
+__pycache__
+.idea
+env
+/sql/DatabaseSchemeTeam6.aux
+/sql/DatabaseSchemeTeam6.dvi
+/sql/DatabaseSchemeTeam6.log
+/sql/DatabaseSchemeTeam6.out
+/sql/DatabaseSchemeTeam6.synctex.gz
+/sql/DatabaseSchemeTeam6.toc
