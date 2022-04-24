@@ -1,8 +1,6 @@
-import sys
 import time
 import math
 import warnings
-import csv
 from typing import List
 from pathlib import Path
 import sqlalchemy
@@ -11,6 +9,8 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.dialects.postgresql import insert
 from config import configDatabase
 from Logger import Logger
+import pandas as pd
+from io import StringIO
 
 MAXBUFFERSIZE: int = 500000
 
@@ -20,10 +20,6 @@ class Database:
         self.engine = None
         self.session = None
         self.meta_data = None
-        self.entries_count = 0
-        self.total_lines = 0
-        self.current_lines = 0
-        self.progress = 0
 
     def connect(self, filename='database.ini', section='postgresql'):
         # read connection parameters
@@ -49,24 +45,16 @@ class Database:
         return self.session.query(table).filter_by(**query_data)
 
     def insertRow(self, table, values: dict):
-        self.entries_count += 1
         self.engine.execute(table.insert(), [values])
-        self.updateProgress()
 
     def insertRows(self, table, values: List[dict]):
-        self.entries_count += len(values)
         self.engine.execute(table.insert(), values)
-        self.updateProgress()
 
     def insertRowNoConflict(self, table, values: dict):
-        self.entries_count += 1
         self.engine.execute(insert(table).values([values]).on_conflict_do_nothing())
-        self.updateProgress()
 
     def insertRowsNoConflict(self, table, values: List[dict]):
-        self.entries_count += len(values)
         self.engine.execute(insert(table).values(values).on_conflict_do_nothing())
-        self.updateProgress()
 
     def addDataset(self, dataset_name: str, uploader_name: str, purchase_data_filename: str, article_data_filename: str,
                    customer_data_filename: str):
@@ -75,12 +63,6 @@ class Database:
             self.meta_data.reflect()
 
         Logger.log(f"Adding dataset {dataset_name}")
-
-        # count all rows in all datasets
-        self.total_lines = \
-            sum(1 for line in open(article_data_filename)) + \
-            sum(1 for line in open(customer_data_filename)) + \
-            sum(1 for line in open(purchase_data_filename)) - 3
 
         # add row in dataset table
         if not self.__addDatasetEntry(dataset_name, uploader_name):
@@ -103,9 +85,11 @@ class Database:
         # add rows in purchase table
         self.__addPurchasesDataset(dataset_name, purchase_data_filename)
 
+        self.session.commit()
+
         duration = time.time() - start_time
         Logger.log(
-            f"Added dataset \"{dataset_name}\", inserted {self.entries_count} rows in {math.floor(duration)} seconds")
+            f"Added dataset \"{dataset_name}\" in {math.floor(duration)} seconds")
 
     def __addDatasetEntry(self, dataset_name: str, uploader_name: str):
         datasets_table = self.meta_data.tables["dataset"]
@@ -123,122 +107,89 @@ class Database:
         return True
 
     def __addMetaDataset(self, dataset_name: str, meta_data_filename: str, meta_data_type: str):
-        attribute_names = []
-        attribute_order = {}
+        self.meta_data.reflect()
+        cursor = self.session.connection().connection.cursor()
 
-        # insert article
-        meta_data_table = self.meta_data.tables[meta_data_type]
-        meta_data_attributes_table = self.meta_data.tables[meta_data_type + "_attribute"]
+        # todo add support for custom seperator and custom index column
+        df_csv = pd.read_csv(meta_data_filename, sep=',')
 
-        meta_data_buffer = []
-        meta_data_attribute_buffer = []
-        with open(meta_data_filename) as infile:
-            is_first_row = True
-            reader = csv.reader(infile, delimiter=",")
+        attribute_names = list(df_csv)
 
-            for attributes in reader:
-                self.current_lines += 1
+        # check if meta_data_id atribute exists
+        if meta_data_type + "_id" not in attribute_names:
+            Logger.logError(f"Could not find \"{meta_data_type}_id\" column in {dataset_name}")
+            return False
 
-                # extract names and order of attributes
-                if is_first_row:
-                    attribute_names = attributes
+        df_meta_data_table = df_csv[[meta_data_type + "_id"]].copy()
+        df_meta_data_table["dataset_name"] = dataset_name
 
-                    for attribute_nr in range(len(attributes)):
-                        attribute_order[attributes[attribute_nr]] = attribute_nr
+        output = StringIO()
+        df_meta_data_table.to_csv(output, sep='\t', header=False, encoding="utf8", index=False)
+        output.seek(0)
 
-                    # check if meta_data_id atribute exists
-                    if meta_data_type + "_id" not in attribute_order.keys():
-                        Logger.logError(f"Could not find \"{meta_data_type}_id\" column in {dataset_name}")
-                        return False
+        cursor.copy_from(output, meta_data_type, sep='\t', null='')
 
-                    is_first_row = False
-                    continue
+        for attribute_name in attribute_names:
+            if attribute_name == meta_data_type + "_id":
+                continue
 
-                meta_data_buffer.append({"dataset_name": dataset_name,
-                                         meta_data_type + "_id": attributes[attribute_order[meta_data_type + "_id"]]})
+            df_meta_data_attribute_table = df_csv[[meta_data_type + "_id"]].copy()
+            df_meta_data_attribute_table["dataset_name"] = dataset_name
+            df_meta_data_attribute_table["attribute"] = attribute_name
+            df_meta_data_attribute_table["value"] = df_csv[attribute_name].copy()
+            # todo add user defined custom type
+            df_meta_data_attribute_table["type"] = 0
 
-                for attribute_nr in range(len(attributes)):
-                    if attribute_nr == attribute_order[meta_data_type + "_id"]:
-                        continue
+            df_meta_data_attribute_table = df_meta_data_attribute_table.dropna(how="any", axis=0)
 
-                    meta_data_attribute_buffer.append({
-                        "dataset_name": dataset_name,
-                        meta_data_type + "_id": attributes[attribute_order[meta_data_type + "_id"]],
-                        "attribute": attribute_names[attribute_nr],
-                        "value": attributes[attribute_nr]
-                    })
+            output = StringIO()
+            df_meta_data_attribute_table.to_csv(output, sep='\t', header=False, encoding="utf8", index=False)
+            output.seek(0)
 
-                if len(meta_data_buffer) >= MAXBUFFERSIZE or len(meta_data_attribute_buffer) >= MAXBUFFERSIZE:
-                    self.insertRows(meta_data_table, meta_data_buffer)
-                    meta_data_buffer.clear()
+            cursor.copy_from(output, meta_data_type + "_attribute", sep='\t', null='',
+                             columns=list(df_meta_data_attribute_table))
 
-                    self.insertRows(meta_data_attributes_table, meta_data_attribute_buffer)
-                    meta_data_attribute_buffer.clear()
-
-            self.insertRows(meta_data_table, meta_data_buffer)
-            self.insertRows(meta_data_attributes_table, meta_data_attribute_buffer)
-
-            meta_data_buffer.clear()
-            meta_data_attribute_buffer.clear()
-
-            return True
+        return True
 
     def __addPurchasesDataset(self, dataset_name: str, purchases_data_filename: str):
-        attribute_order = {}
+        self.meta_data.reflect()
+        cursor = self.session.connection().connection.cursor()
 
-        purchase_buffer = []
+        # todo add support for custom seperator and custom index column
+        df_purchase_data_table = pd.read_csv(purchases_data_filename, sep=',')
 
-        # insert purchases
-        purchases_table = self.meta_data.tables["purchase"]
-        with open(purchases_data_filename) as infile:
-            is_first_row = True
-            reader = csv.reader(infile, delimiter=",")
+        attribute_names = list(df_purchase_data_table)
 
-            for attributes in reader:
-                self.current_lines += 1
+        # todo variable names for purchase attritubes
+        # check if purchase atributes exists
+        if "customer_id" not in attribute_names:
+            Logger.logError(f"Could not find \"customer_id\" column in {dataset_name}")
+            return False
+        elif "article_id" not in attribute_names:
+            Logger.logError(f"Could not find \"article_id\" column in {dataset_name}")
+            return False
+        elif "price" not in attribute_names:
+            Logger.logError(f"Could not find \"price\" column in {dataset_name}")
+            return False
+        elif "t_dat" not in attribute_names:
+            Logger.logError(f"Could not find \"t_dat\" column in {dataset_name}")
+            return False
 
-                # extract order of attributes
-                if is_first_row:
-                    for attribute_nr in range(len(attributes)):
-                        attribute_order[attributes[attribute_nr]] = attribute_nr
+        df_purchase_data_table["dataset_name"] = dataset_name
 
-                    # todo variable names for purchase attritubes
-                    # check if purchase atributes exists
-                    if "customer_id" not in attribute_order.keys():
-                        Logger.logError(f"Could not find \"customer_id\" column in {dataset_name}")
-                        return False
-                    elif "article_id" not in attribute_order.keys():
-                        Logger.logError(f"Could not find \"article_id\" column in {dataset_name}")
-                        return False
-                    elif "price" not in attribute_order.keys():
-                        Logger.logError(f"Could not find \"price\" column in {dataset_name}")
-                        return False
-                    elif "t_dat" not in attribute_order.keys():
-                        Logger.logError(f"Could not find \"t_dat\" column in {dataset_name}")
-                        return False
+        df_purchase_data_table.rename(columns={"t_dat": "timestamp"}, inplace=True)
 
-                    is_first_row = False
-                    continue
+        # drop duplicates but keep the first
+        df_purchase_data_table.drop_duplicates(subset=["dataset_name", "customer_id", "article_id", "timestamp"],
+                                               inplace=True)
 
-                purchase_buffer.append({
-                    "dataset_name": dataset_name,
-                    "customer_id": attributes[attribute_order["customer_id"]],
-                    "article_id": attributes[attribute_order["article_id"]],
-                    "price": attributes[attribute_order["price"]],
-                    "timestamp": attributes[attribute_order["t_dat"]]
-                })
+        output = StringIO()
+        df_purchase_data_table.to_csv(output, sep='\t', header=False, encoding="utf8", index=False)
+        output.seek(0)
 
-                if len(purchase_buffer) >= MAXBUFFERSIZE:
-                    self.insertRowsNoConflict(purchases_table, purchase_buffer)
-                    purchase_buffer.clear()
+        cursor.copy_from(output, "purchase", sep='\t', null='', columns=list(df_purchase_data_table))
 
-            self.insertRowsNoConflict(purchases_table, purchase_buffer)
-            purchase_buffer.clear()
-
-    def updateProgress(self):
-        self.progress = self.current_lines / self.total_lines
-        sys.stdout.write("Dataset progress: %d%%   \r" % (self.progress * 100))
-        sys.stdout.flush()
+        return True
 
 
 if __name__ == '__main__':
