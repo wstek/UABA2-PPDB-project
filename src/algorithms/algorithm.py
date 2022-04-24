@@ -7,11 +7,11 @@ import scipy.sparse
 class Algorithm:
     """ Base class for recommendation algorithms """
     def fit(self, X: scipy.sparse.csr_matrix):
-        """ The actual training of the algorithm """
+        """ The actual training of the algorithms """
         raise NotImplementedError()
 
     def predict(self, X: scipy.sparse.csr_matrix):
-        """ Scoring function of algorithm """
+        """ Scoring function of algorithms """
         raise NotImplementedError()
 
     def _id_to_index(self, ids):
@@ -50,7 +50,7 @@ class Algorithm:
         return X
 
     def train(self, interactions: List[Tuple]):
-        """ Trains the algorithm from pairs of (user, item) interactions. """
+        """ Trains the algorithms from pairs of (user, item) interactions. """
         X = self._interaction_to_matrix(interactions)
         self.fit(X)
         return self

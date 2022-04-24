@@ -1,23 +1,15 @@
-from audioop import cross
-from crypt import methods
-from pickle import POP
-from tracemalloc import start
-from typing import Dict
-from flask import Flask, request, session, render_template
+from flask import Flask, request, session
 from database_access import Database
 from flask_session import Session
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
-from flask_sqlalchemy import SQLAlchemy
-from datetime import timedelta
 import base64
 import redis
 import threading
 import time
 import pandas as pd
 import copy
-import KNN.src.util as util
-from KNN.src.algorithm.iknn import ItemKNNIterative
+from src.algorithms.iknn import ItemKNNIterative
 
 
 # Wanneer jullie webapplicatie af is, moeten we deze kunnen gebruiken om vragen te beantwoorden zoals: “Hoe varieert het aantal actieve gebruikers per dag en is er een verschil te
@@ -317,7 +309,7 @@ class Simulation(threading.Thread):
                         # print("clicks:",clicks)
                         # CTR = clicks/float(n_active_users)
                         # print("CTR",CTR)
-                        # print(f"algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}):",top_k_over_time_statistics[idx][-1])
+                        # print(f"algorithms {algo}: top_k (BETWEEN {start_date} AND {prev_day}):",top_k_over_time_statistics[idx][-1])
 
 
                         # SELECT customer_id, array_to_string(array_agg(article_id), ' ') FROM test3 WHERE CAST(timestamp as DATE) BETWEEN '2020-01-01' and '2020-01-03' GROUP BY customer_id;
@@ -329,7 +321,7 @@ class Simulation(threading.Thread):
                         for i in range(len(active_users)): #random moet gedaan worden in loop om unieke topk voor elke use te maken maar is trager
                             data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(RANDOM_DATA(id=idx, topk=top_k_random, name="ItemKNN")) #DEEP COPY????????????
                         
-                        print(f"algorithm {algo}: top_k random:",top_k_random)
+                        print(f"algorithms {algo}: top_k random:",top_k_random)
 
                         #train KNN algoritme to initialize it:
                         interactions = db_engine.session.execute(f"SELECT customer_id, article_id from purchase").fetchall()
@@ -339,7 +331,7 @@ class Simulation(threading.Thread):
 
                         # top_k_over_time_statistics[idx].append(top_k_random)
 
-                        # print(f"algorithm {algo}: top_k random:",top_k_over_time_statistics[idx][-1])
+                        # print(f"algorithms {algo}: top_k random:",top_k_over_time_statistics[idx][-1])
 
                         # query_str = "SELECT article_id FROM article WHERE"
                         # for articleid in range(len(k_random_items)):
@@ -378,7 +370,7 @@ class Simulation(threading.Thread):
                             top_k_items = dynamic_info_algorithms[idx]["prev_top_k"]
                             # top_k_over_time_statistics[idx].append(copy.deepcopy(top_k_over_time_statistics[idx][-1]))
                         
-                        print(f"current_day: {current_date}, algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}):",top_k_items)
+                        print(f"current_day: {current_date}, algorithms {algo}: top_k (BETWEEN {start_date} AND {prev_day}):",top_k_items)
                         
                         for i in range(len(active_users)):
                             data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(RECENCY_DATA(id=idx, topk=copy.deepcopy(top_k_items)))
@@ -392,7 +384,7 @@ class Simulation(threading.Thread):
                         # print("clicks:",clicks)
                         # CTR = clicks/float(n_active_users)
                         # print("CTR",CTR)
-                        # print(f"algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}):",top_k_over_time_statistics[idx][-1])
+                        # print(f"algorithms {algo}: top_k (BETWEEN {start_date} AND {prev_day}):",top_k_over_time_statistics[idx][-1])
 
                     else:
                         top_k_random = db_engine.session.execute(f"SELECT SUBQUERY.article_id FROM (SELECT article_id FROM article ORDER BY RANDOM() LIMIT {k}) as SUBQUERY ORDER BY article_id ASC").fetchall()
@@ -400,7 +392,7 @@ class Simulation(threading.Thread):
                         for i in range(len(active_users)):
                             data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(RANDOM_DATA(id=idx, topk=copy.deepcopy(top_k_random), name="Recency"))
                         # top_k_over_time_statistics[idx].append(top_k_random)
-                        print(f"current_day: {current_date}, algorithm {algo}: top_k random:",top_k_random)
+                        print(f"current_day: {current_date}, algorithms {algo}: top_k random:",top_k_random)
 
                         #train Recency algoritme to initialize it:
                         top_k = db_engine.session.execute(f"SELECT t.article_id, t.timestamp FROM(SELECT article_id,MIN(timestamp) AS timestamp \
@@ -455,7 +447,7 @@ class Simulation(threading.Thread):
                             top_k_items = dynamic_info_algorithms[idx]["prev_top_k"]
                             # top_k_over_time_statistics[idx].append(copy.deepcopy(top_k_over_time_statistics[idx][-1]))
                         
-                        print(f"algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}):",top_k_items)
+                        print(f"algorithms {algo}: top_k (BETWEEN {start_date} AND {prev_day}):",top_k_items)
 
                         for i in range(len(active_users)):
                             data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(POPULARITY_DATA(id=idx, topk=copy.deepcopy(top_k_items)))
@@ -469,16 +461,16 @@ class Simulation(threading.Thread):
                         # print("clicks:",clicks)
                         # CTR = clicks/float(n_active_users)
                         # print("CTR",CTR)
-                        # print(f"algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}):",top_k_over_time_statistics[idx][-1])
+                        # print(f"algorithms {algo}: top_k (BETWEEN {start_date} AND {prev_day}):",top_k_over_time_statistics[idx][-1])
 
                     else:
                         top_k_random = db_engine.session.execute(f"SELECT SUBQUERY.article_id FROM (SELECT article_id FROM article ORDER BY RANDOM() LIMIT {k}) as SUBQUERY ORDER BY article_id ASC").fetchall()
                         remove_tuples(top_k_random)
                         for i in range(len(active_users)):
                             data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(RANDOM_DATA(id=idx, topk=copy.deepcopy(top_k_random), name="Popularity"))
-                        print(f"algorithm {algo}: top_k random:",top_k_random)
+                        print(f"algorithms {algo}: top_k random:",top_k_random)
 
-                        #train Popularity algorithm to initialize it:
+                        #train Popularity algorithms to initialize it:
                         top_k = db_engine.session.execute(f"SELECT SUBQUERY.article_id, count(*) AS popular_items FROM \
                                 (SELECT * FROM purchase WHERE CAST(timestamp as DATE) = '{start_date}') AS SUBQUERY GROUP \
                                     BY SUBQUERY.article_id ORDER BY popular_items DESC LIMIT {k}").fetchall()
@@ -615,10 +607,10 @@ def start_simulation():
 
     for i in range(len(algorithms)):
         # algorithm_id = db_engine.session.execute("SELECT nextval('algorithm_algorithm_id_seq')").fetchone()[0]
-        db_engine.session.execute("INSERT INTO algorithm(abtest_id, algorithm_name) VALUES(:abtest_id, :algorithm_name)",
+        db_engine.session.execute("INSERT INTO algorithms(abtest_id, algorithm_name) VALUES(:abtest_id, :algorithm_name)",
         {"abtest_id":abtest_id, "algorithm_name":algorithms[i]["name"]})
         db_engine.session.commit()
-        algorithm_id = db_engine.session.execute('SELECT max(algorithm_id) FROM algorithm').fetchone()[0]
+        algorithm_id = db_engine.session.execute('SELECT max(algorithm_id) FROM algorithms').fetchone()[0]
         algorithms[i]["id"] = algorithm_id
         for param, value in algorithms[i]["parameters"].items():
             db_engine.session.execute("INSERT INTO parameter(parametername, algorithm_id, abtest_id, value) VALUES(:parametername, :algorithm_id, :abtest_id, :value)",

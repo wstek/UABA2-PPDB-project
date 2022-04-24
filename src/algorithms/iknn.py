@@ -5,14 +5,14 @@ from .algorithm import Algorithm
 
 
 class ItemKNN(Algorithm):
-    """ Item based nearest neighbors recommendation algorithm """
+    """ Item based nearest neighbors recommendation algorithms """
     def __init__(self, k=20, normalize=False):
         super().__init__()
         self.k = k
         self.normalize = normalize
 
     def fit(self, X: scipy.sparse.csr_matrix):
-        """ Train algorithm with interaction matrix X """
+        """ Train algorithms with interaction matrix X """
         # Input checking
         X.eliminate_zeros()
         assert np.all(X.data == 1), "X should only contain binary values"
