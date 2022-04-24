@@ -47,7 +47,7 @@ const Dashboard = () => {
             .catch((err) => {
                 console.log(err);
             })
-        }, 500);
+        }, 5000);
         return () => {
             if (!cleared) {
                 clearInterval(interval);

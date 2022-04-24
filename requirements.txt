@@ -22,3 +22,4 @@ pytz
 scipy
 six
 typer
+matplotlib
