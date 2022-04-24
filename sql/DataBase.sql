@@ -12,7 +12,7 @@ CREATE DOMAIN nat_int int check ( value >= 0 );
 
 CREATE TABLE "datascientist" (
   "username" varchar PRIMARY KEY,
-  "datascientist_id" serial unique not null,
+  datascientist_id serial unique not null,
 
   "first_name" varchar NOT NULL,
   "last_name" varchar NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE "datascientist" (
 );
 
 CREATE TABLE "admin" (
-  "admin_id" serial unique not null references "datascientist" (datascientist_id),
+    admin_id serial unique not null references "datascientist" (datascientist_id),
   "username" varchar primary key references "datascientist" (username) on update cascade on delete cascade
 );
 
@@ -63,6 +63,7 @@ create table "article_attribute"(
   "attribute" varchar not null,
   "value" varchar not null,
   "dataset_name" varchar not null,
+  "type" varchar not null,
 
   "article_id" nat_int not null,
   foreign key (article_id,dataset_name) references article(article_id,dataset_name) on update cascade on delete cascade,
@@ -73,7 +74,8 @@ create table "article_attribute"(
 
 
 create table "customer_attribute"(
-  "dataset_name" varchar not null references dataset(name),
+  "dataset_name" varchar not null,
+  "type" varchar not null,
 
   "attribute" varchar not null,
   "value" varchar not null,
@@ -104,21 +106,22 @@ CREATE TABLE "parameter" (
   "parametername" varchar not null,
   "algorithm_id" nat_int not null,
   "abtest_id" nat_int not null,
+  "type" varchar not null,
 
   foreign key (algorithm_id,abtest_id) references algorithm(algorithm_id, abtest_id) on update cascade on delete cascade,
   "value" varchar not null,
   PRIMARY KEY ("parametername", "algorithm_id", "abtest_id")
 );
--- CREATE TABLE "statistics" (
---   "statistics_id" serial PRIMARY KEY,
---   "datetime" timestamp not null,
---   "algorithm_id" nat_int not null,
---   "abtest_id" int not null,
+CREATE TABLE "statistics" (
+  "statistics_id" serial PRIMARY KEY,
+  "datetime" timestamp not null,
+  "algorithm_id" nat_int not null,
+  "abtest_id" int not null,
 
---   --unique(abtest_id,algorithm_id, datetime),
+  unique(abtest_id,algorithm_id, datetime),
 
---   foreign key (algorithm_id,abtest_id) references algorithm(algorithm_id,abtest_id) on update cascade on delete cascade
--- );
+  foreign key (algorithm_id,abtest_id) references algorithm(algorithm_id,abtest_id) on update cascade on delete cascade
+);
 CREATE TABLE "customer_specific" (
   "customer_id" nat_int NOT NULL,
 
@@ -129,11 +132,10 @@ CREATE TABLE "customer_specific" (
 );
 
 CREATE TABLE "recommendation" (
-  "algorithm_id" nat_int not null,
-  "datetime" timestamp not null,
-  "rank" nat_int not null
+  "recomendation_id" nat_int not null,
   "customer_id" nat_int not null,
-  -- "statistics_id" nat_int not null,
+  "statistics_id" nat_int not null,
+  "dataset_name" varchar not null,
   "article_id" nat_int NOT NULL,
   foreign key (article_id,dataset_name) references article(article_id,dataset_name) on update cascade on delete cascade,
   foreign key (customer_id,statistics_id) references customer_specific(customer_id,statistics_id) on update cascade on delete cascade,
@@ -144,4 +146,3 @@ insert into "datascientist" (username, first_name, last_name, birthdate, passwor
 values ('xSamx33', 'Sam', 'Roggeman', '2001-06-14', '123456789', 'sam.roggeman@gmail.com');
 insert into "admin" (username)
 values ('xSamx33')
-
