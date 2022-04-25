@@ -1,11 +1,11 @@
 from typing import List, Tuple
-
 import numpy as np
 import scipy.sparse
 
 
 class Algorithm:
     """ Base class for recommendation algorithms """
+
     def fit(self, X: scipy.sparse.csr_matrix):
         """ The actual training of the algorithms """
         raise NotImplementedError()

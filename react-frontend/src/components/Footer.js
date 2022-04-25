@@ -1,7 +1,7 @@
-import "./index.css"
-import React, {useState, useEffect} from "react";
-import ua_logo from "./ua_logo.png"
-import { Link } from "react-router-dom";
+import "../index.css"
+import React, {useEffect, useState} from "react";
+import ua_logo from "../images/ua_logo.png"
+import {Link} from "react-router-dom";
 
 function Footer() {
     const [isMobile, setIsMobile] = useState(false)
@@ -18,7 +18,7 @@ function Footer() {
         window.addEventListener("resize", handleResize)
     })
 
-    if (! isMobile) {
+    if (!isMobile) {
         return (
             <div className="footer container-fluid mt-5 pt-2 mb-0 pb-0">
                 <div className="row ">
@@ -37,9 +37,8 @@ function Footer() {
                 </div>
             </div>
         )
-    }
-    else {
-        return <div />
+    } else {
+        return <div/>
     }
 }
 

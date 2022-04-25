@@ -1,11 +1,11 @@
 import numpy as np
 import scipy.sparse
-
-from .algorithm import Algorithm
+from Algorithm import Algorithm
 
 
 class ItemKNN(Algorithm):
     """ Item based nearest neighbors recommendation algorithms """
+
     def __init__(self, k=20, normalize=False):
         super().__init__()
         self.k = k
@@ -71,6 +71,7 @@ class ItemKNN(Algorithm):
 
 class ItemKNNIterative(ItemKNN):
     """ Reduce memory requirement by taking top K per row immediately. """
+
     def fit(self, X: scipy.sparse.csr_matrix):
         # Input checking
         X.eliminate_zeros()
@@ -109,7 +110,7 @@ class ItemKNNIterative(ItemKNN):
             if self.normalize:
                 total = values.sum()
                 if total == 0:
-                    total = 1   # safe divide
+                    total = 1  # safe divide
                 values = values / total
 
             col_ind.append(cols)

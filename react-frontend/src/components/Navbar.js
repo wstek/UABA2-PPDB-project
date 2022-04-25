@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
-import logo from "./logo.png";
-import "../node_modules/bootstrap/dist/js/bootstrap.min.js";
+import {Link} from "react-router-dom";
+import logo from "../images/logo/logo-with-right-text.png";
+import "bootstrap/dist/js/bootstrap.min.js";
 
 function Navbar() {
 
@@ -9,16 +9,16 @@ function Navbar() {
             <div className="container-fluid">
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapsenavbar">
-                    <span className="navbar-toggler-icon" />
+                    <span className="navbar-toggler-icon"/>
                 </button>
                 <div className="navbar-collapse collapse w-100" id="collapsenavbar">
                     <ul className="navbar-nav w-100 justify-content-center ">
                         <div className="d-flex">
                             <Link to="/">
-                            <img src={logo} height="50"
-                                 alt="pic">
-                            </img>
-                                </Link>
+                                <img src={logo} height="50"
+                                     alt="pic">
+                                </img>
+                            </Link>
                         </div>
                     </ul>
                     <ul className="navbar-nav w-100 justify-content-center ">
@@ -28,7 +28,7 @@ function Navbar() {
                         </li>
                         <li className="nav-item">
                             <Link to="/sign_up"
-                                    className="button-purple flexible">Sign Up
+                                  className="button-purple flexible">Sign Up
                             </Link>
                         </li>
                     </ul>

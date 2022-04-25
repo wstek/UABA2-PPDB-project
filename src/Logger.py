@@ -1,5 +1,5 @@
-import logging
 import datetime
+import logging
 import os
 from config import configLogger
 
@@ -35,11 +35,11 @@ class Logger:
         f.close()
 
     @classmethod
-    def log(cls, message):
+    def log(cls, message, silenced=False):
         if cls.log_to_file:
             cls.__logFile("INFO: " + message)
 
-        if not cls.silence_log_console:
+        if not cls.silence_log_console and not silenced:
             print("INFO: " + message)
 
     @classmethod

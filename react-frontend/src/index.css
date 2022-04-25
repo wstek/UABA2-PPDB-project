@@ -1,20 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
 
 
-
-
 body {
     height: 100%;
 }
 
 .content {
-  height: 70vh;
-  width: 100%;
-  padding: 20px;
-  display:flex;
-  flex-direction:column;
+    height: 70vh;
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
-
 
 
 .flexible {
@@ -170,7 +167,6 @@ body {
 }
 
 
-
 /*Account*/
 
 .Account_Rectangle {
@@ -263,7 +259,6 @@ body {
     background: #0f0c0b;
     transition: all 0.3s ease;
 }
-
 
 
 /*

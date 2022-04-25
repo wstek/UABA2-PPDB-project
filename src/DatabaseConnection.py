@@ -1,21 +1,19 @@
-import time
 import math
+import time
 import warnings
-from typing import List
+from io import StringIO
 from pathlib import Path
+from typing import List
+import pandas as pd
 import sqlalchemy
 from sqlalchemy import MetaData, exc as sa_exc
-from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.dialects.postgresql import insert
-from config import configDatabase
+from sqlalchemy.orm import scoped_session, sessionmaker
 from Logger import Logger
-import pandas as pd
-from io import StringIO
-
-MAXBUFFERSIZE: int = 500000
+from config import configDatabase
 
 
-class Database:
+class DatabaseConnection:
     def __init__(self):
         self.engine = None
         self.session = None
@@ -140,6 +138,7 @@ class Database:
             # todo add user defined custom type
             df_meta_data_attribute_table["type"] = 0
 
+            # drops all rows with a null entry
             df_meta_data_attribute_table = df_meta_data_attribute_table.dropna(how="any", axis=0)
 
             output = StringIO()
@@ -193,7 +192,7 @@ class Database:
 
 
 if __name__ == '__main__':
-    db_con = Database()
+    db_con = DatabaseConnection()
     db_con.connect(filename="config/database.ini")
     db_con.logVersion()
     db_con.addDataset("H_M", "xSamx33", "../datasets/H_M/purchases.csv", "../datasets/H_M/articles.csv",

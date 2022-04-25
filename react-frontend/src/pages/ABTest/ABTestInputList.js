@@ -1,10 +1,9 @@
-import {useState, useEffect} from 'react';
-import { useHistory } from 'react-router-dom';
-import {ColoredLine} from "./coloredLine";
-import { Normalize } from './parameters';
-import axios, { post } from 'axios';
+import {useEffect, useState} from 'react';
+import {useHistory} from 'react-router-dom';
+import {ColoredLine} from "../../components/ColoredLine";
+import {post} from 'axios';
 
-const InputList = ({abs_algorithms}) => {
+const ABTestInputList = ({abs_algorithms}) => {
     const [id, setId] = useState(1);
     const [isPending, setIsPending] = useState(false);
     const history = useHistory();
@@ -22,7 +21,7 @@ const InputList = ({abs_algorithms}) => {
         var newAlgorithm = {id: id, name: algorithmname, fields: inputFieldsArray, parameters: parametersArray};
         temp.push(newAlgorithm);
         setConAlgorithm(temp);
-        setId(id+1);
+        setId(id + 1);
     }
 
     const handleRemoveAlgorithm = (id) => {
@@ -33,13 +32,15 @@ const InputList = ({abs_algorithms}) => {
         resetInput()
         fetch('http://127.0.0.1:5000/api/get_datasets', {
             method: 'GET',
-            headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
+            headers: {"Content-Type": "application/json", 'Accept': 'application/json'},
             credentials: 'include'
         }).then((res) => res.json())
-        .then((data) => {setDatasetsx(data.all_datasets)})
-        .catch((err) => {
-          console.log(err.message);
-        })
+            .then((data) => {
+                setDatasetsx(data.all_datasets)
+            })
+            .catch((err) => {
+                console.log(err.message);
+            })
     }, []);
 
     const resetInput = () => {
@@ -72,7 +73,7 @@ const InputList = ({abs_algorithms}) => {
     const handleStart = async () => {
         var algorithms = [];
         for (let i = 0; i < con_algorithms.length; i++) {
-            var algorithmParams = {name : con_algorithms[i].name, parameters : {}};
+            var algorithmParams = {name: con_algorithms[i].name, parameters: {}};
             for (let k = 0; k < con_algorithms[i].parameters.length; k++) {
                 const val = document.getElementById(con_algorithms[i].parameters[k] + con_algorithms[i].id).value;
                 if (!val) {
@@ -91,32 +92,32 @@ const InputList = ({abs_algorithms}) => {
         const dataset_name = select.options[select.selectedIndex].value;
 
         if (!start || !end || !topk || !stepsize || !dataset_name) {
-          throw Error('Please fill in all the fields');
+            throw Error('Please fill in all the fields');
         } else {
-          const abtest_setup = { start, end, topk, stepsize, dataset_name, algorithms};
-          setIsPending(true);
-          const jdata = await JSON.stringify(abtest_setup);
-          await fetch('http://127.0.0.1:5000/api/start_simulation', {
-            method: 'POST',
-            headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
-            credentials: 'include',
-            body: jdata
-          }).then((res) => res.json())
-          .then((data) => {
-            // if (data.error) {
-            //     throw Error(data.error);
-            // }
-            // history.go(-1);
-            setIsPending(false);
-            // setError(null);
-            history.push('/dashboard');
-          })
-          .catch((err) => {
-            setIsPending(false);
-            // setError(err.message);
-            console.log(err.message);
-          })
-          }
+            const abtest_setup = {start, end, topk, stepsize, dataset_name, algorithms};
+            setIsPending(true);
+            const jdata = await JSON.stringify(abtest_setup);
+            await fetch('http://127.0.0.1:5000/api/start_simulation', {
+                method: 'POST',
+                headers: {"Content-Type": "application/json", 'Accept': 'application/json'},
+                credentials: 'include',
+                body: jdata
+            }).then((res) => res.json())
+                .then((data) => {
+                    // if (data.error) {
+                    //     throw Error(data.error);
+                    // }
+                    // history.go(-1);
+                    setIsPending(false);
+                    // setError(null);
+                    history.push('/dashboard');
+                })
+                .catch((err) => {
+                    setIsPending(false);
+                    // setError(err.message);
+                    console.log(err.message);
+                })
+        }
     }
     var idx = 0;
     var datasets = []
@@ -137,9 +138,12 @@ const InputList = ({abs_algorithms}) => {
             reader.onload = (e) => {
                 const url = "http://127.0.0.1:5000/api/read_cvs";
                 var file1 = e.target.result;
-                const formData = {dataset_name : document.getElementById("dataset").files[i].name, file : file1.split("base64,").pop()}
+                const formData = {
+                    dataset_name: document.getElementById("dataset").files[i].name,
+                    file: file1.split("base64,").pop()
+                }
                 datasets.push(formData);
-                return onGo(datasets, i === (files.length-1));
+                return onGo(datasets, i === (files.length - 1));
                 // return post(url, formData, {withCredentials: true}).then(response => console.log("response:", response));
             }
         }
@@ -149,13 +153,15 @@ const InputList = ({abs_algorithms}) => {
             <div className="row text-center align-items-center">
 
                 <div className="col-6 text-end">
-                    <button className="btn-lg button-purple red_onhover" type="reset" onClick={resetInput}>Reset</button>
+                    <button className="btn-lg button-purple red_onhover" type="reset" onClick={resetInput}>Reset
+                    </button>
                 </div>
                 <div className="col-6 text-start">
-                    <button className="btn-lg button-purple green_onhover" type="submit" onClick={handleStart}>Start</button>
+                    <button className="btn-lg button-purple green_onhover" type="submit" onClick={handleStart}>Start
+                    </button>
                 </div>
             </div>
-            { isPending && <p>Setting up...</p>}
+            {isPending && <p>Setting up...</p>}
             <div className="row text-center align-items-center">
 
 
@@ -201,15 +207,15 @@ const InputList = ({abs_algorithms}) => {
             </div>
             <div className="row text-center justify-content-center align-items-center mb-5">
                 <div>
-                <button id="addRow" type="submit" onClick={() => handleAddAlgorithm()}
-                        className="button-purple btn-lg">Add
-                    Algorithm
-                </button>
-            </div>
+                    <button id="addRow" type="submit" onClick={() => handleAddAlgorithm()}
+                            className="button-purple btn-lg">Add
+                        Algorithm
+                    </button>
+                </div>
             </div>
         </div>
     );
 }
 
 
-export default InputList
+export default ABTestInputList
