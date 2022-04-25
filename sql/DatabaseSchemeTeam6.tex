@@ -99,4 +99,24 @@
 		\includegraphics[height={300px}]{Customer-Specific.png}
 
 \end{center}		
+\section{Metrics}
+Datetime is available in the table of statistics and all dependencies so it is accessible and can be used to chose a window size.
+\subsection{Purchases}
+Can be done using a simple query: \\
+	Select Count(*)\\
+	From purchase;\\
+\subsection{Active Users}
+Can be done using a simple query: \\
+	Select COUNT (DISTINCT amount) \\
+	FROM	customer\_specific; 
+\vspace{15mm}
+
+The following can be done using queries in our database but the exact sql of our queries remains to be seen and decided.
+\subsection{Click Through Rate (CTR)}
+We know all the purchases that have been made and all the top-k list so we can figure out the click through rate
+\subsection{Attribution Rate (AR@D)} 
+We can take an intersection of purchases and recommendations, we can see divide the count of purchases with this intersection over a period of 7 or 30 days.
+\subsection{Average Revenue Per User (ARPU@D)}
+We use the price instead and divide by the amount of active users over the window instead of 7 or 30 days.
+
 \end{document}
