@@ -29,7 +29,7 @@ database_connection = DatabaseConnection()
 database_connection.connect(filename="config/database.ini")
 database_connection.logVersion()
 cors = CORS(app, supports_credentials=True, resources={
-            '/*': {'origins': 'http://localhost:3000'}})
+            '/*': {'origins': 'http://localhost:3000'}})  # https://team6.ua-ppdb.me/
 
 exporting_threads = {}
 

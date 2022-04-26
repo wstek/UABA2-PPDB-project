@@ -18,16 +18,16 @@ function Home({setPage}) { // begin van de app wow
                     <div className="row text-center align-items-center mt-2">
                         <h3>About:</h3>
                         <div className="blue-small-text">
-                            We are second year students at the university of Antwerp and for the course
-                            Programming project databases. We had to make an webapplication that
-                            compares 2 feedback collaborative filtering recommendation algoritmes for a
-                            certain dataset and simulates this. This will give a statistic overview for
-                            the user that will visualize what algoritm is better to use for
-                            recommending items to the simulated customers.
+                            We are second year students at the University of Antwerp and for the subject programming
+                            project databases we are developing an interactive web application for comparing
+                            collaborative filtering recommendation algorithms. We simulate the working of the algorithms
+                            for a given dataset. This will provide a statistical overview for the user that will
+                            visualize which algorithm is better suited for recommending products to the simulated
+                            customers.
 
-                            We will answer these questions: How many active users are there on a certain
-                            day? What will happen if we show people just the popular items that will change
-                            every week or month what period is better?
+                            We will answer these questions: How many active users are there on a given day? What will
+                            happen if we show people only the popular products that will change every week or month,
+                            which period is better?
                         </div>
                         {<ColoredLine color="purple"/>}
 

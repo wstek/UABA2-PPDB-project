@@ -16,6 +16,7 @@ server {
 
     # Backend Python Flask micro web framework
     location /api/ {
+        add_header Access-Control-Allow-Origin *;
         include proxy_params;
         proxy_pass http://unix:/home/app/Programming-project-databases/src/webapp.sock;
     }
