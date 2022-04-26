@@ -1,6 +1,7 @@
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO mohammedshakleya;
 GRANT ALL ON SCHEMA public TO public;
 
 create domain algorythmname varchar check (VALUE IN ('ItemKNN', 'Popularity', 'Recency'));
