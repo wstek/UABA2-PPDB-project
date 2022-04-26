@@ -27,7 +27,6 @@ CREATE TABLE "datascientist"
 
 CREATE TABLE "admin"
 (
-    admin_id   serial unique not null references "datascientist" (datascientist_id) on update cascade on delete cascade,
     "username" varchar primary key references "datascientist" (username) on update cascade on delete cascade
 );
 

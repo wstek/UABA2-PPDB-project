@@ -119,35 +119,7 @@ const ABTestInputList = ({abs_algorithms}) => {
                 })
         }
     }
-    var idx = 0;
-    var datasets = []
-    const onGo = (dataset, finish) => {
-        if (finish) {
-            const url = "/api/read_csv";
-            const aret = post(url, dataset, {withCredentials: true}).then(response => console.log("response:", response));
-            datasets = [];
-            return aret;
-        }
-    }
-    const onChange = (e) => {
-        console.log(document.getElementById("dataset").value)
-        let files = e.target.files;
-        for (let i = 0; i < files.length; i++) {
-            let reader = new FileReader();
-            reader.readAsDataURL(files[i]);
-            reader.onload = (e) => {
-                const url = "/api/read_cvs";
-                var file1 = e.target.result;
-                const formData = {
-                    dataset_name: document.getElementById("dataset").files[i].name,
-                    file: file1.split("base64,").pop()
-                }
-                datasets.push(formData);
-                return onGo(datasets, i === (files.length - 1));
-                // return post(url, formData, {withCredentials: true}).then(response => console.log("response:", response));
-            }
-        }
-    }
+
     return (
         <div className="container-fluid pt-5 pb-5 pl-5 pr-5" id='algorithms'>
             <div className="row text-center align-items-center">
