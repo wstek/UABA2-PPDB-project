@@ -1,7 +1,6 @@
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useHistory} from 'react-router-dom';
 import {ColoredLine} from "../../components/ColoredLine";
-import {post} from 'axios';
 
 const ABTestInputList = ({abs_algorithms}) => {
     const [id, setId] = useState(1);
@@ -71,9 +70,10 @@ const ABTestInputList = ({abs_algorithms}) => {
         )
     }
     const handleStart = async () => {
-        var algorithms = [];
+        setIsPending(true);
+        const algorithms = [];
         for (let i = 0; i < con_algorithms.length; i++) {
-            var algorithmParams = {name: con_algorithms[i].name, parameters: {}};
+            const algorithmParams = {name: con_algorithms[i].name, parameters: {}};
             for (let k = 0; k < con_algorithms[i].parameters.length; k++) {
                 const val = document.getElementById(con_algorithms[i].parameters[k] + con_algorithms[i].id).value;
                 if (!val) {
@@ -95,28 +95,37 @@ const ABTestInputList = ({abs_algorithms}) => {
             throw Error('Please fill in all the fields');
         } else {
             const abtest_setup = {start, end, topk, stepsize, dataset_name, algorithms};
-            setIsPending(true);
-            const jdata = await JSON.stringify(abtest_setup);
+            const jdata = JSON.stringify(abtest_setup);
+
+            console.log(jdata)
+            console.log("trying to fetch...")
+
             await fetch('/api/start_simulation', {
                 method: 'POST',
                 headers: {"Content-Type": "application/json", 'Accept': 'application/json'},
                 credentials: 'include',
                 body: jdata
-            }).then((res) => res.json())
-                .then((data) => {
-                    // if (data.error) {
-                    //     throw Error(data.error);
-                    // }
-                    // history.go(-1);
-                    setIsPending(false);
-                    // setError(null);
-                    history.push('/dashboard');
-                })
+            }).then((res) => {
+                setIsPending(false);
+                if (res.status === 409) {
+                    history.push("/sign_in")
+                }
+                return res.json()
+            }).then((data) => {
+                // if (data.error) {
+                //     throw Error(data.error);
+                // }
+                // history.go(-1);
+                // setError(null);
+                history.push('/dashboard');
+            })
                 .catch((err) => {
                     setIsPending(false);
                     // setError(err.message);
                     console.log(err.message);
                 })
+
+            console.log("started simulation!")
         }
     }
 
@@ -139,18 +148,18 @@ const ABTestInputList = ({abs_algorithms}) => {
 
                 <div className="col-6">
                     <label htmlFor="start">Start:</label>
-                    <input type="date" className="form-control datefield" id="start"/>
+                    <input type="date" className="form-control datefield" id="start" value="2020-01-01"/>
                 </div>
                 <div className="col-6">
                     <label htmlFor="end">End:</label>
-                    <input type="date" className="form-control datefield" id="end"/>
+                    <input type="date" className="form-control datefield" id="end" value="2020-01-10"/>
                 </div>
             </div>
             <div className="row text-center align-items-center mb-5">
                 <div className="col-4">
                     <label htmlFor="topk">Top-K:</label>
                     <input type="number" className="form-control" id="topk" min="1"
-                           placeholder="Enter top-k"/>
+                           placeholder="Enter top-k" value="5"/>
                 </div>
                 <div className="col-4">
                     <br/>
@@ -164,7 +173,7 @@ const ABTestInputList = ({abs_algorithms}) => {
                 <div className="col-4 ">
                     <label htmlFor="stepsize">Step size:</label>
                     <input type="number" className="form-control" id="stepsize" min="1"
-                           placeholder="Enter stepsize"/>
+                           placeholder="Enter stepsize" value="1"/>
                 </div>
             </div>
             {renderFields()}
