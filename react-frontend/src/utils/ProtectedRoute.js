@@ -10,7 +10,7 @@ const ProtectedRoute = ({Component: component, ...rest}) => {
     const [auth, setAuthed] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
-        fetch('http://127.0.0.1:5000/api/me', {
+        fetch('/api/me', {
             method: 'GET',
             credentials: 'include'
         }).then(res => {

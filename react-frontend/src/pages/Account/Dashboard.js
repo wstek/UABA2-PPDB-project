@@ -4,7 +4,7 @@ const Dashboard = () => {
     const [user, setUser] = useState(null);
 
     const logoutUser = (e) => {
-        fetch('http://127.0.0.1:5000/api/logout', {
+        fetch('/api/logout', {
             method: 'GET',
             credentials: 'include'
         })
@@ -22,7 +22,7 @@ const Dashboard = () => {
     }
 
     const handlea = () => {
-        fetch('http://127.0.0.1:5000/api/me', {
+        fetch('/api/me', {
             method: 'GET',
             credentials: 'include',
             headers: {"Content-Type": "application/json", 'Accept': 'application/json'}
