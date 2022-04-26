@@ -10,3 +10,23 @@ logs
 # react
 react-frontend/node_modules
 react-frontend/build
+
+# datasets
+datasets
+/react-frontend/.eslintcache
+/react-frontend/package-lock.json
+
+# Database rapport
+/sql/DatabaseSchemeTeam6.aux
+/sql/DatabaseSchemeTeam6.dvi
+/sql/DatabaseSchemeTeam6.log
+/sql/DatabaseSchemeTeam6.out
+/sql/DatabaseSchemeTeam6.synctex.gz
+/sql/DatabaseSchemeTeam6.toc
+
+# Other
+.DS_Store
+__pycache__
+.idea
+env
+react-frontend/package-lock.json

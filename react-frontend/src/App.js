@@ -1,27 +1,49 @@
-import React, {useState, useEffect} from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
+import React from "react";
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import NotFound from './pages/NotFound';
+import SignUp from './pages/Account/SignUp';
+import Account from './pages/Account/Account';
+import SignIn from './pages/Account/SignIn';
+import Contact from './pages/Contact';
+import ABTestInput from "./pages/ABTest/ABTestInput";
+import Dashboard from './pages/Account/Dashboard';
+import ProtectedRoute from './utils/ProtectedRoute';
 
 function App() {
-    const [currentTime, setCurrentTime] = useState(0);
-
-    useEffect(() => {
-        fetch('/api/time').then(res => res.json()).then(data => {
-            setCurrentTime(data.time);
-        });
-    }, []);
+    fetch('http://127.0.0.1:5000/api/aaa')
 
     return (
-        <div className="App">
-            <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo"/>
-                <p>
-                    Recommendation Algorithms<br/>
-                    Under construction
-                </p>
+        <Router>
+            <div className="App">
+                <Navbar/>
+                <Footer/>
 
-            </header>
-        </div>
+                <div className="content">
+                    <Switch>
+                        <Route exact path="/">
+                            <Home/>
+                        </Route>
+                        <ProtectedRoute component={Account} exact path="/account"/>
+                        <ProtectedRoute component={ABTestInput} exact path="/abtest/setup"/>
+                        <Route exact path="/sign_in" render={(props) => <SignIn {...props}/>}/>
+                        <Route exact path="/sign_up">
+                            <SignUp/>
+                        </Route>
+                        <Route exact path="/contact">
+                            <Contact/>
+                        </Route>
+                        <Route component={Dashboard} exact path="/dashboard"/>
+                        <Route path="*">
+                            <NotFound/>
+                        </Route>
+                    </Switch>
+                </div>
+                <div className="clear"/>
+            </div>
+        </Router>
     );
 }
 
