@@ -7,12 +7,13 @@ from flask_session import Session
 from Logger import Logger
 from DatabaseConnection import DatabaseConnection
 from ABTestSimulation import ABTestSimulation
+from datetime import timedelta
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "changeme"
 app.config['SESSION_TYPE'] = 'redis'
-app.config['SESSION_PERMANENT'] = False
-app.config['SESSION_USE_SIGNER'] = True
+# app.config['SESSION_PERMANENT'] = False
+# app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_REDIS'] = redis.from_url('redis://localhost:6379')
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "None"
@@ -34,10 +35,10 @@ cors = CORS(app, supports_credentials=True, resources={
 exporting_threads = {}
 
 
-
 @app.route("/api/me", methods=['GET'])
 @cross_origin(supports_credentials=True)
 def get_current_user():
+
     user_id = session.get("user_id")
 
     if not user_id:
@@ -46,9 +47,17 @@ def get_current_user():
     user = database_connection.session.execute("SELECT * FROM datascientist WHERE username = :username",
                                                {"username": user_id}).fetchone()
     admin = database_connection.session.execute("SELECT * FROM admin WHERE username = :username",
-                                               {"username": user_id}).fetchone()
-    returnValue = {"username": user.username, "email": user.email_address, 'admin': admin is not None}
+                                                {"username": user_id}).fetchone()
+    returnValue = {"username": user.username,
+                   "email": user.email_address, 'admin': admin is not None}
     return returnValue
+
+
+@app.before_request
+def before_request():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=1)
+    session.modified = True
 
 
 @app.route("/api/register", methods=["POST"])
@@ -74,6 +83,7 @@ def register_user():
          "username": username, "password": hashed_password})
     database_connection.session.commit()
     session["user_id"] = username
+    session.permanent = True
     return {"username": username, "email": email}
 
 
@@ -90,7 +100,7 @@ def login_user():
     if not bcrypt.check_password_hash(user.password, password):
         return {"error": "Unauthorized"}, 401
 
-    # session.permanent = True
+    session.permanent = True
     session["user_id"] = user.username
 
     return {"username": user.username, "email": user.email_address}
