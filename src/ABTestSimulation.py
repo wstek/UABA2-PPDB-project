@@ -68,6 +68,8 @@ class ABTestSimulation(threading.Thread):
         dt_end = pd.to_datetime(self.abtest["end"], format='%Y-%m-%d')
         dayz = (dt_end-dt_start).days
 
+        last_time_train = dt_current_date.strftime('%Y-%m-%d')
+
         # data statistics over time (x-axis = time)
         top_k_over_time_statistics = {'time': []}
         active_users_over_time_statistics = {'time': [], 'n_users': []}
@@ -174,6 +176,7 @@ class ABTestSimulation(threading.Thread):
                                 interactions[i][0], interactions[i][1])
 
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
+                            last_time_train = current_date
                             # retrain interval bereikt => train de KNN algoritme
                             dynamic_info_algorithms[idx]["KNN"].train(
                                 interactions)
@@ -182,7 +185,14 @@ class ABTestSimulation(threading.Thread):
                             # 2020-01-01 - 2020-01-05 = 4 -> 2 keer trainen?   momenten waarop getrain moet worden: 2020-01-01, 2020-01-03, 2020-01-05
                         # gives all users in (start.date, prev.date) => not only the active users!
                         users_with_not_enough_interactions = self.database_connection.session.execute(
-                            f"SELECT sub.cust, COUNT(DISTINCT(sub2.article_id)) FROM (select d.customer_id as cust, o.customer_id FROM (SELECT customer_id, article_id from purchase WHERE CAST(timestamp as DATE) BETWEEN '{start_date}' AND '{prev_day}') AS d INNER JOIN (SELECT customer_id, article_id from purchase WHERE CAST(timestamp as DATE) BETWEEN '{start_date}' AND '{prev_day}') AS o ON (d.article_id = o.article_id and d.customer_id != o.customer_id)) AS sub INNER JOIN (SELECT customer_id, article_id from purchase WHERE CAST(timestamp as DATE) BETWEEN '{start_date}' AND '{prev_day}') as sub2 ON sub.customer_id = sub2.customer_id GROUP BY sub.cust HAVING COUNT(DISTINCT(sub2.article_id)) > {k-1}").fetchall()
+                            f"SELECT sub.cust, COUNT(DISTINCT(sub2.article_id)) FROM (select d.customer_id as cust, o.customer_id \
+                                FROM (SELECT customer_id, article_id from purchase WHERE CAST(timestamp as DATE) BETWEEN '{start_date}' \
+                                    AND '{prev_day}') AS d INNER JOIN (SELECT customer_id, article_id from purchase WHERE CAST(timestamp \
+                                        as DATE) BETWEEN '{start_date}' AND '{prev_day}') AS o ON (d.article_id = o.article_id and d.customer_id \
+                                            != o.customer_id)) AS sub INNER JOIN (SELECT customer_id, article_id from purchase WHERE CAST(timestamp \
+                                                as DATE) BETWEEN '{start_date}' AND '{prev_day}') as sub2 ON sub.customer_id = sub2.customer_id GROUP \
+                                                    BY sub.cust HAVING COUNT(DISTINCT(sub2.article_id)) > {k-1}").fetchall()
+                        print("last time trained:", last_time_train)
                         g_check = set()
                         for ccvv in range(len(users_with_not_enough_interactions)):
                             g_check.add(
@@ -206,9 +216,10 @@ class ABTestSimulation(threading.Thread):
                         # als training mag gebeuren maximaal window_size geleden, moeten we dit dan ook doen met de history van de users of moeten we hun history nemen van het begin
                         histories = list(user_histories.values())
                         # print(histories)
+                        print("current_date:", current_date)
                         recommendations = dynamic_info_algorithms[idx]["KNN"].recommend_all(
                             histories, k)
-                        print("top k's:", recommendations)
+                        # print("top k's:", recommendations)
 
                         # TODO: print all topk recommendations for all users?
 
@@ -257,7 +268,7 @@ class ABTestSimulation(threading.Thread):
 
                         # train KNN algoritme to initialize it:
                         interactions = self.database_connection.session.execute(
-                            f"SELECT DISTINCT SUBQUERY.customer_id, SUBQUERY.article_id FROM (SELECT * FROM \
+                            f"SELECT SUBQUERY.customer_id, SUBQUERY.article_id FROM (SELECT * FROM \
                     purchase WHERE CAST(timestamp as DATE) = '{start_date}') AS SUBQUERY").fetchall()  # BETWEEN zetten
                         for i in range(len(interactions)):
                             interactions[i] = (
