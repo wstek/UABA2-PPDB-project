@@ -115,7 +115,7 @@ def login_user1():
     return {"username": user.username, "email": user.email_address}
 
 
-@ app.route("/api/ss", methods=["POST", "OPTIONS"])
+@ app.route("/api/start_simulation", methods=["POST", "OPTIONS"])
 @ cross_origin(supports_credentials=True)
 def start_simulation():
     start = request.json["start"]

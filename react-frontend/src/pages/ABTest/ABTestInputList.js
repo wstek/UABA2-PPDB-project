@@ -100,7 +100,7 @@ const ABTestInputList = ({abs_algorithms}) => {
             console.log(jdata)
             console.log("trying to fetch...")
 
-            await fetch('/api/ss', {
+            await fetch('/api/start_simulation', {
                 method: 'POST',
                 headers: {"Content-Type": "application/json", 'Accept': 'application/json'},
                 credentials: 'include',
