@@ -3,7 +3,7 @@ import {Link, useHistory} from "react-router-dom"
 import {useState} from "react";
 
 function POST(path, data) {
-    return fetch(`http://127.0.0.1:5000${path}`, {
+    return fetch(`${path}`, {
         method: 'POST', headers: {
             'Content-Type': 'application/json'
         }, body: JSON.stringify(data)
@@ -33,7 +33,7 @@ function SignUp({setPage}) {
         } else {
             const signup_try = {username, email, password, firstname, lastname, birthdate};
             setIsPending(true);
-            fetch('http://127.0.0.1:5000/api/register', {
+            fetch('/api/register', {
                 method: 'POST',
                 headers: {"Content-Type": "application/json"},
                 credentials: 'include',

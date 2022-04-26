@@ -30,7 +30,7 @@ const ABTestInputList = ({abs_algorithms}) => {
     }
     useEffect(() => {
         resetInput()
-        fetch('http://127.0.0.1:5000/api/get_datasets', {
+        fetch('/api/get_datasets', {
             method: 'GET',
             headers: {"Content-Type": "application/json", 'Accept': 'application/json'},
             credentials: 'include'
@@ -97,7 +97,7 @@ const ABTestInputList = ({abs_algorithms}) => {
             const abtest_setup = {start, end, topk, stepsize, dataset_name, algorithms};
             setIsPending(true);
             const jdata = await JSON.stringify(abtest_setup);
-            await fetch('http://127.0.0.1:5000/api/start_simulation', {
+            await fetch('/api/start_simulation', {
                 method: 'POST',
                 headers: {"Content-Type": "application/json", 'Accept': 'application/json'},
                 credentials: 'include',
@@ -123,7 +123,7 @@ const ABTestInputList = ({abs_algorithms}) => {
     var datasets = []
     const onGo = (dataset, finish) => {
         if (finish) {
-            const url = "http://127.0.0.1:5000/api/read_csv";
+            const url = "/api/read_csv";
             const aret = post(url, dataset, {withCredentials: true}).then(response => console.log("response:", response));
             datasets = [];
             return aret;
@@ -136,7 +136,7 @@ const ABTestInputList = ({abs_algorithms}) => {
             let reader = new FileReader();
             reader.readAsDataURL(files[i]);
             reader.onload = (e) => {
-                const url = "http://127.0.0.1:5000/api/read_cvs";
+                const url = "/api/read_cvs";
                 var file1 = e.target.result;
                 const formData = {
                     dataset_name: document.getElementById("dataset").files[i].name,
