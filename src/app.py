@@ -28,7 +28,10 @@ server_session = Session(app)
 database_connection = DatabaseConnection()
 database_connection.connect(filename="config/database.ini")
 database_connection.logVersion()
-cors = CORS(app, supports_credentials=True, resources={'/*': {'origins': 'http://localhost:3000'}})
+cors = CORS(app, supports_credentials=True, resources={
+            '/*': {'origins': 'http://localhost:3000'}})
+
+exporting_threads = {}
 
 
 @app.route("/api/me", methods=['GET'])
@@ -40,7 +43,7 @@ def get_current_user():
         return {"error": "Unauthorized"}, 401
 
     user = database_connection.session.execute("SELECT * FROM datascientist WHERE username = :username",
-                                     {"username": user_id}).fetchone()
+                                               {"username": user_id}).fetchone()
 
     return {"username": user.username, "email": user.email_address}
 
@@ -77,7 +80,7 @@ def login_user():
     username = request.json["username"]
     password = request.json["password"]
     user = database_connection.session.execute("SELECT * FROM datascientist WHERE username = :username",
-                                     {"username": username}).fetchone()
+                                               {"username": username}).fetchone()
     if not user:
         return {"error": "Unauthorized"}, 401
 
@@ -110,7 +113,8 @@ def start_simulation():
          "created_by": session["user_id"]})
     database_connection.session.commit()
 
-    abtest_id = database_connection.session.execute('SELECT max(abtest_id) FROM "ABTest"').fetchone()[0]
+    abtest_id = database_connection.session.execute(
+        'SELECT max(abtest_id) FROM "ABTest"').fetchone()[0]
 
     for i in range(len(algorithms)):
         # algorithm_id = database_connection.session.execute("SELECT nextval(
@@ -119,7 +123,8 @@ def start_simulation():
             "INSERT INTO algorithm(abtest_id, algorithm_name) VALUES(:abtest_id, :algorithm_name)",
             {"abtest_id": abtest_id, "algorithm_name": algorithms[i]["name"]})
         database_connection.session.commit()
-        algorithm_id = database_connection.session.execute('SELECT max(algorithm_id) FROM algorithm').fetchone()[0]
+        algorithm_id = database_connection.session.execute(
+            'SELECT max(algorithm_id) FROM algorithm').fetchone()[0]
         algorithms[i]["id"] = algorithm_id
         for param, value in algorithms[i]["parameters"].items():
             database_connection.session.execute(
@@ -129,9 +134,9 @@ def start_simulation():
                 {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "value": value})
 
     global exporting_threads
-    exporting_threads[0] = ABTestSimulation(
-        {"abtest_id": abtest_id, "start": start, "end": end, "topk": topk, "stepsize": stepsize,
-         "dataset_name": dataset_name, "algorithms": algorithms})
+    exporting_threads[0] = ABTestSimulation(database_connection,
+                                            {"abtest_id": abtest_id, "start": start, "end": end, "topk": topk, "stepsize": stepsize,
+                                             "dataset_name": dataset_name, "algorithms": algorithms})
     exporting_threads[0].start()
     return "200"
 
@@ -141,7 +146,8 @@ def start_simulation():
 def read_csv():
     datasets = request.json
     for i in range(len(datasets)):
-        base64_message = base64.b64decode(datasets[i]['file']).decode('utf-8').rstrip()
+        base64_message = base64.b64decode(
+            datasets[i]['file']).decode('utf-8').rstrip()
         print(base64_message)
     return "200"
 
@@ -149,7 +155,8 @@ def read_csv():
 @app.route("/api/get_datasets")
 @cross_origin(supports_credentials=True)
 def get_datasets():
-    datasets = database_connection.session.execute("SELECT * FROM dataset").fetchall()
+    datasets = database_connection.session.execute(
+        "SELECT * FROM dataset").fetchall()
     for i in range(len(datasets)):
         datasets[i] = str(datasets[i].name)
     return {"all_datasets": datasets}
@@ -165,7 +172,8 @@ def logout_user():
 
 @app.route("/api/aaa", methods=["GET"])
 def logIpAddress():
-    Logger.log("User visited, IP: " + request.environ.get('HTTP_X_REAL_IP', request.remote_addr), True)
+    Logger.log("User visited, IP: " +
+               request.environ.get('HTTP_X_REAL_IP', request.remote_addr), True)
     return "200"
 
 
