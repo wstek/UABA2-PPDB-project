@@ -34,6 +34,7 @@ cors = CORS(app, supports_credentials=True, resources={
 exporting_threads = {}
 
 
+
 @app.route("/api/me", methods=['GET'])
 @cross_origin(supports_credentials=True)
 def get_current_user():
@@ -44,8 +45,10 @@ def get_current_user():
 
     user = database_connection.session.execute("SELECT * FROM datascientist WHERE username = :username",
                                                {"username": user_id}).fetchone()
-
-    return {"username": user.username, "email": user.email_address}
+    admin = database_connection.session.execute("SELECT * FROM admin WHERE username = :username",
+                                               {"username": user_id}).fetchone()
+    returnValue = {"username": user.username, "email": user.email_address, 'admin': admin is not None}
+    return returnValue
 
 
 @app.route("/api/register", methods=["POST"])
