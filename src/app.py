@@ -1,6 +1,4 @@
 import base64
-from distutils.log import Log
-from glob import glob
 import redis
 from flask import Flask, request, session, redirect, url_for
 from flask_bcrypt import Bcrypt
@@ -9,7 +7,6 @@ from flask_session import Session
 from Logger import Logger
 from DatabaseConnection import DatabaseConnection
 from ABTestSimulation import ABTestSimulation
-from datetime import timedelta
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "changeme"
@@ -118,7 +115,7 @@ def login_user1():
     return {"username": user.username, "email": user.email_address}
 
 
-@ app.route("/api/start_simulation", methods=["POST", "OPTIONS"])
+@ app.route("/api/ss", methods=["POST", "OPTIONS"])
 @ cross_origin(supports_credentials=True)
 def start_simulation():
     start = request.json["start"]

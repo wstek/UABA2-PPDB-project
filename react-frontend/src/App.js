@@ -21,31 +21,31 @@ function App() {
     const [auth, setAuthed] = useState(false);
     const history = useHistory();
 
-    useEffect(() => {
-        var cleared = false;
-        const interval = setInterval(() => {
-            fetch('/api/me', {
-                method: 'GET',
-                headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
-                credentials: 'include'
-            }).then((res) => {
-                if (res.status === 409) {
-                    alert('session has expired')
-                    history.push('/sign_in');
-                }
-            })
-                .catch((err) => {
-                    // console.log(err.message);
-                })
-        }, 5000);
-        return () => {
-            if (!cleared) {
-                clearInterval(interval);
-            }
-        }
-    }, []);
+    // useEffect(() => {
+    //     var cleared = false;
+    //     const interval = setInterval(() => {
+    //         fetch('/api/me', {
+    //             method: 'GET',
+    //             headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
+    //             credentials: 'include'
+    //         }).then((res) => {
+    //             if (res.status === 409) {
+    //                 alert('session has expired')
+    //                 history.push('/sign_in');
+    //             }
+    //         })
+    //             .catch((err) => {
+    //                 // console.log(err.message);
+    //             })
+    //     }, 5000);
+    //     return () => {
+    //         if (!cleared) {
+    //             clearInterval(interval);
+    //         }
+    //     }
+    // }, []);
 
-    // fetch('/api/aaa')
+    fetch('/api/aaa')
 
     return (
         <Router>
