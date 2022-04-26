@@ -5,6 +5,9 @@ server {
 
     # Frontend React webapp
     location / {
+        if (!-e $request_filename){
+            rewrite ^(.*)$ /index.html break;
+        }
         try_files $uri $uri/ =404;
         add_header Cache-Control "no-cache";
     }
@@ -16,7 +19,6 @@ server {
 
     # Backend Python Flask micro web framework
     location /api/ {
-        add_header Access-Control-Allow-Origin *;
         include proxy_params;
         proxy_pass http://unix:/home/app/Programming-project-databases/src/webapp.sock;
     }
