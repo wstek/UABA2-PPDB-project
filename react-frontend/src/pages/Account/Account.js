@@ -1,8 +1,28 @@
 import "../../index.css"
-import {Link} from "react-router-dom"
-
+import { Link } from "react-router-dom"
+import React, { useState } from "react";
+import { useHistory } from 'react-router-dom';
 
 function Account() {
+    const history = useHistory();
+    const [isPending, setIsPending] = useState(false);
+    const logout = () => {
+        setIsPending(true);
+        fetch('/api/logout', {
+            method: 'GET',
+            headers: { "Content-Type": "application/json" },
+            credentials: 'include',
+        }).then(res => {
+            setIsPending(false);
+            if (res.status === 409) {
+                alert('session has expired')
+                history.push("/sign_in")
+            }
+        }).catch((err) => {
+            setIsPending(false);
+            console.log(err);
+        })
+    }
     return (
         <div className="Contact">
             <label className="info">Info</label>
@@ -13,7 +33,9 @@ function Account() {
             </div>
 
             <Link to="" className="Change_Info">Change info</Link>
-            <Link to="" className="Log_Out">Log out</Link>
+            <Link to="/sign_in" onClick={logout} className="Log_Out">Log out</Link>
+            {!isPending && <Link to="/sign_in" onClick={logout} className="Log_Out">Log out</Link>}
+            {isPending && <button disabled className="Log_Out">Logging out...</button>}
         </div>
 
     );

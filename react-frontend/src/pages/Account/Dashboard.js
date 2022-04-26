@@ -1,7 +1,9 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
+import { useHistory } from 'react-router-dom';
 
 const Dashboard = () => {
     const [user, setUser] = useState(null);
+    const history = useHistory();
 
     const logoutUser = (e) => {
         fetch('/api/logout', {
@@ -9,8 +11,9 @@ const Dashboard = () => {
             credentials: 'include'
         })
             .then((res) => {
-                if (!res.ok) {
-                    throw Error('could not logout');
+                if (res.status === 409) {
+                    alert('session has expired')
+                    history.push("/sign_in")
                 }
                 setUser(null);
                 // History.push("/sign_in");
@@ -25,7 +28,7 @@ const Dashboard = () => {
         fetch('/api/me', {
             method: 'GET',
             credentials: 'include',
-            headers: {"Content-Type": "application/json", 'Accept': 'application/json'}
+            headers: { "Content-Type": "application/json", 'Accept': 'application/json' }
         }).then(res => res.json())
             .then((data) => {
                 if (data.error) {
@@ -33,9 +36,9 @@ const Dashboard = () => {
                 }
                 setUser(data);
             }).catch((err) => {
-            setUser(null);
-            console.log(err);
-        })
+                setUser(null);
+                console.log(err);
+            })
     }
     return (
         <div>

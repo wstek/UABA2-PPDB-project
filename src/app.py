@@ -1,6 +1,8 @@
 import base64
+from distutils.log import Log
+from glob import glob
 import redis
-from flask import Flask, request, session
+from flask import Flask, request, session, redirect, url_for
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_session import Session
@@ -33,6 +35,7 @@ cors = CORS(app, supports_credentials=True, resources={
             '/*': {'origins': 'http://localhost:3000'}})  # https://team6.ua-ppdb.me/
 
 exporting_threads = {}
+LoggedIn = False
 
 
 @app.route("/api/me", methods=['GET'])
@@ -53,16 +56,23 @@ def get_current_user():
     return returnValue
 
 
-@app.before_request
-def before_request():
-    session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=1)
-    session.modified = True
+# @app.before_request
+# @cross_origin(supports_credentials=True)
+# def before_request():
+#     global LoggedIn
+#     user_id = session.get("user_id")
+#     if LoggedIn and not user_id:
+#         LoggedIn = False
+#         return {"error": "Unauthorized"}, 401
+#     if LoggedIn and user_id:
+#         session.permanent = True
+#         app.permanent_session_lifetime = timedelta(minutes=1)
+#         session.modified = True
 
-
-@app.route("/api/register", methods=["POST"])
-@cross_origin(supports_credentials=True)
+@ app.route("/api/register", methods=["POST"])
+@ cross_origin(supports_credentials=True)
 def register_user():
+    global LoggedIn
     firstname = request.json["firstname"]
     lastname = request.json["lastname"]
     birthdate = request.json["birthdate"]
@@ -84,12 +94,14 @@ def register_user():
     database_connection.session.commit()
     session["user_id"] = username
     session.permanent = True
+    LoggedIn = True
     return {"username": username, "email": email}
 
 
-@app.route("/api/login", methods=["POST"])
-@cross_origin(supports_credentials=True)
-def login_user():
+@ app.route("/api/login", methods=["POST"])
+@ cross_origin(supports_credentials=True)
+def login_user1():
+    global LoggedIn
     username = request.json["username"]
     password = request.json["password"]
     user = database_connection.session.execute("SELECT * FROM datascientist WHERE username = :username",
@@ -102,12 +114,12 @@ def login_user():
 
     session.permanent = True
     session["user_id"] = user.username
-
+    LoggedIn = True
     return {"username": user.username, "email": user.email_address}
 
 
-@app.route("/api/start_simulation", methods=["POST", "OPTIONS"])
-@cross_origin(supports_credentials=True)
+@ app.route("/api/start_simulation", methods=["POST", "OPTIONS"])
+@ cross_origin(supports_credentials=True)
 def start_simulation():
     start = request.json["start"]
     end = request.json["end"]
@@ -142,9 +154,9 @@ def start_simulation():
         for param, value in algorithms[i]["parameters"].items():
             database_connection.session.execute(
                 "INSERT INTO parameter("
-                "parametername, algorithm_id, abtest_id, value) "
-                "VALUES(:parametername, :algorithm_id, :abtest_id, :value)",
-                {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "value": value})
+                "parametername, algorithm_id, abtest_id, type, value) "
+                "VALUES(:parametername, :algorithm_id, :abtest_id, :type, :value)",
+                {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "type": "string", "value": value})
 
     global exporting_threads
     exporting_threads[0] = ABTestSimulation(database_connection,
@@ -154,8 +166,8 @@ def start_simulation():
     return "200"
 
 
-@app.route("/api/read_csv", methods=["POST"])
-@cross_origin(supports_credentials=True)
+@ app.route("/api/read_csv", methods=["POST"])
+@ cross_origin(supports_credentials=True)
 def read_csv():
     datasets = request.json
     for i in range(len(datasets)):
@@ -165,8 +177,8 @@ def read_csv():
     return "200"
 
 
-@app.route("/api/get_datasets")
-@cross_origin(supports_credentials=True)
+@ app.route("/api/get_datasets")
+@ cross_origin(supports_credentials=True)
 def get_datasets():
     datasets = database_connection.session.execute(
         "SELECT * FROM dataset").fetchall()
@@ -175,15 +187,17 @@ def get_datasets():
     return {"all_datasets": datasets}
 
 
-@app.route("/api/logout")
-@cross_origin(supports_credentials=True)
+@ app.route("/api/logout")
+@ cross_origin(supports_credentials=True)
 def logout_user():
+    global LoggedIn
     if "user_id" in session:
+        LoggedIn = False
         session.pop("user_id")
     return "200"
 
 
-@app.route("/api/aaa", methods=["GET"])
+@ app.route("/api/aaa", methods=["GET"])
 def logIpAddress():
     Logger.log("User visited, IP: " +
                request.environ.get('HTTP_X_REAL_IP', request.remote_addr), True)
