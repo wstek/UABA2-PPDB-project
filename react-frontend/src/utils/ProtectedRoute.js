@@ -1,15 +1,17 @@
-import {useEffect, useState} from 'react';
-import {Redirect, Route} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Redirect, Route } from 'react-router-dom';
+import React from 'react';
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 
-const ProtectedRoute = ({Component: component, setAdmin, setAuthed, auth, ...rest}) => {
+const ProtectedRoute = ({ Component: component, setAdmin, setAuthed, auth, ...rest }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        setIsLoading(true);
         fetch('/api/me', {
             method: 'GET',
             credentials: 'include'
@@ -29,7 +31,7 @@ const ProtectedRoute = ({Component: component, setAdmin, setAuthed, auth, ...res
 
     return (
         <Route render={(props) => (auth ? <rest.component {...props} /> :
-            <Redirect to={{pathname: '/sign_in', state: {from: rest.path}}}/>)}/>
+            <Redirect to={{ pathname: '/sign_in', state: { from: rest.path } }} />)} />
     );
 }
 
