@@ -10,14 +10,18 @@ function Statistics() {
     // popularity retrain look back
     // recency retrain
     // itemknn k,window, normalize retrain
-    const algoritmdict = [{Algorithm: "recency", retrain: 10}, {
-        Algorithm: "popularity",
-        retrain: 3,
-        window: 30
-    }, {Algorithm: "itemknn", retrain: 40, window: 9, K: 70, Normalize: 1}]
+    const algoritmdict = [{Algorithm: "recency", retrain: 10, name: "algorithmLin"},
+        {Algorithm: "popularity", retrain: 3, window: 30,name: "algorithmidExp"},
+        // {Algorithm: "itemknn", retrain: 40, window: 9, K: 70, Normalize: 1, name: "algorithm3"}
+    ]
+    const matrix = [[1, 2, 3, 4, 5], [[{value: 1}, {value: 1}], [{value: 2}, {value: 4}], [{value: 3}, {value: 9}], [{value: 4}, {value: 16}], [{value: 5}, {value: 25}]]]
+
+
+
     const google = useGoogleCharts();
-    const algorithms = ["algorithm 1", "algorithm 2", "algorithm 3"]
-    const matrix = [[2000, 500, 2000, 1241], [2001, 1500, 1250, 3123]]
+    const algorithms = algoritmdict.map(algorithmentry => {
+        return algorithmentry.name
+    })
 
     return (
         <div className="container-fluid  p-0 my-auto">
@@ -30,11 +34,11 @@ function Statistics() {
             </div>
             <div className="row text-center align-content-center justify-content-center">
                 <h4>Purchases</h4>
-                <LineChart chart_id={1}  title="Purchases" google={google} algorithms={algorithms} matrix={matrix}/>
+                <LineChart chart_id={1} title="Purchases" google={google} algorithms={algorithms} matrix={matrix}/>
             </div>
             <div className="row text-center mt-5 align-content-center justify-content-center">
                 <h4>Active Users</h4>
-                <LineChart chart_id={2}  title={"Active Users"} google={google} algorithms={algorithms} matrix={matrix}/>
+                <LineChart chart_id={2} title={"Active Users"} google={google} algorithms={algorithms} matrix={matrix}/>
             </div>
             <div className="row text-center mt-5 align-content-center justify-content-center">
                 <h4>Click Through Rate</h4>
@@ -48,7 +52,7 @@ function Statistics() {
                 <h4>Average Revenue Per User</h4>
                 <LineChart chart_id={5} title={"ARPU@D"} google={google} algorithms={algorithms} matrix={matrix}/>
             </div>
-            <ColoredLine />
+            <ColoredLine/>
         </div>
     );
 }

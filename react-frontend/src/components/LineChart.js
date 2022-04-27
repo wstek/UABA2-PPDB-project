@@ -17,20 +17,28 @@ function LineChart({google, matrix, algorithms, chart_id, title}) {
             if (!chart) {
                 data = new google.visualization.DataTable();
                 data.addColumn('number', "Year")
+                console.log(algorithms.length)
                 for (let i = 0, len = algorithms.length; i < len; i++) {
                     data.addColumn('number', algorithms[i])
                 }
             } else {
                 data = chartdata
             }
-            // let row = []
-            // for (let i = 0, len = algorithms.length + 1; i < len; i++){
-            //     let x = list[0]
-            //
-            // }
+            let matrix2 = []
+            for (let i = 0; i < matrix[0].length; i++) {
+                let row = []
+                let x = matrix[0][i]
 
+                row.push(x)
+                for (let j = 0; j < matrix[1][i].length; j++) {
+                    let y = matrix[1][i][j].value
+                    row.push(y)
+                }
+                matrix2.push(row)
+            }
+            console.log(matrix2)
 
-            data.addRows(matrix)
+            data.addRows(matrix2)
             setChartdata(data)
 
             const newChart = new google.visualization.LineChart(document.getElementById('curve_chart' + chart_id));
@@ -44,7 +52,7 @@ function LineChart({google, matrix, algorithms, chart_id, title}) {
 
     function drawChart() {
         var data = chartdata
-        if ( data){
+        if (data) {
             // Instantiate and draw our chart, passing in some options.
             const newChart = new google.visualization.LineChart(document.getElementById('curve_chart' + chart_id));
             newChart.draw(data, options);
