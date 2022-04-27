@@ -1,10 +1,11 @@
 import numpy as np
 import scipy.sparse
+
 from Algorithm import Algorithm
 
 
 class ItemKNN(Algorithm):
-    """ Item based nearest neighbors recommendation algorithms """
+    """ Item based nearest neighbors recommendation algorithm """
 
     def __init__(self, k=20, normalize=False):
         super().__init__()
@@ -12,7 +13,7 @@ class ItemKNN(Algorithm):
         self.normalize = normalize
 
     def fit(self, X: scipy.sparse.csr_matrix):
-        """ Train algorithms with interaction matrix X """
+        """ Train algorithm with interaction matrix X """
         # Input checking
         X.eliminate_zeros()
         assert np.all(X.data == 1), "X should only contain binary values"
@@ -110,7 +111,7 @@ class ItemKNNIterative(ItemKNN):
             if self.normalize:
                 total = values.sum()
                 if total == 0:
-                    total = 1  # safe divide
+                    total = 1   # safe divide
                 values = values / total
 
             col_ind.append(cols)
@@ -121,7 +122,8 @@ class ItemKNNIterative(ItemKNN):
         data = np.concatenate(data, axis=0)
         row_ind = np.concatenate(row_ind, axis=0)
         col_ind = np.concatenate(col_ind, axis=0)
-        sim = scipy.sparse.csr_matrix((data, (row_ind, col_ind)), shape=(n, n), dtype=np.float32)
+        sim = scipy.sparse.csr_matrix(
+            (data, (row_ind, col_ind)), shape=(n, n), dtype=np.float32)
 
         self.B_ = sim
 

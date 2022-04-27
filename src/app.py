@@ -1,13 +1,14 @@
+from abc import abstractclassmethod
 import base64
 import redis
-from flask import Flask, request, session
+from flask import Flask, request, session, redirect, url_for
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_session import Session
 from Logger import Logger
 from DatabaseConnection import DatabaseConnection
-from ABTestSimulation import ABTestSimulation
-from datetime import timedelta
+from ABTestSimulation import ABTestSimulation, remove_tuples
+from datetime import date, timedelta
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "changeme"
@@ -17,7 +18,7 @@ app.config['SESSION_TYPE'] = 'redis'
 app.config['SESSION_REDIS'] = redis.from_url('redis://localhost:6379')
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "None"
-# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=1)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=1)
 # app.config['SESSION_MODIFIED'] = True
 # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # app.config['SQLALCHEMY_ECHO'] = True
@@ -33,6 +34,17 @@ cors = CORS(app, supports_credentials=True, resources={
             '/*': {'origins': 'http://localhost:3000'}})  # https://team6.ua-ppdb.me/
 
 exporting_threads = {}
+LoggedIn = False
+
+
+@app.route("/api/progress", methods=['GET'])
+@cross_origin(supports_credentials=True)
+def get_data():
+    global exporting_threads
+    if exporting_threads:
+        return {"progress": exporting_threads[0].progress, "topk": exporting_threads[0].temp_topk, "id": exporting_threads[0].id2, "done": exporting_threads[0].done}
+    else:
+        return {"done": True}
 
 
 @app.route("/api/me", methods=['GET'])
@@ -46,23 +58,121 @@ def get_current_user():
 
     user = database_connection.session.execute("SELECT * FROM datascientist WHERE username = :username",
                                                {"username": user_id}).fetchone()
+    database_connection.session.commit()
     admin = database_connection.session.execute("SELECT * FROM admin WHERE username = :username",
                                                 {"username": user_id}).fetchone()
+    database_connection.session.commit()
     returnValue = {"username": user.username,
                    "email": user.email_address, 'admin': admin is not None}
     return returnValue
 
 
-@app.before_request
-def before_request():
-    session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=1)
-    session.modified = True
-
-
-@app.route("/api/register", methods=["POST"])
+@app.route("/api/<int:abtest_id>/<stat>")
 @cross_origin(supports_credentials=True)
+def get_stat(abtest_id, stat):
+    username = session.get("user_id")
+
+    if not username:
+        return {"error": "unauthorized"}, 401
+
+    if stat == "abtest_simulation":
+        date_data = database_connection.session.execute(
+            f"SELECT DISTINCT datetime FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
+        database_connection.session.commit()
+        remove_tuples(date_data)
+        dataset_name = database_connection.session.execute(
+            f'SELECT dataset_name FROM "ABTest" WHERE abtest_id = {abtest_id}').fetchall()
+        database_connection.session.commit()
+        users_data = database_connection.session.execute(
+            "SELECT DISTINCT customer_id FROM customer").fetchall()
+        database_connection.session.commit()
+        remove_tuples(users_data)
+        algorithms_data = database_connection.session.execute(
+            f"SELECT * FROM algorithm WHERE abtest_id = {abtest_id}").fetchall()
+        database_connection.session.commit()
+        y_stat = []
+        for x in range(len(date_data)):
+            y_stat.append({})
+            for y in range(len(users_data)):
+                y_stat[x][users_data(y)] = {"history": [], "algorithms": {}}
+                for z in range(len(algorithms_data)):
+                    statistics_id = database_connection.session.execute(
+                        f"SELECT statistics_id FROM statistics WHERE datetime = {date_data(x)} AND algorithm_id = {algorithms_data(z)[0]} AND abtest_id = {abtest_id}").fetchall()
+                    database_connection.session.commit()
+                    k_recommendations = database_connection.session.execute(
+                        f"SELECT sub.article_id FROM (SELECT article_id, recommendation_id FROM recommendation WHERE customer_id = {users_data(y)} AND statistics_id = {statistics_id} AND dataset_name = {dataset_name[0]} ORDER BY recommendation_id ASC) AS sub").fetchall()
+                    database_connection.session.commit()
+                    remove_tuples(k_recommendations)
+                    history = database_connection.session.execute(
+                        f"SELECT article_id FROM purchase WHERE customer_id = {users_data(y)} AND CAST(timestamp as DATE) < '{date_data(x)}'").fetchall()
+                    database_connection.session.commit()
+                    remove_tuples(history)
+                    y_stat[x][users_data(y)]["history"] = history
+                    y_stat[x][users_data(y)]["algorithms"][algorithms_data(z)[
+                        0]] = k_recommendations
+        return {"abtest_simulation": {"x": date_data, "y": y_stat}}
+
+    if stat == "abtest_summary":
+        abtest_summary = database_connection.session.execute(
+            f'SELECT * FROM "ABTest" WHERE abtest_id = {abtest_id}').fetchall()
+        database_connection.session.commit()
+        abtest_summary = abtest_summary[0]
+        algorithms = []
+        data = database_connection.session.execute(
+            f"SELECT algorithm_id, algorithm_name FROM algorithm WHERE abtest_id = {abtest_id}").fetchall()
+        database_connection.session.commit()
+        for i in range(len(data)):
+            algorithms.append({"algorithm_id": data[
+                i][0], "algorithm_name": data[i][1]})
+            parameters = database_connection.session.execute(
+                f"SELECT parametername, value FROM parameter WHERE algorithm_id = {data[i][0]} AND abtest_id = {abtest_id}").fetchall()
+            database_connection.session.commit()
+            for k in range(len(parameters)):
+                algorithms[i][parameters[k][0]] = parameters[k][1]
+
+        return {"abtest_summary": {"abtest_id": abtest_summary[0], "top_k": abtest_summary[1], "stepsize": abtest_summary[2], "start": abtest_summary[3],
+                "end": abtest_summary[4], "dataset_name": abtest_summary[5], "created_on": abtest_summary[6], "created_by": abtest_summary[7]}, "algorithms": algorithms}
+
+    if stat == "active_users_over_time" or stat == "purchases_over_time":
+        datetimes = database_connection.session.execute(
+            f"SELECT DISTINCT datetime FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
+        database_connection.session.commit()
+        user_counts = []
+        for i in range(len(datetimes)):
+            if stat == "active_users_over_time":
+                countz = database_connection.session.execute(
+                    f"SELECT COUNT(DISTINCT(customer_id)) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
+            else:
+                countz = database_connection.session.execute(
+                    f"SELECT COUNT(customer_id) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
+            database_connection.session.commit()
+            user_counts.append(countz[0][0])
+            datetimes[i] = str(datetimes[i][0])
+        return {"x": datetimes, "y": user_counts}
+
+    if stat == "CTR_over_time":
+        pass
+
+
+# @ app.before_request
+# @ cross_origin(supports_credentials=True)
+# def before_request():
+#     # global LoggedIn
+#     # user_id = session.get("user_id")
+#     # if LoggedIn and not user_id:
+#     #     LoggedIn = False
+#     #     return {"error": "Unauthorized"}, 401
+#     # if LoggedIn and user_id:
+#     session.permanent = True
+#     app.permanent_session_lifetime = timedelta(minutes=1)
+#     session.modified = True
+#     return redirect(url_for('login_user1'))
+
+
+@ app.route("/api/register", methods=["POST"])
+@ cross_origin(supports_credentials=True)
 def register_user():
+    global LoggedIn
     firstname = request.json["firstname"]
     lastname = request.json["lastname"]
     birthdate = request.json["birthdate"]
@@ -72,6 +182,7 @@ def register_user():
     user = database_connection.session.execute(
         "SELECT * FROM datascientist WHERE username = :username OR email_address = :email",
         {"username": username, "email": email}).fetchall()
+    database_connection.session.commit()
     if user:
         return {"error": "User already exists"}, 409
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -83,31 +194,37 @@ def register_user():
          "username": username, "password": hashed_password})
     database_connection.session.commit()
     session["user_id"] = username
+
     session.permanent = True
+    LoggedIn = True
     return {"username": username, "email": email}
 
 
-@app.route("/api/login", methods=["POST"])
-@cross_origin(supports_credentials=True)
-def login_user():
+@ app.route("/api/login", methods=["POST"])
+@ cross_origin(supports_credentials=True)
+def login_user1():
+    global LoggedIn
     username = request.json["username"]
     password = request.json["password"]
     user = database_connection.session.execute("SELECT * FROM datascientist WHERE username = :username",
                                                {"username": username}).fetchone()
+    database_connection.session.commit()
     if not user:
         return {"error": "Unauthorized"}, 401
 
     if not bcrypt.check_password_hash(user.password, password):
         return {"error": "Unauthorized"}, 401
+    admin = database_connection.session.execute("SELECT * FROM admin WHERE username = :username",
+                                                {"username": username}).fetchone()
 
     session.permanent = True
     session["user_id"] = user.username
+    LoggedIn = True
+    return {"username": user.username, "email": user.email_address, "admin": admin is not None}
 
-    return {"username": user.username, "email": user.email_address}
 
-
-@app.route("/api/start_simulation", methods=["POST", "OPTIONS"])
-@cross_origin(supports_credentials=True)
+@ app.route("/api/start_simulation", methods=["POST", "OPTIONS"])
+@ cross_origin(supports_credentials=True)
 def start_simulation():
     start = request.json["start"]
     end = request.json["end"]
@@ -128,6 +245,7 @@ def start_simulation():
 
     abtest_id = database_connection.session.execute(
         'SELECT max(abtest_id) FROM "ABTest"').fetchone()[0]
+    database_connection.session.commit()
 
     for i in range(len(algorithms)):
         # algorithm_id = database_connection.session.execute("SELECT nextval(
@@ -138,13 +256,12 @@ def start_simulation():
         database_connection.session.commit()
         algorithm_id = database_connection.session.execute(
             'SELECT max(algorithm_id) FROM algorithm').fetchone()[0]
+        database_connection.session.commit()
         algorithms[i]["id"] = algorithm_id
         for param, value in algorithms[i]["parameters"].items():
-            database_connection.session.execute(
-                "INSERT INTO parameter("
-                "parametername, algorithm_id, abtest_id, value) "
-                "VALUES(:parametername, :algorithm_id, :abtest_id, :value)",
-                {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "value": value})
+            database_connection.session.execute("INSERT INTO parameter(parametername, algorithm_id, abtest_id, type, value) VALUES(:parametername, :algorithm_id, :abtest_id, :type, :value)",
+                                                {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "type": "string", "value": value})
+        database_connection.session.commit()
 
     global exporting_threads
     exporting_threads[0] = ABTestSimulation(database_connection,
@@ -154,8 +271,8 @@ def start_simulation():
     return "200"
 
 
-@app.route("/api/read_csv", methods=["POST"])
-@cross_origin(supports_credentials=True)
+@ app.route("/api/read_csv", methods=["POST"])
+@ cross_origin(supports_credentials=True)
 def read_csv():
     datasets = request.json
     for i in range(len(datasets)):
@@ -165,25 +282,28 @@ def read_csv():
     return "200"
 
 
-@app.route("/api/get_datasets")
-@cross_origin(supports_credentials=True)
+@ app.route("/api/get_datasets")
+@ cross_origin(supports_credentials=True)
 def get_datasets():
     datasets = database_connection.session.execute(
         "SELECT * FROM dataset").fetchall()
+    database_connection.session.commit()
     for i in range(len(datasets)):
         datasets[i] = str(datasets[i].name)
     return {"all_datasets": datasets}
 
 
-@app.route("/api/logout")
-@cross_origin(supports_credentials=True)
+@ app.route("/api/logout")
+@ cross_origin(supports_credentials=True)
 def logout_user():
+    global LoggedIn
     if "user_id" in session:
+        LoggedIn = False
         session.pop("user_id")
     return "200"
 
 
-@app.route("/api/aaa", methods=["GET"])
+@ app.route("/api/aaa", methods=["GET"])
 def logIpAddress():
     Logger.log("User visited, IP: " +
                request.environ.get('HTTP_X_REAL_IP', request.remote_addr), True)
