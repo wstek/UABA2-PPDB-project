@@ -18,7 +18,7 @@ app.config['SESSION_TYPE'] = 'redis'
 app.config['SESSION_REDIS'] = redis.from_url('redis://localhost:6379')
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "None"
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=1)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 # app.config['SESSION_MODIFIED'] = True
 # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # app.config['SQLALCHEMY_ECHO'] = True
@@ -67,48 +67,51 @@ def get_current_user():
     return returnValue
 
 
-@app.route("/api/<int:abtest_id>/<stat>")
+@app.route("/api/abtest/statistics/<int:abtest_id>/<stat>")
 @cross_origin(supports_credentials=True)
 def get_stat(abtest_id, stat):
     username = session.get("user_id")
 
     if not username:
         return {"error": "unauthorized"}, 401
+    if stat == "algorithm_information":
+        result = database_connection.session.execute(
+            f"select algorithm_id, algorithm_name, parametername, value from algorithm natural join parameter where abtest_id = 1;").fetchall()
+        algorithms = {}
+        for row in result:
+            if not row[0] in algorithms.keys():
+                algorithms[row[0]] = { 'name': row[1] }
+            algorithms[row[0]][row[2]] = row[3]
+
+        return algorithms
 
     if stat == "abtest_simulation":
         date_data = database_connection.session.execute(
             f"SELECT DISTINCT datetime FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
-        database_connection.session.commit()
         remove_tuples(date_data)
         dataset_name = database_connection.session.execute(
             f'SELECT dataset_name FROM "ABTest" WHERE abtest_id = {abtest_id}').fetchall()
-        database_connection.session.commit()
         users_data = database_connection.session.execute(
             "SELECT DISTINCT customer_id FROM customer").fetchall()
-        database_connection.session.commit()
         remove_tuples(users_data)
         algorithms_data = database_connection.session.execute(
             f"SELECT * FROM algorithm WHERE abtest_id = {abtest_id}").fetchall()
-        database_connection.session.commit()
         y_stat = []
         for x in range(len(date_data)):
             y_stat.append({})
             for y in range(len(users_data)):
-                y_stat[x][users_data(y)] = {"history": [], "algorithms": {}}
+                y_stat[x][users_data[y]] = {"history": [], "algorithms": {}}
                 for z in range(len(algorithms_data)):
                     statistics_id = database_connection.session.execute(
-                        f"SELECT statistics_id FROM statistics WHERE datetime = {date_data(x)} AND algorithm_id = {algorithms_data(z)[0]} AND abtest_id = {abtest_id}").fetchall()
-                    database_connection.session.commit()
+                        f"SELECT statistics_id FROM statistics WHERE datetime = '{date_data[x]}' AND algorithm_id = {algorithms_data[z][0]} AND abtest_id = {abtest_id}").fetchall()
                     k_recommendations = database_connection.session.execute(
-                        f"SELECT sub.article_id FROM (SELECT article_id, recommendation_id FROM recommendation WHERE customer_id = {users_data(y)} AND statistics_id = {statistics_id} AND dataset_name = {dataset_name[0]} ORDER BY recommendation_id ASC) AS sub").fetchall()
-                    database_connection.session.commit()
+                        f"SELECT sub.article_id FROM (SELECT article_id, recomendation_id FROM recommendation WHERE customer_id = {users_data[y]} AND statistics_id = {statistics_id[0][0]} AND dataset_name = '{dataset_name[0][0]}' ORDER BY recomendation_id ASC) AS sub").fetchall()
                     remove_tuples(k_recommendations)
                     history = database_connection.session.execute(
-                        f"SELECT article_id FROM purchase WHERE customer_id = {users_data(y)} AND CAST(timestamp as DATE) < '{date_data(x)}'").fetchall()
-                    database_connection.session.commit()
+                        f"SELECT article_id FROM purchase WHERE customer_id = {users_data[y]} AND CAST(timestamp as DATE) < '{date_data[x]}'").fetchall()
                     remove_tuples(history)
-                    y_stat[x][users_data(y)]["history"] = history
-                    y_stat[x][users_data(y)]["algorithms"][algorithms_data(z)[
+                    y_stat[x][users_data[y]]["history"] = history
+                    y_stat[x][users_data[y]]["algorithms"][algorithms_data[z][
                         0]] = k_recommendations
         return {"abtest_simulation": {"x": date_data, "y": y_stat}}
 
