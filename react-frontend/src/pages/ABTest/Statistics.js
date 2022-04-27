@@ -12,8 +12,10 @@ function Statistics() {
     // itemknn k,window, normalize retrain
     const algoritmdict = [{Algorithm: "recency", retrain: 10, name: "algorithmLin"},
         {Algorithm: "popularity", retrain: 3, window: 30,name: "algorithmidExp"},
-        // {Algorithm: "itemknn", retrain: 40, window: 9, K: 70, Normalize: 1, name: "algorithm3"}
+        // {Algorithm: "itemknn",
+        // retrain: 40, window: 9, K: 70, Normalize: 1, name: "algorithm3"}
     ]
+
     const matrix = [[1, 2, 3, 4, 5], [[{value: 1}, {value: 1}], [{value: 2}, {value: 4}], [{value: 3}, {value: 9}], [{value: 4}, {value: 16}], [{value: 5}, {value: 25}]]]
 
 
