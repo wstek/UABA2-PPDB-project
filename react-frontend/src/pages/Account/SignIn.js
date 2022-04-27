@@ -12,8 +12,9 @@ function POST(path, data) {
 }
 
 
-function SignIn(props) {
+function SignIn({ auth, admin, setAdmin, setAuthed, ...props }) {
     // console.log(props);
+    console.log(admin);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [passwordShown, setPasswordShown] = useState(false);

@@ -21,29 +21,31 @@ function App() {
     const [auth, setAuthed] = useState(false);
     const history = useHistory();
 
-    useEffect(() => {
-        var cleared = false;
-        const interval = setInterval(() => {
-            fetch('/api/me', {
-                method: 'GET',
-                headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
-                credentials: 'include'
-            }).then((res) => {
-                if (res.status === 409) {
-                    alert('session has expired')
-                    history.push('/sign_in');
-                }
-            })
-                .catch((err) => {
-                    // console.log(err.message);
-                })
-        }, 5000);
-        return () => {
-            if (!cleared) {
-                clearInterval(interval);
-            }
-        }
-    }, []);
+    // useEffect(() => {
+    //     var cleared = false;
+    //     const interval = setInterval(() => {
+    //         fetch('/api/me', {
+    //             method: 'GET',
+    //             headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
+    //             credentials: 'include'
+    //         }).then((res) => {
+    //             cleared = True;
+    //             clearInterval(interval);
+    //             if (res.status === 409) {
+    //                 alert('session has expired')
+    //                 history.push('/sign_in');
+    //             }
+    //         })
+    //             .catch((err) => {
+    //                 // console.log(err.message);
+    //             })
+    //     }, 5000);
+    //     return () => {
+    //         if (!cleared) {
+    //             clearInterval(interval);
+    //         }
+    //     }
+    // }, []);
 
     // fetch('/api/aaa')
 
@@ -60,7 +62,7 @@ function App() {
                         </Route>
                         <ProtectedRoute component={Account} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin} exact path="/account" />
                         <ProtectedRoute component={ABTestInput} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin} exact path="/abtest/setup" />
-                        <Route exact path="/sign_in" render={(props) => <SignIn {...props} />} />
+                        <Route exact path="/sign_in" render={(props) => <SignIn admin={admin} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin} {...props} />} />
                         <Route exact path="/sign_up">
                             <SignUp />
                         </Route>
