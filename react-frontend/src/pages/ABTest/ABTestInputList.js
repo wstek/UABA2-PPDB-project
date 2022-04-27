@@ -148,18 +148,18 @@ const ABTestInputList = ({abs_algorithms}) => {
 
                 <div className="col-6">
                     <label htmlFor="start">Start:</label>
-                    <input type="date" className="form-control datefield" id="start" value="2020-01-01"/>
+                    <input type="date" className="form-control datefield" id="start" />
                 </div>
                 <div className="col-6">
                     <label htmlFor="end">End:</label>
-                    <input type="date" className="form-control datefield" id="end" value="2020-01-10"/>
+                    <input type="date" className="form-control datefield" id="end"/>
                 </div>
             </div>
             <div className="row text-center align-items-center mb-5">
                 <div className="col-4">
                     <label htmlFor="topk">Top-K:</label>
                     <input type="number" className="form-control" id="topk" min="1"
-                           placeholder="Enter top-k" value="5"/>
+                           placeholder="Enter top-k"/>
                 </div>
                 <div className="col-4">
                     <br/>
@@ -173,7 +173,7 @@ const ABTestInputList = ({abs_algorithms}) => {
                 <div className="col-4 ">
                     <label htmlFor="stepsize">Step size:</label>
                     <input type="number" className="form-control" id="stepsize" min="1"
-                           placeholder="Enter stepsize" value="1"/>
+                           placeholder="Enter stepsize"/>
                 </div>
             </div>
             {renderFields()}

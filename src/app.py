@@ -37,6 +37,16 @@ exporting_threads = {}
 LoggedIn = False
 
 
+@app.route("/api/progress", methods=['GET'])
+@cross_origin(supports_credentials=True)
+def get_data():
+    global exporting_threads
+    if exporting_threads:
+        return {"progress": exporting_threads[0].progress, "topk": exporting_threads[0].temp_topk, "id": exporting_threads[0].id2, "done": exporting_threads[0].done}
+    else:
+        return {"done": True}
+
+
 @app.route("/api/me", methods=['GET'])
 @cross_origin(supports_credentials=True)
 def get_current_user():
