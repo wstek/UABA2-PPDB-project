@@ -30,7 +30,7 @@ const ProtectedRoute = ({ Component: component, setAdmin, setAuthed, auth, ...re
     }
 
     return (
-        <Route render={(props) => (auth ? <rest.component {...props} /> :
+        <Route render={(props) => (auth ? <rest.component setAdmin={setAdmin} setAuthed={setAuthed} {...props} /> :
             <Redirect to={{ pathname: '/sign_in', state: { from: rest.path } }} />)} />
     );
 }

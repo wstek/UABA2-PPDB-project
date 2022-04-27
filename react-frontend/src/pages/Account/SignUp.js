@@ -11,7 +11,7 @@ function POST(path, data) {
     })
 }
 
-function SignUp({ setPage }) {
+function SignUp({ setAdmin, setAuthed }) {
     const [passwordShown, setPasswordShown] = useState(false);
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastname] = useState('');
@@ -67,6 +67,8 @@ function SignUp({ setPage }) {
                     // history.go(-1);
                     setIsPending(false);
                     setError(null);
+                    setAuthed(true)
+                    setAdmin(false)
                     history.push('/dashboard');
                 })
                 .catch((err) => {

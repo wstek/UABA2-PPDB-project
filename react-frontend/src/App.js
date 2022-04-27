@@ -14,6 +14,7 @@ import Dashboard from './pages/Account/Dashboard';
 import ProtectedRoute from './utils/ProtectedRoute';
 import { useEffect, useState } from 'react';
 import { useHistory } from "react-router-dom"
+import Statistics from "./pages/ABTest/Statistics";
 
 function App() {
 
@@ -51,23 +52,26 @@ function App() {
         <Router>
             <div className="App">
                 <Navbar admin={admin} auth={auth} />
-                <Footer />
 
                 <div className="content">
                     <Switch>
                         <Route exact path="/">
                             <Home />
                         </Route>
+                        <ProtectedRoute component={Account} setAdmin={setAdmin} setAuthed={setAuthed} auth={auth} exact path="/account" />
+                        <ProtectedRoute component={ABTestInput} setAdmin={setAdmin} setAuthed={setAuthed} auth={auth} exact path="/abtest/setup" />
+                        <Route exact path="/sign_in" render={(props) => <SignIn setAdmin={setAdmin} setAuthed={setAuthed} {...props} />} />
                         <ProtectedRoute component={Account} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin} exact path="/account" />
                         <ProtectedRoute component={ABTestInput} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin} exact path="/abtest/setup" />
-                        <Route exact path="/sign_in" render={(props) => <SignIn {...props} />} />
+                        <Route exact path="/sign_in" render={(props) => <SignIn admin={admin} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin} {...props} />} />
                         <Route exact path="/sign_up">
-                            <SignUp />
+                            <SignUp setAdmin={setAdmin} setAuthed={setAuthed}/>
                         </Route>
                         <Route exact path="/contact">
                             <Contact />
                         </Route>
-                        <Route component={Dashboard} exact path="/dashboard" />
+                        <Route component={Dashboard} setAuthed={setAuthed} setAdmin={setAdmin} exact path="/dashboard" />
+                        <Route component={Statistics}  exact path="/statistics" />
                         <Route component={UploadDataset} exact path="/dataset/upload" />
                         <Route path="*">
                             <NotFound />
@@ -75,6 +79,8 @@ function App() {
                     </Switch>
                 </div>
                 <div className="clear" />
+                <Footer />
+
             </div>
         </Router>
     );

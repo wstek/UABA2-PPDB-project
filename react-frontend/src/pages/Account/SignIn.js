@@ -12,7 +12,7 @@ function POST(path, data) {
 }
 
 
-function SignIn(props) {
+function SignIn({setAuthed, setAdmin,  ...props}) {
     // console.log(props);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -48,6 +48,8 @@ function SignIn(props) {
             // history.go(-1);
             setIsPending(false);
             setError(null);
+            setAuthed(true)
+            setAdmin(data.admin)
             if (props.location.state !== undefined)
                 history.push(props.location.state.from);
             else
