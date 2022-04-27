@@ -29,8 +29,6 @@ function App() {
     //             headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
     //             credentials: 'include'
     //         }).then((res) => {
-    //             cleared = True;
-    //             clearInterval(interval);
     //             if (res.status === 409) {
     //                 alert('session has expired')
     //                 history.push('/sign_in');
@@ -47,7 +45,7 @@ function App() {
     //     }
     // }, []);
 
-    // fetch('/api/aaa')
+    fetch('/api/aaa')
 
     return (
         <Router>
