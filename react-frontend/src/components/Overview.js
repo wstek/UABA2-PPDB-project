@@ -2,52 +2,38 @@
 import "../index.css";
 import React from 'react'
 
-function Overview({ algoritmdict }) {
-    // useEffect(() => {
-    //     var indents = [];
-    //     // tbl.style.width = '500px';
-    //     // tbl.style.border = '2px solid black';
-    //
-    //     for (let i = 0; i < algoritmdict.length; i++) {
-    //         indents.push(<div className="row">;
-    //             for (let j = 0; j < algoritmdict[i].length; j++) {
-    //                 indents.push(<div className="col">)
-    //                     <h1>{algoritmdict[i][j]}</h1>
-    //                     {/*const td = tr.insertCell();*/}
-    //                     {/*    td.appendChild(document.createTextNode(algoritmdict[i][j]));*/}
-    //                     {/*td.style.border = '2px solid black';*/}
-    //                     indents.push(</div>)
-    //             }
-    //             indents.push(</div>)
-    //
-    //     }
-    //     // body.appendChild(tbl);
-    //     return indents;
-    // }, []);
+function Overview({algoritmdict, input_algorithms}) {
+    console.log(algoritmdict)
+    console.log(input_algorithms)
 
-
-    return (
-        <div className="container-fluid bg-lightpurple align-content-center text-center border border-dark rounded-3 border-3">
-            <div className="row border border-dark rounded-3 border-1">
-                <div className="col ">Algorithm</div>
-                <div className="col">retrain</div>
-                <div className="col">window</div>
-                <div className="col">K</div>
-                <div className="col">Normalize</div>
-            </div>
-            {algoritmdict.map((val, key) => {
+    return (<table>
+            <thead className="thead-dark">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col ">Algorithm</th>
+                <th scope="col">id</th>
+                <th scope="col">retrain</th>
+                <th scope="col">window</th>
+                <th scope="col">K</th>
+                <th scope="col">Normalize</th>
+            </tr>
+            </thead>
+            <tbody>
+            {Object.keys(input_algorithms).map((val, key) => {
                 return (
-                    <div className="row" key={key}>
-                        <div className="col">{val.Algorithm}</div>
-                        <div className="col">{val.retrain}</div>
-                        <div className="col">{val.window}</div>
-                        <div className="col">{val.K}</div>
-                        <div className="col">{val.Normalize}</div>
-                    </div>
+                    <tr key={key}>
+                            <th scope="row">{key}</th>
+                            <td>{input_algorithms[val].name}</td>
+                            <td>{input_algorithms[val].RetrainInterval}</td>
+                            <td>{input_algorithms[val].LookBackWindow}</td>
+                            <td>{input_algorithms[val].KNearest}</td>
+                            <td>{input_algorithms[val].Normalize}</td>
+                    </tr>
                 )
+
             })}
-        </div>
-    );
+            </tbody>
+        </table>);
 }
 
 export default Overview;
