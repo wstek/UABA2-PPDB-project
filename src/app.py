@@ -178,6 +178,7 @@ def register_user():
          "username": username, "password": hashed_password})
     database_connection.session.commit()
     session["user_id"] = username
+
     session.permanent = True
     LoggedIn = True
     return {"username": username, "email": email}
@@ -197,11 +198,13 @@ def login_user1():
 
     if not bcrypt.check_password_hash(user.password, password):
         return {"error": "Unauthorized"}, 401
+    admin = database_connection.session.execute("SELECT * FROM admin WHERE username = :username",
+                                                {"username": username}).fetchone()
 
     session.permanent = True
     session["user_id"] = user.username
     LoggedIn = True
-    return {"username": user.username, "email": user.email_address}
+    return {"username": user.username, "email": user.email_address, "admin": admin is not None}
 
 
 @ app.route("/api/start_simulation", methods=["POST", "OPTIONS"])

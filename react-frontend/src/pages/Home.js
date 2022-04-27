@@ -17,8 +17,8 @@ function Home({ setPage }) { // begin van de app wow
                         </div>
                     </div>
                     <div className="row text-center align-items-center mt-2">
-                        <div className="body-header align-left">About</div>
-                        <div className="body-paragraph align-left">
+                        <div className="body-header">About</div>
+                        <div className="body-paragraph">
                             We are second year students at the University of Antwerp and for the subject programming
                             project databases we are developing an interactive web application for comparing
                             collaborative filtering recommendation algorithms. We simulate the working of the algorithms

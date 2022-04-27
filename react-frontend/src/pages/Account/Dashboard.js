@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useHistory } from 'react-router-dom';
 
-const Dashboard = () => {
+const Dashboard = ({setAuthed,setAdmin}) => {
     const [user, setUser] = useState(null);
     const history = useHistory();
 
@@ -15,6 +15,8 @@ const Dashboard = () => {
                     alert('session has expired')
                     history.push("/sign_in")
                 }
+                setAuthed(false)
+                setAdmin(false)
                 setUser(null);
                 // History.push("/sign_in");
                 window.location.reload();

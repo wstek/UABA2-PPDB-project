@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import React, { useState } from "react";
 import { useHistory } from 'react-router-dom';
 
-function Account() {
+function Account({...props}) {
     const history = useHistory();
     const [isPending, setIsPending] = useState(false);
     const logout = () => {
@@ -18,6 +18,9 @@ function Account() {
                 alert('session has expired')
                 history.push("/sign_in")
             }
+            props.setAuthed(false)
+            props.setAdmin(false)
+
         }).catch((err) => {
             setIsPending(false);
             console.log(err);
