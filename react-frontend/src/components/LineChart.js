@@ -1,13 +1,14 @@
-import {useState} from "react";
-import {Spinner} from "react-bootstrap";
+import { useState } from "react";
+import { Spinner } from "react-bootstrap";
+import React from 'react'
 
-function LineChart({google, matrix, algorithms, chart_id, title}) {
+function LineChart({ google, matrix, algorithms, chart_id, title }) {
     const [chart, setChart] = useState(null);
     const [chartdata, setChartdata] = useState(null)
     var options = {
         title: title,
         curveType: 'function',
-        legend: {position: 'bottom'}
+        legend: { position: 'bottom' }
     };
 
     function nextStep() {
@@ -69,8 +70,8 @@ function LineChart({google, matrix, algorithms, chart_id, title}) {
         <div className="container-fluid ">
             <div className="row text-center align-content-center mb-3 justify-content-center">
                 <div className="container">
-                    {!google && <Spinner/>}
-                    <div id={"curve_chart" + chart_id} className={!google ? 'd-none' : ''}/>
+                    {!google && <Spinner />}
+                    <div id={"curve_chart" + chart_id} className={!google ? 'd-none' : ''} />
                 </div>
             </div>
             <div className="row text-center justify-content-center align-items-center">

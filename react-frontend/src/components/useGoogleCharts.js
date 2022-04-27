@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import React from 'react'
 
-function useGoogleCharts () {
-  const [google, setGoogle] = useState(null);
+function useGoogleCharts() {
+    const [google, setGoogle] = useState(null);
 
     useEffect(() => {
         if (!google) {
@@ -13,7 +14,7 @@ function useGoogleCharts () {
                 script.id = 'googleChartsScript';
                 script.onload = () => {
                     if (window.google && window.google.charts) {
-                        window.google.charts.load('current', {'packages':['corechart']});
+                        window.google.charts.load('current', { 'packages': ['corechart'] });
 
                         window.google.charts.setOnLoadCallback(() => setGoogle(window.google))
                     }
@@ -24,14 +25,14 @@ function useGoogleCharts () {
             }
         }
         return () => {
-        let script = document.getElementById('googleChartsScript');
-        if (script) {
-            script.remove();
-      }
-    }
-   }, [google]);
+            let script = document.getElementById('googleChartsScript');
+            if (script) {
+                script.remove();
+            }
+        }
+    }, [google]);
 
-  return google;
+    return google;
 }
 
 export default useGoogleCharts;

@@ -2,8 +2,8 @@ import {Container} from "react-bootstrap";
 import Overview from "../../components/Overview";
 import LineChart from "../../components/LineChart";
 import useGoogleCharts from '../../components/useGoogleCharts';
-import {ColoredLine} from '../../components/ColoredLine';
-
+import { ColoredLine } from '../../components/ColoredLine';
+import React from 'react'
 
 function Statistics() {
 

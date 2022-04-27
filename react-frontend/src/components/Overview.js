@@ -1,7 +1,8 @@
 // import {useEffect} from "react";
 import "../index.css";
+import React from 'react'
 
-function Overview({algoritmdict}) {
+function Overview({ algoritmdict }) {
     // useEffect(() => {
     //     var indents = [];
     //     // tbl.style.width = '500px';

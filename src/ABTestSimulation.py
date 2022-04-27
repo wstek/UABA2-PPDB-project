@@ -144,12 +144,13 @@ class ABTestSimulation(threading.Thread):
 
             for algo in range(len(self.abtest["algorithms"])):
 
-                # statistics_id = self.database_connection.session.execute(
-                #     "SELECT nextval('statistics_statistics_id_seq')").fetchone()[0]
+                statistics_id = self.database_connection.session.execute(
+                    "SELECT nextval('statistics_statistics_id_seq')").fetchone()[0]
+                self.database_connection.session.commit()
 
-                # self.database_connection.session.execute("INSERT INTO statistics(datetime, algorithm_id, abtest_id) VALUES(:datetime, :algorithm_id,\
-                # :abtest_id)", {"datetime": current_date, "algorithm_id": self.abtest["algorithms"][algo]["id"], "abtest_id": self.abtest["abtest_id"]})
-                # self.database_connection.session.commit()
+                self.database_connection.session.execute("INSERT INTO statistics(datetime, algorithm_id, abtest_id) VALUES(:datetime, :algorithm_id,\
+                :abtest_id)", {"datetime": current_date, "algorithm_id": self.abtest["algorithms"][algo]["id"], "abtest_id": self.abtest["abtest_id"]})
+                self.database_connection.session.commit()
 
                 idx = int(self.abtest["algorithms"][algo]["id"]) - \
                     int(self.abtest["algorithms"][0]["id"])

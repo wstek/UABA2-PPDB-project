@@ -8,7 +8,7 @@ from flask_session import Session
 from Logger import Logger
 from DatabaseConnection import DatabaseConnection
 from ABTestSimulation import ABTestSimulation, remove_tuples
-from datetime import timedelta
+from datetime import date, timedelta
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "changeme"
@@ -123,16 +123,22 @@ def get_stat(abtest_id, stat):
         return {"abtest_summary": {"abtest_id": abtest_summary[0], "top_k": abtest_summary[1], "stepsize": abtest_summary[2], "start": abtest_summary[3],
                 "end": abtest_summary[4], "dataset_name": abtest_summary[5], "created_on": abtest_summary[6], "created_by": abtest_summary[7]}, "algorithms": algorithms}
 
-    if stat == "active_users_over_time":
-        info = database_connection.session.execute(
-            f'SELECT start, "end" FROM "ABTest" WHERE abtest_id = {abtest_id}').fetchall()
-        database_connection.session.commit()
-        info = info[0]
+    if stat == "active_users_over_time" or stat == "purchases_over_time":
         datetimes = database_connection.session.execute(
-            f"SELECT sub.timestamp, COUNT(DISTINCT(sub.customer_id)) FROM ((SELECT DISTINCT datetime as timestamp FROM statistics WHERE abtest_id = {abtest_id}) as d inner join (SELECT DISTINCT customer_id, timestamp FROM purchase WHERE CAST(timestamp as DATE) BETWEEN '{info[0]}' AND '{info[1]}') as o ON (d.timestamp = o.timestamp)) AS sub GROUP BY timestamp").fetchall()
+            f"SELECT DISTINCT datetime FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
         database_connection.session.commit()
-        print(datetimes)
-        return datetimes
+        user_counts = []
+        for i in range(len(datetimes)):
+            if stat == "active_users_over_time":
+                countz = database_connection.session.execute(
+                    f"SELECT COUNT(DISTINCT(customer_id)) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
+            else:
+                countz = database_connection.session.execute(
+                    f"SELECT COUNT(customer_id) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
+            database_connection.session.commit()
+            user_counts.append(countz[0][0])
+            datetimes[i] = str(datetimes[i][0])
+        return {"x": datetimes, "y": user_counts}
 
     if stat == "CTR_over_time":
         pass
