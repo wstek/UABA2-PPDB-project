@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse
 
-from algorithm import Algorithm
+from Algorithm import Algorithm
 
 
 class ItemKNN(Algorithm):
