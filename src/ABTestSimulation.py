@@ -56,6 +56,9 @@ def remove_tuples(arr):
 class ABTestSimulation(threading.Thread):
     def __init__(self, database_connection, abtest):
         self.database_connection = database_connection
+        self.id2 = 0
+        self.temp_topk = []
+        self.done = False
         self.abtest = abtest
         self.progress = 0
         super().__init__()
@@ -220,7 +223,8 @@ class ABTestSimulation(threading.Thread):
                         # print(histories)
                         recommendations = dynamic_info_algorithms[idx]["KNN"].recommend_all(
                             histories, k)
-                        print("top k's:", recommendations)
+                        self.temp_topk = f"current_day: {current_date}, algorithm {algo}: top_k recommendations (BETWEEN {start_date} AND {prev_day}): {recommendations}"
+                        self.id2 += 1
 
                         # TODO: print all topk recommendations for all users?
 
@@ -265,7 +269,8 @@ class ABTestSimulation(threading.Thread):
 
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(RANDOM_DATA(id=idx, topk=top_k_random, name="ItemKNN")) #DEEP COPY????????????
 
-                        print(f"algorithm {algo}: top_k random:", top_k_random)
+                        self.temp_topk = f"algorithm {algo}: top_k random: {top_k_random}"
+                        self.id2 += 1
 
                         # train KNN algoritme to initialize it:
                         interactions = self.database_connection.session.execute(
@@ -324,8 +329,8 @@ class ABTestSimulation(threading.Thread):
                             top_k_items = dynamic_info_algorithms[idx]["prev_top_k"]
                             # top_k_over_time_statistics[idx].append(copy.deepcopy(top_k_over_time_statistics[idx][-1]))
 
-                        print(
-                            f"current_day: {current_date}, algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}):", top_k_items)
+                        self.temp_topk = f"current_day: {current_date}, algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}): {top_k_items}"
+                        self.id2 += 1
 
                         # for i in range(len(active_users)):
                         #     self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
@@ -363,8 +368,8 @@ class ABTestSimulation(threading.Thread):
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(
                         #     RANDOM_DATA(id=idx, topk=copy.deepcopy(top_k_random), name="Recency"))
                         # top_k_over_time_statistics[idx].append(top_k_random)
-                        print(
-                            f"current_day: {current_date}, algorithm {algo}: top_k random:", top_k_random)
+                        self.temp_topk = f"current_day: {current_date}, algorithm {algo}: top_k random: {top_k_random}"
+                        self.id2 += 1
 
                         # train Recency algoritme to initialize it:
                         top_k = self.database_connection.session.execute(f"SELECT t.article_id, t.timestamp FROM(SELECT article_id,MIN(timestamp) AS timestamp \
@@ -425,8 +430,8 @@ class ABTestSimulation(threading.Thread):
                             top_k_items = dynamic_info_algorithms[idx]["prev_top_k"]
                             # top_k_over_time_statistics[idx].append(copy.deepcopy(top_k_over_time_statistics[idx][-1]))
 
-                        print(
-                            f"algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}):", top_k_items)
+                        self.temp_topk = f"algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}): {top_k_items}"
+                        self.id2 += 1
 
                         # for i in range(len(active_users)):
                         #     self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
@@ -463,7 +468,8 @@ class ABTestSimulation(threading.Thread):
 
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(
                         #     RANDOM_DATA(id=idx, topk=copy.deepcopy(top_k_random), name="Popularity"))
-                        print(f"algorithm {algo}: top_k random:", top_k_random)
+                        self.temp_topk = f"algorithm {algo}: top_k random: {top_k_random}"
+                        self.id2 += 1
 
                         # train Popularity algorithm to initialize it:
                         top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.article_id, count(*) AS popular_items FROM \
@@ -489,7 +495,6 @@ class ABTestSimulation(threading.Thread):
                         # print("clicks:",clicks)
                         # CTR = clicks/float(n_active_users)
                         # print("CTR",CTR)
-
-                time.sleep(0.3)
                 self.progress = n_day*100.0/float(dayz)
+        self.done = True
         return
