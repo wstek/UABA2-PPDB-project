@@ -66,23 +66,49 @@ def get_current_user():
                    "email": user.email_address, 'admin': admin is not None}
     return returnValue
 
+@app.route("/api/abtest/statistics/")
+@cross_origin(supports_credentials=True)
+def get_personal_abtestids():
+    username = session.get("user_id")
+
+    if not username:
+        return {"error": "unauthorized"}, 401
+
+    personal_abtestids = database_connection.session.execute(
+        f"select abtest_id from \"ABTest\" where created_by = '{username}';").fetchall()
+    personal_abtestids = [r[0] for r in personal_abtestids]
+    return {"personal_abtestids": personal_abtestids}
 
 @app.route("/api/abtest/statistics/<int:abtest_id>/<stat>")
 @cross_origin(supports_credentials=True)
 def get_stat(abtest_id, stat):
+    print("getstat")
     username = session.get("user_id")
 
     if not username:
         return {"error": "unauthorized"}, 401
     if stat == "algorithm_information":
-        result = database_connection.session.execute(
-            f"select algorithm_id, algorithm_name, parametername, value from algorithm natural join parameter where abtest_id = 1;").fetchall()
-        algorithms = {}
-        for row in result:
-            if not row[0] in algorithms.keys():
-                algorithms[row[0]] = { 'name': row[1] }
-            algorithms[row[0]][row[2]] = row[3]
+        algorithm_id : int
+        algorithm_name : str
+        parametername : str
+        parametervalue : any
 
+        # alle parameter entries
+        # result : list (algorithm_id, algorithm_name, parametername, value)
+        result = database_connection.session.execute(
+            f"select algorithm_id, algorithm_name, parametername, value from algorithm natural join parameter where abtest_id = {abtest_id};").fetchall()
+        algorithms = {}
+        # for every parameter
+        for row in result:
+            algorithm_id = row[0]
+            algorithmname = row[1]
+            parametername = row[2]
+            parametervalue = row[3]
+            # if algorithm id was not present in the dictionary
+            if not algorithm_id in algorithms.keys():
+                # add the algorithm in the dictionarry and initialize name
+                algorithms[algorithm_id] = { 'name': algorithmname }
+            algorithms[algorithm_id][parametername] = parametervalue
         return algorithms
 
     if stat == "abtest_simulation":
