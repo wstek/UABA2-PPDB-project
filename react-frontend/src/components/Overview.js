@@ -2,11 +2,9 @@
 import "../index.css";
 import React from 'react'
 
-function Overview({algoritmdict, input_algorithms}) {
-    console.log(algoritmdict)
-    console.log(input_algorithms)
+function Overview({input_algorithms}) {
 
-    return (<table>
+    return (<table className="pt-3">    
             <thead className="thead-dark">
             <tr>
                 <th scope="col">#</th>
