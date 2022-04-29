@@ -20,22 +20,22 @@ function Footer() {
 
     if (!isMobile) {
         return (
-            <div className="footer container-fluid mt-5 pt-2 mb-0 pb-0">
-                <div className="row ">
-                    <div className="col-2">
+            <footer className=" text-center text-white fixed-bottom bg-purple">
+                <div className="row mx-4 mb-0">
+                    <div className="col-2 align-left ">
                         <img src={ua_logo} className="footer-image" alt="pic" id="footer"/>
                     </div>
-                    <div className="col-8 footer-text">
-                        <div className="footer-text align-left">Jorden Van Handenhoven, Mohammed Shakleya, Said Yandarbiev, Sam
+                    <div className="col-8 ">
+                        <div className="align-center footer-text">Jorden Van Handenhoven, Mohammed Shakleya, Said Yandarbiev, Sam
                             Roggeman, William Steklein</div>
                     </div>
-                    <div className="col-2 body">
-                        <div className="contact footer-text">
+                    <div className="col-2 body align-right ">
+                        <div className="">
                             <Link to="/contact" className="">Contact</Link>
                         </div>
                     </div>
                 </div>
-            </div>
+            </footer>
         )
     } else {
         return <div/>

@@ -3,14 +3,15 @@ import LineChart from "../../components/LineChart";
 import {ColoredLine} from '../../components/ColoredLine';
 import {useEffect, useState} from "react";
 import ABTestPicker from "../../components/ABTestpicker";
+import {Spinner} from "react-bootstrap";
 
 function Statistics() {
     // Currently selected ab test id
     const [selected_abtest, setSelectedABTest] = useState(null)
     // The input algorithms and their parameters
-    const [input_algorithms, setInputAlgorithms] = useState([{}]);
+    const [input_algorithms, setInputAlgorithms] = useState(null);
     // The ABTests of the current user
-    const [personal_abtests, setPersonalABTests] = useState([]);
+    const [personal_abtests, setPersonalABTests] = useState(null);
     // The Purchases of the abtest
     const [activeUsersOverTime, setActiveUsersOverTime] = useState(null);
 
@@ -36,7 +37,7 @@ function Statistics() {
     }
 
     function fetchInputParameters() {
-        if (!selected_abtest) return
+        if (!selected_abtest) return setInputAlgorithms([{}])
         fetch('/api/abtest/statistics/' + selected_abtest + '/algorithm_information', {
             method: 'GET',
             credentials: 'include'

@@ -18,7 +18,12 @@ body {
 
 .footer-text {
     color: #12375c;
-    font-weight: 500;
+    /*font-weight: 500;*/
+    /*max-height: 10vh;*/
+    /*height: auto;*/
+    /*width: auto;*/
+    min-font-size: 1vh;
+    max-font-size: 3vh;
 }
 
 .align-left {
@@ -70,14 +75,15 @@ body {
 .border-dark{
   border-color: #7734E7FF !important;
 }
-.footer {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: rgba(216, 196, 252, 1);
-    text-align: center;
-}
+/*.footer {*/
+/*    max-height: 5vh;*/
+/*    position: fixed;*/
+/*    left: 0;*/
+/*    bottom: 0;*/
+/*    right: 0;*/
+/*    background: rgba(216, 196, 252, 1);*/
+/*    text-align: center;*/
+/*}*/
 
 .contact {
     padding: 1px 20px 2px 10px;
@@ -97,12 +103,16 @@ body {
 }
 
 .footer-image {
+    /*    max-width: 100%;*/
+    /*    max-height: 20px;*/
+    /*    width: auto;*/
+    /*    height: auto;*/
+    /*}*/
+    padding: 0.25rem;
+    border-radius: 0.25rem;
     max-width: 100%;
-    max-height: 35px;
-    width: auto;
     height: auto;
 }
-
 .names {
     position: absolute;
     left: 120px;
@@ -431,4 +441,10 @@ gedaan met mohammed zijn troep
 .clear {
     clear: both;
     height: 100px;
+}
+
+.purple-color{
+        border-bottom-color: rgba(214, 203, 248) !important;
+        border-top-color: rgba(214, 203, 248) !important;
+    border-left-color: rgba(119, 52, 231) !important;
 }
