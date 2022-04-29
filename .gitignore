@@ -30,3 +30,4 @@ __pycache__
 .idea
 env
 react-frontend/package-lock.json
+/react-frontend/src/setupPoxy.js

@@ -1,7 +1,6 @@
 import "../../index.css"
-import { Link } from "react-router-dom"
-import React, { useState } from "react";
-import { useHistory } from 'react-router-dom';
+import {Link, useHistory} from "react-router-dom"
+import React, {useState} from "react";
 
 function Account({...props}) {
     const history = useHistory();
@@ -10,7 +9,7 @@ function Account({...props}) {
         setIsPending(true);
         fetch('/api/logout', {
             method: 'GET',
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             credentials: 'include',
         }).then(res => {
             setIsPending(false);

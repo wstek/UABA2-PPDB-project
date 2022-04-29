@@ -1,16 +1,14 @@
-import { Link } from "react-router-dom";
-import { post } from "axios";
-import { useState } from "react";
-import React from 'react';
+import {post} from "axios";
+import React from "react";
 
 
 export default function UploadDataset() {
 
-    var datasets = []
+    let datasets = [];
     const onGo = (dataset, finish) => {
         if (finish) {
             const url = "/api/read_csv";
-            const aret = post(url, dataset, { withCredentials: true }).then(response => console.log("response:", response));
+            const aret = post(url, dataset, {withCredentials: true}).then(response => console.log("response:", response));
             datasets = [];
             return aret;
         }
@@ -53,16 +51,16 @@ export default function UploadDataset() {
                             <div className="col-12 col-sm-12 col-md-12 col-lg-10 col-xl-10 col-xxl-10">
                                 <h4>Customers</h4>
                                 <input type="file" id="uploaded_customers" className="form-control"
-                                    onChange={(e) => onChange(e, "uploaded_customers")}
-                                    data-show-upload="false" data-show-caption="true" />
+                                       onChange={(e) => onChange(e, "uploaded_customers")}
+                                       data-show-upload="false" data-show-caption="true"/>
                             </div>
                         </div>
                         <div className="row pt-5 text-center justify-content-center">
                             <div className="col-12 col-sm-12 col-md-12 col-lg-10 col-xl-10 col-xxl-10">
                                 <h4>Purchases</h4>
                                 <input type="file" id="uploaded_purchases" className="form-control"
-                                    onChange={(e) => onChange(e, "uploaded_purchases")}
-                                    data-show-upload="false" data-show-caption="true" />
+                                       onChange={(e) => onChange(e, "uploaded_purchases")}
+                                       data-show-upload="false" data-show-caption="true"/>
                             </div>
                         </div>
 
@@ -70,9 +68,9 @@ export default function UploadDataset() {
                             <div className="col-12 col-sm-12 col-md-12 col-lg-10 col-xl-10 col-xxl-10">
                                 <h4>Articles</h4>
                                 <input id="uploaded_articles" name="uploaded_articles" type="file"
-                                    className="form-control"
-                                    onChange={(e) => onChange(e, "uploaded_articles")}
-                                    data-show-upload="false" data-show-caption="true" />
+                                       className="form-control"
+                                       onChange={(e) => onChange(e, "uploaded_articles")}
+                                       data-show-upload="false" data-show-caption="true"/>
                             </div>
                         </div>
                     </div>
