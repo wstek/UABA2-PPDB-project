@@ -1,5 +1,5 @@
 import {Chart} from "react-google-charts";
-import {Spinner} from "react-bootstrap";
+import React from "react";
 
 function LineChart({XFnY, title}) {
     const options = {
@@ -9,18 +9,15 @@ function LineChart({XFnY, title}) {
     };
     return (
         <div className="container-fluid ">
-            <div className="row text-center  align-content-center mb-3 justify-content-center">
+            <div className="row text-center align-content-center mb-3 justify-content-center">
                 <div className="container">
-                    {XFnY && XFnY.graphdata.length > 1 ? <Chart
+                    {XFnY && <Chart
                         chartType="LineChart"
                         width="100%"
                         height="400px"
                         data={XFnY.graphdata}
                         options={options}
-                    />
-                    :
-                    <Spinner animation="border" className="purple-color" variant="danger" />
-                    }
+                    />}
                 </div>
             </div>
         </div>

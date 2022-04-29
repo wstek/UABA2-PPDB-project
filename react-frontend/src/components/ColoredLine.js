@@ -1,5 +1,6 @@
 import React from 'react';
-export const ColoredLine = ({ color }) => (
+
+export const ColoredLine = ({color}) => (
     <hr
         style={{
             color,

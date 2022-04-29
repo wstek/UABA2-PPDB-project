@@ -1,5 +1,6 @@
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import React from "react";
+import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
+// import {BrowserRouter as useHistory} from 'react-router-dom';
+import React, {useState} from "react";
 import Navbar from './components/Navbar';
 import UploadDataset from './pages/Dataset/UploadDataset';
 import Footer from './components/Footer';
@@ -12,15 +13,13 @@ import Contact from './pages/Contact';
 import ABTestInput from "./pages/ABTest/ABTestInput";
 import Dashboard from './pages/Account/Dashboard';
 import ProtectedRoute from './utils/ProtectedRoute';
-import { useEffect, useState } from 'react';
-import { useHistory } from "react-router-dom"
 import Statistics from "./pages/ABTest/Statistics";
 
 function App() {
 
     const [admin, setAdmin] = useState(false);
     const [auth, setAuthed] = useState(false);
-    const history = useHistory();
+    // const history = useHistory();
 
     // useEffect(() => {
     //     var cleared = false;
@@ -51,35 +50,42 @@ function App() {
     return (
         <Router>
             <div className="App">
-                <Navbar admin={admin} auth={auth} />
+                <Navbar admin={admin} auth={auth}/>
 
                 <div className="content">
                     <Switch>
                         <Route exact path="/">
-                            <Home />
+                            <Home/>
                         </Route>
-                        <ProtectedRoute component={Account} setAdmin={setAdmin} setAuthed={setAuthed} auth={auth} exact path="/account" />
-                        <ProtectedRoute component={ABTestInput} setAdmin={setAdmin} setAuthed={setAuthed} auth={auth} exact path="/abtest/setup" />
-                        <Route exact path="/sign_in" render={(props) => <SignIn setAdmin={setAdmin} setAuthed={setAuthed} {...props} />} />
-                        <ProtectedRoute component={Account} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin} exact path="/account" />
-                        <ProtectedRoute component={ABTestInput} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin} exact path="/abtest/setup" />
-                        <Route exact path="/sign_in" render={(props) => <SignIn admin={admin} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin} {...props} />} />
+                        <ProtectedRoute component={Account} setAdmin={setAdmin} setAuthed={setAuthed} auth={auth} exact
+                                        path="/account"/>
+                        <ProtectedRoute component={ABTestInput} setAdmin={setAdmin} setAuthed={setAuthed} auth={auth}
+                                        exact path="/abtest/setup"/>
+                        <Route exact path="/sign_in"
+                               render={(props) => <SignIn setAdmin={setAdmin} setAuthed={setAuthed} {...props} />}/>
+                        <ProtectedRoute component={Account} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin} exact
+                                        path="/account"/>
+                        <ProtectedRoute component={ABTestInput} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin}
+                                        exact path="/abtest/setup"/>
+                        <Route exact path="/sign_in"
+                               render={(props) => <SignIn admin={admin} auth={auth} setAuthed={setAuthed}
+                                                          setAdmin={setAdmin} {...props} />}/>
                         <Route exact path="/sign_up">
                             <SignUp setAdmin={setAdmin} setAuthed={setAuthed}/>
                         </Route>
                         <Route exact path="/contact">
-                            <Contact />
+                            <Contact/>
                         </Route>
-                        <Route component={Dashboard} setAuthed={setAuthed} setAdmin={setAdmin} exact path="/dashboard" />
-                        <Route component={Statistics}  exact path="/statistics" />
-                        <Route component={UploadDataset} exact path="/dataset/upload" />
+                        <Route component={Dashboard} setAuthed={setAuthed} setAdmin={setAdmin} exact path="/dashboard"/>
+                        <Route component={Statistics} exact path="/statistics"/>
+                        <Route component={UploadDataset} exact path="/dataset/upload"/>
                         <Route path="*">
-                            <NotFound />
+                            <NotFound/>
                         </Route>
                     </Switch>
                 </div>
-                <div className="clear" />
-                <Footer />
+                <div className="clear"/>
+                <Footer/>
 
             </div>
         </Router>

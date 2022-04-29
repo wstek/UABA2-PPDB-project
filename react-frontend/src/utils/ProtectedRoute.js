@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Redirect, Route } from 'react-router-dom';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+import {Redirect, Route} from 'react-router-dom';
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 
-const ProtectedRoute = ({ Component: component, setAdmin, setAuthed, auth, ...rest }) => {
+const ProtectedRoute = ({Component: component, setAdmin, setAuthed, auth, ...rest}) => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -31,7 +30,7 @@ const ProtectedRoute = ({ Component: component, setAdmin, setAuthed, auth, ...re
 
     return (
         <Route render={(props) => (auth ? <rest.component setAdmin={setAdmin} setAuthed={setAuthed} {...props} /> :
-            <Redirect to={{ pathname: '/sign_in', state: { from: rest.path } }} />)} />
+            <Redirect to={{pathname: '/sign_in', state: {from: rest.path}}}/>)}/>
     );
 }
 
