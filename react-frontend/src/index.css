@@ -64,12 +64,15 @@ body {
 .bg-purple {
     background: rgba(216, 196, 252, 1);
 }
+
 .bg-lightpurple {
     background: rgb(214, 203, 248);
 }
-.border-dark{
-  border-color: #7734E7FF !important;
+
+.border-dark {
+    border-color: #7734E7FF !important;
 }
+
 .footer {
     position: fixed;
     left: 0;

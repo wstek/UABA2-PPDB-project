@@ -1,7 +1,7 @@
 import Overview from "../../components/Overview";
 import LineChart from "../../components/LineChart";
 import {ColoredLine} from '../../components/ColoredLine';
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import ABTestPicker from "../../components/ABTestpicker";
 
 function Statistics() {
@@ -24,6 +24,7 @@ function Statistics() {
         // {Algorithm: "itemknn",
         // retrain: 40, window: 9, K: 70, Normalize: 1, name: "algorithm3"}
     ]
+
     function fetchCurrentUserABTestIDs() {
         fetch('/api/abtest/statistics/', {
             method: 'GET',
@@ -46,6 +47,7 @@ function Statistics() {
             setInputAlgorithms(data)
         }).catch()
     }
+
     function fetchInputActiveUsersOverTime() {
         if (!selected_abtest) return
         fetch('/api/abtest/statistics/' + selected_abtest + '/active_users_over_time', {
@@ -59,7 +61,10 @@ function Statistics() {
     }
 
     useEffect(fetchCurrentUserABTestIDs, [],);
-    useEffect(() => {fetchInputParameters(); fetchInputActiveUsersOverTime()}, [selected_abtest],);
+    useEffect(() => {
+        fetchInputParameters();
+        fetchInputActiveUsersOverTime()
+    }, [selected_abtest],);
 
 
     const algorithms = algoritmdict.map(algorithmentry => {
@@ -82,9 +87,9 @@ function Statistics() {
                 </div>
                 <div className="row text-center align-content-center justify-content-center">
                     <div className="col-12 col-lg-6 col-xl-5 col-xxl-6">
-                    <h4>Purchases</h4>
-                    <LineChart chart_id={1} title="Active Users" XFnY={ activeUsersOverTime }/>
-                </div>
+                        <h4>Purchases</h4>
+                        <LineChart chart_id={1} title="Active Users" XFnY={activeUsersOverTime}/>
+                    </div>
                 </div>
                 {/*<div className="row text-center mt-5 align-content-center justify-content-center">*/}
                 {/*    <h4>Active Users</h4>*/}

@@ -26,8 +26,10 @@ function Footer() {
                         <img src={ua_logo} className="footer-image" alt="pic" id="footer"/>
                     </div>
                     <div className="col-8 footer-text">
-                        <div className="footer-text align-left">Jorden Van Handenhoven, Mohammed Shakleya, Said Yandarbiev, Sam
-                            Roggeman, William Steklein</div>
+                        <div className="footer-text align-left">Jorden Van Handenhoven, Mohammed Shakleya, Said
+                            Yandarbiev, Sam
+                            Roggeman, William Steklein
+                        </div>
                     </div>
                     <div className="col-2 body">
                         <div className="contact footer-text">

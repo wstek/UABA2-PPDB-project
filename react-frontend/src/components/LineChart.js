@@ -1,4 +1,5 @@
 import {Chart} from "react-google-charts";
+import React from "react";
 
 function LineChart({XFnY, title}) {
     const options = {
