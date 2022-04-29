@@ -23,10 +23,10 @@ const ABTestInputList = ({abs_algorithms}) => {
         setId(id + 1);
     }
 
-    const handleRemoveAlgorithm = (id) => {
-        const newAlgorithms = con_algorithms.filter(alg => alg.id !== id);
-        setConAlgorithm(newAlgorithms)
-    }
+    // const handleRemoveAlgorithm = (id) => {
+    //     const newAlgorithms = con_algorithms.filter(alg => alg.id !== id);
+    //     setConAlgorithm(newAlgorithms)
+    // }
     useEffect(() => {
         resetInput()
         fetch('/api/get_datasets', {
@@ -148,7 +148,7 @@ const ABTestInputList = ({abs_algorithms}) => {
 
                 <div className="col-6">
                     <label htmlFor="start">Start:</label>
-                    <input type="date" className="form-control datefield" id="start" />
+                    <input type="date" className="form-control datefield" id="start"/>
                 </div>
                 <div className="col-6">
                     <label htmlFor="end">End:</label>

@@ -82,7 +82,6 @@ def get_personal_abtestids():
 @app.route("/api/abtest/statistics/<int:abtest_id>/<stat>")
 @cross_origin(supports_credentials=True)
 def get_stat(abtest_id, stat):
-    print("getstat")
     username = session.get("user_id")
 
     if not username:
@@ -163,7 +162,13 @@ def get_stat(abtest_id, stat):
         return {"abtest_summary": {"abtest_id": abtest_summary[0], "top_k": abtest_summary[1], "stepsize": abtest_summary[2], "start": abtest_summary[3],
                 "end": abtest_summary[4], "dataset_name": abtest_summary[5], "created_on": abtest_summary[6], "created_by": abtest_summary[7]}, "algorithms": algorithms}
 
-    if stat == "active_users_over_time" or stat == "purchases_over_time":
+    if stat == "active_users_over_time":
+        datetimes = database_connection.session.execute(
+            f"SELECT datetime,COUNT(DISTINCT(customer_id)) FROM statistics join purchase on timestamp = datetime WHERE abtest_id = {abtest_id} group by datetime").fetchall()
+        XFnY = [ [ str(r[0]), r[1] ] for r in datetimes]
+        XFnY.insert(0,['Date', 'Users'])
+        return {'graphdata': XFnY}
+    if stat == "purchases_over_time":
         datetimes = database_connection.session.execute(
             f"SELECT DISTINCT datetime FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
         XFnY = [['Date', 'Users'] ]
@@ -172,7 +177,7 @@ def get_stat(abtest_id, stat):
             if stat == "active_users_over_time":
                 countz = database_connection.session.execute(
                     f"SELECT COUNT(DISTINCT(customer_id)) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
-            elif stat == "purchases":
+            elif stat == "purchases_over_time":
                 countz = database_connection.session.execute(
                     f"SELECT COUNT(customer_id) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
             XFnY.append([str(datetimes[i][0]), countz[0][0]])
