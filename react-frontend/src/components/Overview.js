@@ -29,7 +29,6 @@ function Overview({input_algorithms}) {
                         <td>{input_algorithms[val].Normalize}</td>
                     </tr>
                 )
-
             }):<Spinner animation="border" variant="danger"/> }
         </tbody>
     </table>);
