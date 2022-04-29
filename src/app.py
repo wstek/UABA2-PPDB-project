@@ -139,6 +139,7 @@ def get_stat(abtest_id, stat):
                     y_stat[x][users_data[y]]["history"] = history
                     y_stat[x][users_data[y]]["algorithms"][algorithms_data[z][
                         0]] = k_recommendations
+        database_connection.session.commit()
         return {"abtest_simulation": {"x": date_data, "y": y_stat}}
 
     if stat == "abtest_summary":
