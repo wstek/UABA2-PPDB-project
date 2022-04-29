@@ -12,9 +12,7 @@ function Home({setPage}) { // begin van de app wow
 
                 <div className="col-12 col-xm-12 col-md-6 col-lg-6 col-xl-6 align-items-center">
                     <div className="row text-center align-items-center">
-                        <div>
-                            <img src={mountain} className="image1" alt="Italian Trulli"/>
-                        </div>
+                        <img src={mountain} className="img-fluid" alt="Italian Trulli"/>
                     </div>
                     <div className="row text-center align-items-center mt-2">
                         <div className="body-header">About</div>
@@ -52,9 +50,7 @@ function Home({setPage}) { // begin van de app wow
                     </div>
 
                     <div className="row text-center align-items-center mt-4">
-                        <div>
-                            <img src={tree} className="image1" alt="Italian Trulli"/>
-                        </div>
+                            <img src={tree} className="img-fluid" alt="Italian Trulli"/>
                     </div>
                 </div>
             </div>
