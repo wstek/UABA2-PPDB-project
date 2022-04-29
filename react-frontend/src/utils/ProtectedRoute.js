@@ -6,22 +6,9 @@ function sleep(ms) {
 }
 
 
-const ProtectedRoute = ({Component: component, setAdmin, setAuthed, auth, ...rest}) => {
-    const [isLoading, setIsLoading] = useState(true);
+const ProtectedRoute = ({Component: component, isLoading, setAdmin, setAuthed, auth, ...rest}) => {
 
-    useEffect(() => {
-        setIsLoading(true);
-        fetch('/api/me', {
-            method: 'GET',
-            credentials: 'include'
-        }).then(res => {
-            setAuthed(res.ok);
-            return res.json()
-        }).then(data => {
-            setAdmin(data.admin)
-            setIsLoading(false);
-        })
-    }, []);
+    // useEffect(() => handleLoggedIn(setAdmin,setAuthed,setIsLoading), []);
     if (isLoading) {
         return (
             <p>Loading...</p>
