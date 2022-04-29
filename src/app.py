@@ -165,19 +165,17 @@ def get_stat(abtest_id, stat):
     if stat == "active_users_over_time" or stat == "purchases_over_time":
         datetimes = database_connection.session.execute(
             f"SELECT DISTINCT datetime FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
-        database_connection.session.commit()
-        user_counts = []
+        XFnY = [['Date', 'Users'] ]
+        countz: list = []
         for i in range(len(datetimes)):
             if stat == "active_users_over_time":
                 countz = database_connection.session.execute(
                     f"SELECT COUNT(DISTINCT(customer_id)) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
-            else:
+            elif stat == "purchases":
                 countz = database_connection.session.execute(
                     f"SELECT COUNT(customer_id) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
-            database_connection.session.commit()
-            user_counts.append(countz[0][0])
-            datetimes[i] = str(datetimes[i][0])
-        return {"x": datetimes, "y": user_counts}
+            XFnY.append([str(datetimes[i][0]), countz[0][0]])
+        return {'graphdata': XFnY}
 
     if stat == "CTR_over_time":
         pass
