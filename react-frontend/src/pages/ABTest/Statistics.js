@@ -83,7 +83,7 @@ function Statistics() {
                 </div>
                 <div className="row text-center align-content-center justify-content-center">
                     <div className="col-12 col-lg-6 col-xl-5 col-xxl-6">
-                    <h4>Purchases</h4>
+                    <h4>Active users</h4>
                     <LineChart chart_id={1} title="Active Users" XFnY={ activeUsersOverTime }/>
                 </div>
                 </div>

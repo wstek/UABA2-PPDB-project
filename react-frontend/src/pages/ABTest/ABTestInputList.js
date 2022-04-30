@@ -117,7 +117,7 @@ const ABTestInputList = ({abs_algorithms}) => {
                 // }
                 // history.go(-1);
                 // setError(null);
-                history.push('/dashboard');
+                history.push('/simulation');
             })
                 .catch((err) => {
                     setIsPending(false);

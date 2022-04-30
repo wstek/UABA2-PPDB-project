@@ -15,6 +15,7 @@ import Dashboard from './pages/Account/Dashboard';
 import ProtectedRoute from './utils/ProtectedRoute';
 import Statistics from "./pages/ABTest/Statistics";
 import {handleLoggedIn} from './utils/handleLoggedIn'
+import Simulation from "./pages/Account/Simulation";
 
 function App() {
 
@@ -62,7 +63,7 @@ function App() {
                         <Route exact path="/">
                             <Home/>
                         </Route>
-                        <ProtectedRoute component={Account} setAdmin={setAdmin} setAuthed={setAuthed} auth={auth} exact
+                        <ProtectedRoute component={Account}  setAdmin={setAdmin} setAuthed={setAuthed} auth={auth} exact
                                         path="/account"/>
                         <ProtectedRoute component={ABTestInput} setAdmin={setAdmin} setAuthed={setAuthed} auth={auth}
                                         exact path="/abtest/setup"/>
@@ -82,6 +83,7 @@ function App() {
                             <Contact/>
                         </Route>
                         <Route component={Dashboard} setAuthed={setAuthed} setAdmin={setAdmin} exact path="/dashboard"/>
+                        <Route component={Simulation} setAuthed={setAuthed} setAdmin={setAdmin} exact path="/simulation"/>
                         <Route component={Statistics} exact path="/statistics"/>
                         <Route component={UploadDataset} exact path="/dataset/upload"/>
                         <Route path="*">
