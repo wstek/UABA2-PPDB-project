@@ -1,6 +1,6 @@
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 // import {BrowserRouter as useHistory} from 'react-router-dom';
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Navbar from './components/Navbar';
 import UploadDataset from './pages/Dataset/UploadDataset';
 import Footer from './components/Footer';
@@ -14,11 +14,16 @@ import ABTestInput from "./pages/ABTest/ABTestInput";
 import Dashboard from './pages/Account/Dashboard';
 import ProtectedRoute from './utils/ProtectedRoute';
 import Statistics from "./pages/ABTest/Statistics";
+import {handleLoggedIn} from './utils/handleLoggedIn'
 
 function App() {
 
     const [admin, setAdmin] = useState(false);
     const [auth, setAuthed] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => handleLoggedIn(setAdmin, setAuthed, setIsLoading),[])
+
     // const history = useHistory();
 
     // useEffect(() => {
@@ -63,9 +68,9 @@ function App() {
                                         exact path="/abtest/setup"/>
                         <Route exact path="/sign_in"
                                render={(props) => <SignIn setAdmin={setAdmin} setAuthed={setAuthed} {...props} />}/>
-                        <ProtectedRoute component={Account} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin} exact
+                        <ProtectedRoute component={Account} auth={auth} isLoading={isLoading} setAuthed={setAuthed} setAdmin={setAdmin} exact
                                         path="/account"/>
-                        <ProtectedRoute component={ABTestInput} auth={auth} setAuthed={setAuthed} setAdmin={setAdmin}
+                        <ProtectedRoute component={ABTestInput} auth={auth} isLoading={isLoading} setAuthed={setAuthed} setAdmin={setAdmin}
                                         exact path="/abtest/setup"/>
                         <Route exact path="/sign_in"
                                render={(props) => <SignIn admin={admin} auth={auth} setAuthed={setAuthed}
