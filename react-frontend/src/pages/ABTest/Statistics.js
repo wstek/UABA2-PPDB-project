@@ -12,9 +12,16 @@ function Statistics() {
     const [input_algorithms, setInputAlgorithms] = useState(null);
     // The ABTests of the current user
     const [personal_abtests, setPersonalABTests] = useState(null);
-    // The Purchases of the abtest
+    // The Active users of the abtest
     const [activeUsersOverTime, setActiveUsersOverTime] = useState(null);
-
+    // The Purchases of the abtest
+    const [purchases, setPurchases] = useState(null);
+    // The Purchases of the abtest
+    const [clickThroughRate, setClickThroughRate] = useState(null);
+    // The Purchases of the abtest
+    const [attributionRate, setAttributionRate] = useState(null);
+    // The Purchases of the abtest
+    const [revenuePerUser, setRevenuePerUser] = useState(null);
 
     //todo garbage remove
     // popularity retrain look back
@@ -59,8 +66,20 @@ function Statistics() {
         }).catch()
     }
 
+    function fetchInputPurchasesOverTime() {
+        if (!selected_abtest) return
+        fetch('/api/abtest/statistics/' + selected_abtest + '/purchases_over_time', {
+            method: 'GET',
+            credentials: 'include'
+        }).then(res => {
+            return res.json()
+        }).then(data => {
+            setPurchases(data)
+        }).catch()
+    }
+
     useEffect(fetchCurrentUserABTestIDs, [],);
-    useEffect(() => {fetchInputParameters(); fetchInputActiveUsersOverTime()}, [selected_abtest],);
+    useEffect(() => {fetchInputParameters(); fetchInputActiveUsersOverTime(); fetchInputPurchasesOverTime()}, [selected_abtest],);
 
 
     const algorithms = algoritmdict.map(algorithmentry => {
@@ -87,11 +106,10 @@ function Statistics() {
                     <LineChart chart_id={1} title="Active Users" XFnY={ activeUsersOverTime }/>
                 </div>
                 </div>
-                {/*<div className="row text-center mt-5 align-content-center justify-content-center">*/}
-                {/*    <h4>Active Users</h4>*/}
-                {/*    <LineChart chart_id={2} title={"Purchases"} google={google} algorithms={algorithms}*/}
-                {/*               matrix={matrix}/>*/}
-                {/*</div>*/}
+                <div className="row text-center mt-5 align-content-center justify-content-center">
+                    <h4>Purchases</h4>
+                    <LineChart chart_id={2} title={"Purchases"} XFnY={ purchases }/>
+                </div>
                 {/*<div className="row text-center mt-5 align-content-center justify-content-center">*/}
                 {/*    <h4>Click Through Rate</h4>*/}
                 {/*    <LineChart chart_id={3} title={"CTR"} google={google} algorithms={algorithms} matrix={matrix}/>*/}
