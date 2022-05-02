@@ -7,7 +7,6 @@ export function fetchData(api, fnt, abortCont = new AbortController()) {
         return res.json()
 
     }).then(data => {
-        data.abortController = abortCont
         fnt(data)
     }).catch(err => {
             if (err.name === 'AbortError') {
