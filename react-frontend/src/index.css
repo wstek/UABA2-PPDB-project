@@ -203,7 +203,9 @@ body {
 /*    width: max-content;*/
 /*    !*height: auto;*!*/
 /*}*/
-
+.vh-2{
+    height: 2vh;
+}
 
 /*Account*/
 
