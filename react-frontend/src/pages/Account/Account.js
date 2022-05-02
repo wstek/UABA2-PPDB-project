@@ -2,7 +2,7 @@ import "../../index.css"
 import {Link, useHistory} from "react-router-dom"
 import React, {useState} from "react";
 
-function Account({...props}) {
+function Account({ ...props }) {
     const history = useHistory();
     const [isPending, setIsPending] = useState(false);
     const logout = () => {

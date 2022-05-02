@@ -228,13 +228,13 @@ class ABTestSimulation(threading.Thread):
 
                         # TODO: print all topk recommendations for all users?
 
-                        # for cc in range(len(recommendations)):
-                        #     self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
-                        #         "customer_id": index2item_id[cc], "statistics_id": statistics_id}).fetchall()
-                        #     for vv in range(k):
-                        #         self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
-                        #             "recommendation_id": vv+1, "customer_id": index2item_id[cc], "statistics_id": statistics_id, "dataset_name": "H", "article_id": recommendations[cc][vv]})
-                        # self.database_connection.session.commit()
+                        for cc in range(len(recommendations)):
+                            self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
+                                "customer_id": index2item_id[cc], "statistics_id": statistics_id}).fetchall()
+                            for vv in range(k):
+                                self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
+                                    "recommendation_id": vv+1, "customer_id": index2item_id[cc], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": recommendations[cc][vv]})
+                        self.database_connection.session.commit()
                         # data_per_user_over_time_statistics['customer_id'][index2item_id[cc]][-1].algorithm_data.append(KNN_DATA(id=idx, topk=recommendations[cc], history=histories[cc]))
 
                         # top_k_over_time_statistics[idx].append(copy.deepcopy(top_k_over_time_statistics[idx][-1]))
@@ -259,13 +259,13 @@ class ABTestSimulation(threading.Thread):
                         remove_tuples(top_k_random)
 
                         # random moet gedaan worden in loop om unieke topk voor elke use te maken maar is trager
-                        # for i in range(len(active_users)):
-                        #     self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
-                        #         "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
-                        #     for vv in range(k):
-                        #         self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
-                        #             "recommendation_id": vv+1, "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": top_k_random[vv]})
-                        # self.database_connection.session.commit()
+                        for i in range(len(active_users)):
+                            self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
+                                "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
+                            for vv in range(k):
+                                self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
+                                    "recommendation_id": vv+1, "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": top_k_random[vv]})
+                        self.database_connection.session.commit()
 
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(RANDOM_DATA(id=idx, topk=top_k_random, name="ItemKNN")) #DEEP COPY????????????
 
@@ -332,12 +332,13 @@ class ABTestSimulation(threading.Thread):
                         self.temp_topk = f"current_day: {current_date}, algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}): {top_k_items}"
                         self.id2 += 1
 
-                        # for i in range(len(active_users)):
-                        #     self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
-                        #         "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
-                        #     for vv in range(k):
-                        #         self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
-                        #             "recommendation_id": vv+1, "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": top_k_random[vv]})
+                        for i in range(len(active_users)):
+                            self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
+                                "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
+                            for vv in range(k):
+                                self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
+                                    "recommendation_id": vv+1, "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": top_k_random[vv]})
+                        self.database_connection.session.commit()
 
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(
                         #     RECENCY_DATA(id=idx, topk=copy.deepcopy(top_k_items)))
@@ -358,13 +359,13 @@ class ABTestSimulation(threading.Thread):
                             f"SELECT SUBQUERY.article_id FROM (SELECT article_id FROM article ORDER BY RANDOM() LIMIT {k}) as SUBQUERY ORDER BY article_id ASC").fetchall()
                         remove_tuples(top_k_random)
 
-                        # for i in range(len(active_users)):
-                        #     self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
-                        #         "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
-                        #     for vv in range(k):
-                        #         self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
-                        #             "recommendation_id": vv+1, "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": top_k_random[vv]})
-
+                        for i in range(len(active_users)):
+                            self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
+                                "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
+                            for vv in range(k):
+                                self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
+                                    "recommendation_id": vv+1, "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": top_k_random[vv]})
+                        self.database_connection.session.commit()
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(
                         #     RANDOM_DATA(id=idx, topk=copy.deepcopy(top_k_random), name="Recency"))
                         # top_k_over_time_statistics[idx].append(top_k_random)
@@ -433,13 +434,13 @@ class ABTestSimulation(threading.Thread):
                         self.temp_topk = f"algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}): {top_k_items}"
                         self.id2 += 1
 
-                        # for i in range(len(active_users)):
-                        #     self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
-                        #         "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
-                        #     for vv in range(k):
-                        #         self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
-                        #             "recommendation_id": vv+1, "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": top_k_random[vv]})
-
+                        for i in range(len(active_users)):
+                            self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
+                                "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
+                            for vv in range(k):
+                                self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
+                                    "recommendation_id": vv+1, "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": top_k_random[vv]})
+                        self.database_connection.session.commit()
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(
                         #     POPULARITY_DATA(id=idx, topk=copy.deepcopy(top_k_items)))
 
@@ -459,12 +460,13 @@ class ABTestSimulation(threading.Thread):
                             f"SELECT SUBQUERY.article_id FROM (SELECT article_id FROM article ORDER BY RANDOM() LIMIT {k}) as SUBQUERY ORDER BY article_id ASC").fetchall()
                         remove_tuples(top_k_random)
 
-                        # for i in range(len(active_users)):
-                        #     self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
-                        #         "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
-                        #     for vv in range(k):
-                        #         self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
-                        #             "recommendation_id": vv+1, "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": top_k_random[vv]})
+                        for i in range(len(active_users)):
+                            self.database_connection.session.execute("INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)", {
+                                "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
+                            for vv in range(k):
+                                self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
+                                    "recommendation_id": vv+1, "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": top_k_random[vv]})
+                        self.database_connection.session.commit()
 
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(
                         #     RANDOM_DATA(id=idx, topk=copy.deepcopy(top_k_random), name="Popularity"))

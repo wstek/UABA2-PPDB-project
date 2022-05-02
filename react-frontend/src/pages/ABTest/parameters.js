@@ -36,4 +36,3 @@ export const Normalize = (id) => {
 export const RetrainInterval = (id) => {
     return RealNumberField("RetrainInterval" + id, "Retrain every Y days:", "Enter Y");
 };
-
