@@ -13,6 +13,7 @@ from Logger import Logger
 from config import configDatabase
 
 
+
 class DatabaseConnection:
     def __init__(self):
         self.engine = None
@@ -189,6 +190,8 @@ class DatabaseConnection:
         cursor.copy_from(output, "purchase", sep='\t', null='', columns=list(df_purchase_data_table))
 
         return True
+
+
 
 
 if __name__ == '__main__':

@@ -342,6 +342,9 @@ def logIpAddress():
                request.environ.get('HTTP_X_REAL_IP', request.remote_addr), True)
     return "200"
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    database_connection.session.remove()
 
 # RUN DEV SERVER
 if __name__ == "__main__":
