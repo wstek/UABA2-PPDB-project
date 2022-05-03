@@ -1,14 +1,14 @@
-import copy
-from pydoc import cli
 import threading
-import time
 import pandas as pd
-from DatabaseConnection import DatabaseConnection
 from iknn import ItemKNNIterative
-from iknn import ItemKNN
 import random
 import numpy
 from psycopg2.extensions import register_adapter, AsIs
+# import copy
+# from pydoc import cli
+# import time
+# from DatabaseConnection import DatabaseConnection
+# from iknn import ItemKNN
 
 
 def addapt_numpy_float64(numpy_float64):
@@ -126,7 +126,7 @@ class ABTestSimulation(threading.Thread):
 
         # SIMULATION LOOP MAIN
         for n_day in range(0, int(dayz)+1, int(self.abtest["stepsize"])):
-            print(str(n_day) + "/" + str(int(dayz) + 1))
+            print(str(n_day) + "/" + str(int(dayz)))
             if n_day:
                 dt_current_date = dt_current_date + \
                     pd.DateOffset(days=int(self.abtest["stepsize"]))
@@ -383,6 +383,7 @@ class ABTestSimulation(threading.Thread):
                         #     RECENCY_DATA(id=idx, topk=copy.deepcopy(top_k_items)))
 
                     else:
+                        clicks = 0
                         top_k_random = self.generateRandomTopK(
                             all_unique_item_ids, k)
 

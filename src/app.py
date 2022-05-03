@@ -189,7 +189,7 @@ def get_stat(abtest_id, stat):
     if stat == "purchases_over_time":
         datetimes = database_connection.session.execute(
             f"SELECT DISTINCT datetime FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
-        XFnY = [['Date', 'Users']]
+        XFnY = [['Date', 'Purchases']]
         for i in range(len(datetimes)):
             countz = database_connection.session.execute(
                 f"SELECT COUNT(customer_id) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
@@ -197,7 +197,34 @@ def get_stat(abtest_id, stat):
         return {'graphdata': XFnY}
 
     if stat == "CTR_over_time":
-        pass
+        XFnY = []
+        # ['Date', 'ClickThroughRate']
+        datetimes = database_connection.session.execute(
+            f"SELECT datetime, algorithm_id,parametervalue FROM statistics NATURAL JOIN \"DynamicStepsizeVar\" NATURAL JOIN  algorithm WHERE abtest_id = {abtest_id} AND paramterername = 'CTR' ORDER BY datetime").fetchall()
+        datetime = None
+        Y = []
+        legend = ["Date"]
+        for index in range(len(datetimes)):
+            entry = datetimes[index]
+            algorithm_id = entry[1]
+            if str(algorithm_id) not in legend:
+                legend.append(str(algorithm_id))
+            else:
+                XFnY.append(legend)
+                break
+        for index in range(len(datetimes)):
+            entry = datetimes[index]
+            value = float(entry[2])
+            if datetime != entry[0]:
+                if len(Y):
+                    XFnY.append(Y)
+                datetime = entry[0]
+                Y = [str(datetime)]
+            Y.append(value)
+        XFnY.append(Y)
+        return {'graphdata': XFnY}
+
+
 
 
 # @ app.before_request

@@ -35,7 +35,7 @@ export default function ABTestPicker({setSelectedABTest, personal_abtests,select
         <>
             <h1>Select AB-Test</h1>
             <div>
-                <select id="abtestIds" defaultValue={0} value={value} name="abtestIds" className="custom-select bg-purple form-select-lg" onChange={handleChange}>
+                <select id="abtestIds" value={value} name="abtestIds" className="custom-select bg-purple form-select-lg" onChange={handleChange}>
                     <option disabled value={0}> -- select an option -- </option>
                     {personal_idtests_id_components.length && personal_idtests_id_components}
                 </select>

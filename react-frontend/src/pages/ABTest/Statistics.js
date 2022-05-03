@@ -56,6 +56,10 @@ function Statistics() {
         setPurchases(null)
         fetchData('/api/abtest/statistics/' + selected_abtest + '/purchases_over_time', setPurchases, abortCont)
     }
+    function fetchCTROverTime(abortCont) {
+        setClickThroughRate(null)
+        fetchData('/api/abtest/statistics/' + selected_abtest + '/CTR_over_time', setClickThroughRate, abortCont)
+    }
 
     useEffect(fetchCurrentUserABTestIDs, [],);
 
@@ -66,6 +70,7 @@ function Statistics() {
             fetchInputParameters(abortCont);
             fetchInputActiveUsersOverTime(abortCont);
             fetchInputPurchasesOverTime(abortCont)
+            fetchCTROverTime(abortCont)
         }
 
         return () => abortCont.abort();
@@ -122,6 +127,14 @@ function Statistics() {
                     <div className="col-12 col-lg-6 col-xl-6 col-xxl-6">
                         <LineChart chart_id={2} title={"Purchases"} XFnY={purchases}/>
                     </div>
+                </div>
+                <div className="row text-center align-content-center justify-content-center">
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 pl-">
+                        <LineChart chart_id={3} title="Click Through Rate" XFnY={clickThroughRate}/>
+                    </div>
+                    {/*<div className="col-12 col-lg-6 col-xl-6 col-xxl-6">*/}
+                    {/*    <LineChart chart_id={2} title={"Purchases"} XFnY={purchases}/>*/}
+                    {/*</div>*/}
                 </div>
 
                 {/*<div className="row text-center mt-5 align-content-center justify-content-center">*/}
