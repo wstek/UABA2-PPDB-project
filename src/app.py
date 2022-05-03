@@ -1,12 +1,14 @@
 import base64
-import base64
+import os
 from datetime import timedelta
 
 import redis
+import flask
 from flask import Flask, request, session
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_session import Session
+from werkzeug.utils import secure_filename
 
 from ABTestSimulation import ABTestSimulation, remove_tuples
 from DatabaseConnection import DatabaseConnection
@@ -26,6 +28,11 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 # app.config['SQLALCHEMY_ECHO'] = True
 # app.config['SESSION_PERMANENT'] = False
 # app.config['SESSION_USE_SIGNER'] = True
+
+# 2 gigabyte file upload limit
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 2000
+app.config['UPLOAD_EXTENSIONS'] = ['.csv']
+app.config['UPLOAD_PATH'] = '../uploaded-files'
 
 bcrypt = Bcrypt(app)
 server_session = Session(app)
@@ -314,14 +321,20 @@ def start_simulation():
     return "200"
 
 
-@app.route("/api/read_csv", methods=["POST"])
+@app.route("/api/uploadCSV", methods=["POST"])
 @cross_origin(supports_credentials=True)
-def read_csv():
-    datasets = request.json
-    for i in range(len(datasets)):
-        base64_message = base64.b64decode(
-            datasets[i]['file']).decode('utf-8').rstrip()
-        print(base64_message)
+def uploadCSV():
+    for uploaded_file in request.files.getlist('files'):
+        filename = uploaded_file.filename
+        if filename != '':
+            file_ext = os.path.splitext(filename)[1]
+            if file_ext not in app.config['UPLOAD_EXTENSIONS']:
+                flask.abort(400)
+
+            # todo save file with userid
+            if not os.path.exists(app.config['UPLOAD_PATH']):
+                os.makedirs(app.config['UPLOAD_PATH'])
+            uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
     return "200"
 
 

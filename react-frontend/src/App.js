@@ -2,7 +2,7 @@ import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 // import {BrowserRouter as useHistory} from 'react-router-dom';
 import React, {useEffect, useState} from "react";
 import Navbar from './components/Navbar';
-import UploadDataset from './pages/Dataset/UploadDataset';
+import DatasetUpload from './pages/Dataset/DatasetUpload';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
@@ -60,7 +60,7 @@ function App() {
                 <div className="content">
                     <Switch>
                         <Route exact path="/">
-                            <Home/>
+                            <DatasetUpload/>
                         </Route>
                         <ProtectedRoute component={Account} setAdmin={setAdmin} isLoading={isLoading}
                                         setAuthed={setAuthed} auth={auth} exact
@@ -91,7 +91,7 @@ function App() {
                                         setAdmin={setAdmin} exact path="/simulation"/>
                         <ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth} exact
                                         path="/statistics"/>
-                        <ProtectedRoute component={UploadDataset} isLoading={isLoading} auth={auth} exact
+                        <ProtectedRoute component={DatasetUpload} isLoading={isLoading} auth={auth} exact
                                         path="/dataset/upload"/>
                         <Route path="*">
                             <NotFound/>
