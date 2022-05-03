@@ -61,8 +61,16 @@ body {
 }
 
 
-.button-purple:hover {
+.orange-hover:hover {
     background: #cc4f0e;
+    transition: all 0.3s ease;
+}
+.red-hover:hover {
+    background: #e80f0f;
+    transition: all 0.3s ease;
+}
+.green-hover:hover {
+    background: #0bcc62;
     transition: all 0.3s ease;
 }
 
@@ -266,8 +274,6 @@ body {
     border: none;
     outline: none;
     border-radius: 15px;
-    background: rgba(119, 52, 231);
-    color: #fff;
     left: 5%;
     top: 45%;
 }
@@ -284,21 +290,10 @@ body {
     border: none;
     outline: none;
     border-radius: 15px;
-    background: rgba(119, 52, 231);
-    color: #fff;
     left: 5%;
     top: 55%;
 }
 
-.Change_Info:hover {
-    background: #0f0c0b;
-    transition: all 0.3s ease;
-}
-
-.Log_Out:hover {
-    background: #0f0c0b;
-    transition: all 0.3s ease;
-}
 
 
 /*

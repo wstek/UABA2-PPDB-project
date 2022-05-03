@@ -79,6 +79,24 @@ def get_personal_abtestids():
     personal_abtestids = [r[0] for r in personal_abtestids]
     return {"personal_abtestids": personal_abtestids}
 
+@app.route("/api/abtest/delete/<int:abtest_id>/", methods=["DELETE"])
+@cross_origin(supports_credentials=True)
+def del_abtest(abtest_id):
+    username = session.get("user_id")
+    if not username:
+        return {"error": "unauthorized"}, 401
+    owned = database_connection.session.execute(
+        f"select abtest_id from \"ABTest\" where created_by = '{username}' and abtest_id = '{abtest_id}';").fetchall()
+
+    database_connection.session.execute(
+        f"delete from \"ABTest\" where created_by = '{username}' and abtest_id = '{abtest_id}';")
+    database_connection.session.commit()
+    return "200"
+
+
+
+
+
 @app.route("/api/abtest/statistics/<int:abtest_id>/<stat>")
 @cross_origin(supports_credentials=True)
 def get_stat(abtest_id, stat):
