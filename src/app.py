@@ -164,7 +164,7 @@ def get_stat(abtest_id, stat):
 
     if stat == "active_users_over_time":
         datetimes = database_connection.session.execute(
-            f"SELECT datetime,COUNT(DISTINCT(customer_id)) FROM statistics join purchase on timestamp = datetime WHERE abtest_id = {abtest_id} group by datetime").fetchall()
+            f"SELECT datetime,COUNT(DISTINCT(customer_id)) FROM statistics natural join customer_specific WHERE abtest_id = {abtest_id} group by datetime").fetchall()
         XFnY = [ [ str(r[0]), r[1] ] for r in datetimes]
         XFnY.insert(0,['Date', 'Users'])
         return {'graphdata': XFnY}
@@ -172,13 +172,8 @@ def get_stat(abtest_id, stat):
         datetimes = database_connection.session.execute(
             f"SELECT DISTINCT datetime FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
         XFnY = [['Date', 'Users'] ]
-        countz: list = []
         for i in range(len(datetimes)):
-            if stat == "active_users_over_time":
-                countz = database_connection.session.execute(
-                    f"SELECT COUNT(DISTINCT(customer_id)) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
-            elif stat == "purchases_over_time":
-                countz = database_connection.session.execute(
+            countz = database_connection.session.execute(
                     f"SELECT COUNT(customer_id) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
             XFnY.append([str(datetimes[i][0]), countz[0][0]])
         return {'graphdata': XFnY}
