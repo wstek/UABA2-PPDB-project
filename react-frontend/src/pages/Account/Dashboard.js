@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from "react";
-import {useHistory} from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useHistory } from 'react-router-dom';
 
-const Dashboard = ({setAuthed, setAdmin}) => {
+const Dashboard = ({ setAuthed, setAdmin }) => {
     const [user, setUser] = useState("user");
     const [id, setId] = useState(-1);
     const [topk, setTopk] = useState([]);
@@ -35,7 +35,7 @@ const Dashboard = ({setAuthed, setAdmin}) => {
         const interval = setInterval(() => {
             fetch('/api/progress', {
                 method: 'GET',
-                headers: {"Content-Type": "application/json", 'Accept': 'application/json'},
+                headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
                 credentials: 'include'
             }).then((res) => res.json())
                 .then(data => {
@@ -65,7 +65,7 @@ const Dashboard = ({setAuthed, setAdmin}) => {
         fetch('/api/me', {
             method: 'GET',
             credentials: 'include',
-            headers: {"Content-Type": "application/json", 'Accept': 'application/json'}
+            headers: { "Content-Type": "application/json", 'Accept': 'application/json' }
         }).then(res => res.json())
             .then((data) => {
                 if (data.error) {
@@ -73,9 +73,9 @@ const Dashboard = ({setAuthed, setAdmin}) => {
                 }
                 setUser(data);
             }).catch((err) => {
-            setUser(null);
-            console.log(err);
-        })
+                setUser(null);
+                console.log(err);
+            })
     }
     return (
         <div>

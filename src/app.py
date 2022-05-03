@@ -66,6 +66,7 @@ def get_current_user():
                    "email": user.email_address, 'admin': admin is not None}
     return returnValue
 
+
 @app.route("/api/abtest/statistics/")
 @cross_origin(supports_credentials=True)
 def get_personal_abtestids():
@@ -97,6 +98,7 @@ def del_abtest(abtest_id):
 
 
 
+
 @app.route("/api/abtest/statistics/<int:abtest_id>/<stat>")
 @cross_origin(supports_credentials=True)
 def get_stat(abtest_id, stat):
@@ -105,10 +107,10 @@ def get_stat(abtest_id, stat):
     if not username:
         return {"error": "unauthorized"}, 401
     if stat == "algorithm_information":
-        algorithm_id : int
-        algorithm_name : str
-        parametername : str
-        parametervalue : any
+        algorithm_id: int
+        algorithm_name: str
+        parametername: str
+        parametervalue: any
 
         # alle parameter entries
         # result : list (algorithm_id, algorithm_name, parametername, value)
@@ -124,7 +126,7 @@ def get_stat(abtest_id, stat):
             # if algorithm id was not present in the dictionary
             if not algorithm_id in algorithms.keys():
                 # add the algorithm in the dictionarry and initialize name
-                algorithms[algorithm_id] = { 'name': algorithmname }
+                algorithms[algorithm_id] = {'name': algorithmname}
             algorithms[algorithm_id][parametername] = parametervalue
         return algorithms
 
@@ -183,16 +185,16 @@ def get_stat(abtest_id, stat):
     if stat == "active_users_over_time":
         datetimes = database_connection.session.execute(
             f"SELECT datetime,COUNT(DISTINCT(customer_id)) FROM statistics natural join customer_specific WHERE abtest_id = {abtest_id} group by datetime").fetchall()
-        XFnY = [ [ str(r[0]), r[1] ] for r in datetimes]
-        XFnY.insert(0,['Date', 'Users'])
+        XFnY = [[str(r[0]), r[1]] for r in datetimes]
+        XFnY.insert(0, ['Date', 'Users'])
         return {'graphdata': XFnY}
     if stat == "purchases_over_time":
         datetimes = database_connection.session.execute(
             f"SELECT DISTINCT datetime FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
-        XFnY = [['Date', 'Users'] ]
+        XFnY = [['Date', 'Users']]
         for i in range(len(datetimes)):
             countz = database_connection.session.execute(
-                    f"SELECT COUNT(customer_id) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
+                f"SELECT COUNT(customer_id) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
             XFnY.append([str(datetimes[i][0]), countz[0][0]])
         return {'graphdata': XFnY}
 
@@ -355,9 +357,11 @@ def logIpAddress():
                request.environ.get('HTTP_X_REAL_IP', request.remote_addr), True)
     return "200"
 
+
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     database_connection.session.remove()
+
 
 # RUN DEV SERVER
 if __name__ == "__main__":
