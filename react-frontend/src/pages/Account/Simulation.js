@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {useHistory} from 'react-router-dom';
 
-const Dashboard = ({setAuthed, setAdmin}) => {
+const Simulation = ({setAuthed, setAdmin}) => {
     const [user, setUser] = useState("user");
     const [id, setId] = useState(-1);
     const [topk, setTopk] = useState([]);
@@ -79,7 +79,7 @@ const Dashboard = ({setAuthed, setAdmin}) => {
     }
     return (
         <div>
-            <h3>Welcome</h3>
+            <h3>Simulation Started</h3>
             <button onClick={handlea}>check</button>
             {done && <div>
                 {handlea}
@@ -96,4 +96,4 @@ const Dashboard = ({setAuthed, setAdmin}) => {
     );
 }
 
-export default Dashboard;
+export default Simulation;

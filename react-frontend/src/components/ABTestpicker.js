@@ -1,26 +1,33 @@
 import {useEffect, useState} from 'react';
+import {PurpleSpinner} from "./PurpleSpinner"
 
 export default function ABTestPicker({setSelectedABTest, personal_abtests}) {
     const [personal_idtests_id_components, setPersonalABTestsElements] = useState([])
 
+
+
+
     function personalABTests() {
-        let temp_personal_idtests_id_components = []
-        let id
-        for (let ab_test_id in personal_abtests) {
-            id = personal_abtests[ab_test_id]
-            temp_personal_idtests_id_components.push(
-                <option value={id} key={id}>{id}</option>
-            )
-            setPersonalABTestsElements(temp_personal_idtests_id_components)
+        if (personal_abtests) {
+            let ids = personal_abtests.personal_abtestids
+            let temp_personal_idtests_id_components = []
+            let id
+            for (let ab_test_id in ids) {
+                id = ids[ab_test_id]
+                temp_personal_idtests_id_components.push(
+                    <option value={id} key={id}>{id}</option>
+                )
+                setPersonalABTestsElements(temp_personal_idtests_id_components)
+            }
         }
     }
+    useEffect(personalABTests, [personal_abtests],);
 
     function handleChange(e) {
         setSelectedABTest(e.target.value)
     }
 
-    useEffect(personalABTests, [personal_abtests],);
-
+    if ( ! personal_abtests ) return <PurpleSpinner />
     return (
         <>
             <h1>Select AB-Test</h1>

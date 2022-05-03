@@ -15,14 +15,14 @@ import Dashboard from './pages/Account/Dashboard';
 import ProtectedRoute from './utils/ProtectedRoute';
 import Statistics from "./pages/ABTest/Statistics";
 import {handleLoggedIn} from './utils/handleLoggedIn'
+import Simulation from "./pages/Account/Simulation";
 
 function App() {
 
     const [admin, setAdmin] = useState(false);
     const [auth, setAuthed] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => handleLoggedIn(setAdmin, setAuthed, setIsLoading),[])
+    useEffect(() => handleLoggedIn(setAdmin, setAuthed, setIsLoading), [])
 
     // const history = useHistory();
 
@@ -62,15 +62,19 @@ function App() {
                         <Route exact path="/">
                             <Home/>
                         </Route>
-                        <ProtectedRoute component={Account} setAdmin={setAdmin} setAuthed={setAuthed} auth={auth} exact
+                        <ProtectedRoute component={Account} setAdmin={setAdmin} isLoading={isLoading}
+                                        setAuthed={setAuthed} auth={auth} exact
                                         path="/account"/>
-                        <ProtectedRoute component={ABTestInput} setAdmin={setAdmin} setAuthed={setAuthed} auth={auth}
+                        <ProtectedRoute component={ABTestInput} setAdmin={setAdmin} isLoading={isLoading}
+                                        setAuthed={setAuthed} auth={auth}
                                         exact path="/abtest/setup"/>
                         <Route exact path="/sign_in"
                                render={(props) => <SignIn setAdmin={setAdmin} setAuthed={setAuthed} {...props} />}/>
-                        <ProtectedRoute component={Account} auth={auth} isLoading={isLoading} setAuthed={setAuthed} setAdmin={setAdmin} exact
+                        <ProtectedRoute component={Account} auth={auth} isLoading={isLoading} setAuthed={setAuthed}
+                                        setAdmin={setAdmin} exact
                                         path="/account"/>
-                        <ProtectedRoute component={ABTestInput} auth={auth} isLoading={isLoading} setAuthed={setAuthed} setAdmin={setAdmin}
+                        <ProtectedRoute component={ABTestInput} auth={auth} isLoading={isLoading} setAuthed={setAuthed}
+                                        setAdmin={setAdmin}
                                         exact path="/abtest/setup"/>
                         <Route exact path="/sign_in"
                                render={(props) => <SignIn admin={admin} auth={auth} setAuthed={setAuthed}
@@ -81,9 +85,14 @@ function App() {
                         <Route exact path="/contact">
                             <Contact/>
                         </Route>
-                        <Route component={Dashboard} setAuthed={setAuthed} setAdmin={setAdmin} exact path="/dashboard"/>
-                        <Route component={Statistics} exact path="/statistics"/>
-                        <Route component={UploadDataset} exact path="/dataset/upload"/>
+                        <ProtectedRoute component={Dashboard} isLoading={isLoading} auth={auth} setAuthed={setAuthed}
+                                        setAdmin={setAdmin} exact path="/dashboard"/>
+                        <ProtectedRoute component={Simulation} isLoading={isLoading} auth={auth} setAuthed={setAuthed}
+                                        setAdmin={setAdmin} exact path="/simulation"/>
+                        <ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth} exact
+                                        path="/statistics"/>
+                        <ProtectedRoute component={UploadDataset} isLoading={isLoading} auth={auth} exact
+                                        path="/dataset/upload"/>
                         <Route path="*">
                             <NotFound/>
                         </Route>
