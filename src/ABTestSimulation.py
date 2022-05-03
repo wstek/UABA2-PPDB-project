@@ -4,42 +4,10 @@ import time
 import pandas as pd
 from iknn import ItemKNNIterative
 from iknn import ItemKNN
+import random
 
 
 # TODO als er data is achter de start date van de simulatie mogen we deze data dan gebruiken (bv voor training, etc)
-
-class RandomData:
-    def __init__(self, id, topk, name):
-        self.name = name
-        self.id = id
-        self.topk = topk
-        self.random = True
-
-
-class KNNData:
-    def __init__(self, id, topk, history):
-        self.name = 'ItemKNN'
-        self.id = id
-        self.topk = topk
-        self.history = history
-        self.random = False
-
-
-class RecencyData:
-    def __init__(self, id, topk):
-        self.name = 'Recency'
-        self.id = id
-        self.topk = topk
-        self.random = False
-
-
-class PopularityData:
-    def __init__(self, id, topk):
-        self.name = 'Popularity'
-        self.id = id
-        self.topk = topk
-        self.random = False
-
 
 class UserDataPerStep:
     def __init__(self, step_date, active):
@@ -53,8 +21,6 @@ def remove_tuples(arr):
         arr[i] = arr[i][0]
 
 
-
-
 class ABTestSimulation(threading.Thread):
     def __init__(self, database_connection, abtest):
         self.database_connection = database_connection
@@ -64,6 +30,7 @@ class ABTestSimulation(threading.Thread):
         self.abtest = abtest
         self.progress = 0
         super().__init__()
+
     def insertCustomer(self, customer_id, statistics_id, dataset_name):
         self.database_connection.session.execute(
             "INSERT INTO customer_specific(customer_id, statistics_id,dataset_name) "
@@ -90,6 +57,9 @@ class ABTestSimulation(threading.Thread):
                                       statistics_id=statistics_id, dataset_name=self.abtest["dataset_name"],
                                       article_id=recommendations[vv])
         self.database_connection.session.commit()
+
+    def generateRandomTopK(listx, items):
+        return random.random(listx, items)
 
     # TODO: OPMERKING: mogen we data gebruiken voor self.abtest["start"] voor de simulatie?
     def run(self):
@@ -123,13 +93,13 @@ class ABTestSimulation(threading.Thread):
 
         for i in range(len(self.abtest["algorithms"])):
             idx = int(self.abtest["algorithms"][i]["id"]) - \
-                  int(self.abtest["algorithms"][0]["id"])
+                int(self.abtest["algorithms"][0]["id"])
             top_k_over_time_statistics[idx] = []
 
             if self.abtest["algorithms"][i]["name"] == "ItemKNN":
                 dynamic_info_algorithms[idx] = {"dt_start_LookBackWindow": pd.to_datetime(self.abtest["start"], format='%Y-%m-%d'),
                                                 "dt_start_RetrainInterval": pd.to_datetime(self.abtest["start"], format='%Y-%m-%d'), "KNN": ItemKNNIterative(k=int(
-                        self.abtest["algorithms"][i]["parameters"]["KNearest"]), normalize=(self.abtest["algorithms"][i]["parameters"]["Normalize"] == 'True'))}
+                                                    self.abtest["algorithms"][i]["parameters"]["KNearest"]), normalize=(self.abtest["algorithms"][i]["parameters"]["Normalize"] == 'True'))}
 
             elif self.abtest["algorithms"][i]["name"] == "Recency":
                 dynamic_info_algorithms[idx] = {"dt_start_RetrainInterval": pd.to_datetime(
@@ -144,7 +114,7 @@ class ABTestSimulation(threading.Thread):
             print(str(n_day) + "/" + str(int(dayz) + 1))
             if n_day:
                 dt_current_date = dt_current_date + \
-                                  pd.DateOffset(days=int(self.abtest["stepsize"]))
+                    pd.DateOffset(days=int(self.abtest["stepsize"]))
 
             current_date = dt_current_date.strftime('%Y-%m-%d')
             # statistics per step per algorithm
@@ -176,9 +146,6 @@ class ABTestSimulation(threading.Thread):
 
             for algo in range(len(self.abtest["algorithms"])):
 
-
-                self.database_connection.session.commit()
-
                 self.database_connection.session.execute("INSERT INTO statistics(datetime, algorithm_id, abtest_id) VALUES(:datetime, :algorithm_id,\
                 :abtest_id)", {"datetime": current_date, "algorithm_id": self.abtest["algorithms"][algo]["id"], "abtest_id": self.abtest["abtest_id"]})
                 statistics_id = self.database_connection.session.execute(
@@ -186,15 +153,15 @@ class ABTestSimulation(threading.Thread):
                 self.database_connection.session.commit()
 
                 idx = int(self.abtest["algorithms"][algo]["id"]) - \
-                      int(self.abtest["algorithms"][0]["id"])
+                    int(self.abtest["algorithms"][0]["id"])
                 k = int(self.abtest["topk"])
                 start_date = dt_start.strftime('%Y-%m-%d')
 
                 if self.abtest["algorithms"][algo]["name"] == "ItemKNN":
 
                     diff = (dt_current_date-dynamic_info_algorithms[idx]["dt_start_LookBackWindow"]).days - \
-                           int(self.abtest["algorithms"][algo]
-                               ["parameters"]["LookBackWindow"])
+                        int(self.abtest["algorithms"][algo]
+                            ["parameters"]["LookBackWindow"])
                     if diff > 0:
                         dynamic_info_algorithms[idx]["dt_start_LookBackWindow"] += pd.DateOffset(
                             days=diff)
@@ -205,7 +172,7 @@ class ABTestSimulation(threading.Thread):
                         dt_prev_day = dt_current_date - pd.DateOffset(days=1)
                         prev_day = dt_prev_day.strftime('%Y-%m-%d')
                         retrain = (
-                                dt_current_date-dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
+                            dt_current_date-dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         interactions = self.database_connection.session.execute(f"SELECT customer_id, article_id from purchase WHERE \
                             CAST(timestamp as DATE) BETWEEN '{start_date}' AND '{prev_day}'").fetchall()
                         self.database_connection.session.commit()
@@ -246,7 +213,7 @@ class ABTestSimulation(threading.Thread):
                         #         del user_histories[key]
 
                         index2item_id = {index: item_id for index,
-                                                            item_id in enumerate(user_histories)}
+                                         item_id in enumerate(user_histories)}
 
                         # als training mag gebeuren maximaal window_size geleden, moeten we dit dan ook doen met de history van de users of moeten we hun history nemen van het begin
                         histories = list(user_histories.values())
@@ -258,9 +225,8 @@ class ABTestSimulation(threading.Thread):
 
                         # TODO: print all topk recommendations for all users?
                         for cc in range(len(recommendations)):
-                            self.insertRecommendations(recommendations=recommendations[cc], statistics_id=statistics_id,
+                            self.insertRecommendations(recommendations=recommendations[cc]+self.generateRandomTopK(all_unique_item_ids, k-len(recommendations[cc])), statistics_id=statistics_id,
                                                        customer_id=index2item_id[cc])
-
 
                         # data_per_user_over_time_statistics['customer_id'][index2item_id[cc]][-1].algorithm_data.append(KNN_DATA(id=idx, topk=recommendations[cc], history=histories[cc]))
 
@@ -280,19 +246,15 @@ class ABTestSimulation(threading.Thread):
                         # SELECT customer_id, array_to_string(array_agg(article_id), ' ') FROM test3 WHERE CAST(timestamp as DATE) BETWEEN '2020-01-01' and '2020-01-03' GROUP BY customer_id;
                     else:
                         print(len(active_users))
-                        top_k_random = self.database_connection.session.execute(
-                            f"SELECT SUBQUERY.article_id FROM (SELECT article_id FROM article ORDER BY RANDOM() LIMIT {k}) as SUBQUERY ORDER BY article_id ASC").fetchall()
-                        self.database_connection.session.commit()
-                        remove_tuples(top_k_random)
+                        top_k_random = self.generateRandomTopK(
+                            all_unique_item_ids, k)
+                        # top_k_random = self.database_connection.session.execute(
+                        #     f"SELECT SUBQUERY.article_id FROM (SELECT article_id FROM article ORDER BY RANDOM() LIMIT {k}) as SUBQUERY ORDER BY article_id ASC").fetchall()
 
                         # random moet gedaan worden in loop om unieke topk voor elke use te maken maar is trager
                         for i in range(len(active_users)):
                             self.insertRecommendations(recommendations=top_k_random, statistics_id=statistics_id,
-                                                   customer_id=active_users[i])
-
-
-
-
+                                                       customer_id=active_users[i])
 
                         self.database_connection.session.commit()
 
@@ -340,7 +302,7 @@ class ABTestSimulation(threading.Thread):
                         dt_prev_day = dt_current_date - pd.DateOffset(days=1)
                         prev_day = dt_prev_day.strftime('%Y-%m-%d')
                         retrain = (
-                                dt_current_date-dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
+                            dt_current_date-dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme
                             top_k = self.database_connection.session.execute(f"SELECT t.article_id, t.timestamp FROM(SELECT article_id,MIN(timestamp) AS timestamp \
@@ -362,7 +324,8 @@ class ABTestSimulation(threading.Thread):
                         self.id2 += 1
 
                         for i in range(len(active_users)):
-                            self.insertCustomer(dataset_name=self.abtest["dataset_name"], statistics_id=statistics_id,customer_id=active_users[i])
+                            self.insertCustomer(
+                                dataset_name=self.abtest["dataset_name"], statistics_id=statistics_id, customer_id=active_users[i])
                             for vv in range(k):
                                 self.insertRecommendation(recomendation_id=vv + 1, customer_id=active_users[i],
                                                           dataset_name=self.abtest["dataset_name"],
@@ -385,12 +348,12 @@ class ABTestSimulation(threading.Thread):
                         # print(f"algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}):",top_k_over_time_statistics[idx][-1])
 
                     else:
-                        top_k_random = self.database_connection.session.execute(
-                            f"SELECT SUBQUERY.article_id FROM (SELECT article_id FROM article ORDER BY RANDOM() LIMIT {k}) as SUBQUERY ORDER BY article_id ASC").fetchall()
-                        remove_tuples(top_k_random)
+                        top_k_random = self.generateRandomTopK(
+                            all_unique_item_ids, k)
 
                         for i in range(len(active_users)):
-                            self.insertCustomer(dataset_name=self.abtest["dataset_name"], statistics_id=statistics_id,customer_id=active_users[i])
+                            self.insertCustomer(
+                                dataset_name=self.abtest["dataset_name"], statistics_id=statistics_id, customer_id=active_users[i])
                             for vv in range(k):
                                 self.database_connection.session.execute("INSERT INTO recommendation(recomendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
                                     "recommendation_id": vv+1, "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": top_k_random[vv]})
@@ -429,8 +392,8 @@ class ABTestSimulation(threading.Thread):
                 elif self.abtest["algorithms"][algo]["name"] == "Popularity":
 
                     diff = (dt_current_date-dynamic_info_algorithms[idx]["dt_start_LookBackWindow"]).days - \
-                           int(self.abtest["algorithms"][algo]
-                               ["parameters"]["LookBackWindow"])
+                        int(self.abtest["algorithms"][algo]
+                            ["parameters"]["LookBackWindow"])
                     if diff > 0:
                         dynamic_info_algorithms[idx]["dt_start_LookBackWindow"] += pd.DateOffset(
                             days=diff)
@@ -441,7 +404,7 @@ class ABTestSimulation(threading.Thread):
                         dt_prev_day = dt_current_date - pd.DateOffset(days=1)
                         prev_day = dt_prev_day.strftime('%Y-%m-%d')
                         retrain = (
-                                dt_current_date-dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
+                            dt_current_date-dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme
                             top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.article_id, count(*) AS popular_items FROM \
@@ -464,9 +427,11 @@ class ABTestSimulation(threading.Thread):
                         self.id2 += 1
 
                         for i in range(len(active_users)):
-                            self.insertCustomer(customer_id=active_users[i], statistics_id=statistics_id, dataset_name=self.abtest["dataset_name"])
+                            self.insertCustomer(
+                                customer_id=active_users[i], statistics_id=statistics_id, dataset_name=self.abtest["dataset_name"])
                             for vv in range(k):
-                                self.insertRecommendation(recomendation_id=vv+1,customer_id=active_users[i],statistics_id=statistics_id,article_id=top_k_random[vv],dataset_name=self.abtest["dataset_name"])
+                                self.insertRecommendation(
+                                    recomendation_id=vv+1, customer_id=active_users[i], statistics_id=statistics_id, article_id=top_k_random[vv], dataset_name=self.abtest["dataset_name"])
                         self.database_connection.session.commit()
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(
                         #     POPULARITY_DATA(id=idx, topk=copy.deepcopy(top_k_items)))
@@ -483,16 +448,16 @@ class ABTestSimulation(threading.Thread):
                         # print(f"algorithm {algo}: top_k (BETWEEN {start_date} AND {prev_day}):",top_k_over_time_statistics[idx][-1])
 
                     else:
-                        top_k_random = self.database_connection.session.execute(
-                            f"SELECT SUBQUERY.article_id FROM (SELECT article_id FROM article ORDER BY RANDOM() LIMIT {k}) as SUBQUERY ORDER BY article_id ASC").fetchall()
-                        remove_tuples(top_k_random)
+                        top_k_random = self.generateRandomTopK(
+                            all_unique_item_ids, k)
 
                         for i in range(len(active_users)):
                             self.insertCustomer(customer_id=active_users[i], statistics_id=statistics_id,
                                                 dataset_name=self.abtest["dataset_name"])
                             for vv in range(k):
                                 self.insertRecommendation(recomendation_id=vv + 1, customer_id=active_users[i],
-                                                          statistics_id=statistics_id, article_id=top_k_random[vv],
+                                                          statistics_id=statistics_id, article_id=top_k_random[
+                                                              vv],
                                                           dataset_name=self.abtest["dataset_name"])
 
                         self.database_connection.session.commit()
