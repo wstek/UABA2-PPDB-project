@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { ColoredLine } from "../../components/ColoredLine";
+import React, {useEffect, useState} from 'react';
+import {useHistory} from 'react-router-dom';
+import {ColoredLine} from "../../components/ColoredLine";
 
-const ABTestInputList = ({ abs_algorithms }) => {
+const ABTestInputList = ({abs_algorithms}) => {
     const [id, setId] = useState(1);
     const [isPending, setIsPending] = useState(false);
     const history = useHistory();
@@ -17,7 +17,7 @@ const ABTestInputList = ({ abs_algorithms }) => {
         const inputFieldsArray = algorithm.inputFields;
         const parametersArray = algorithm.parameters;
         const temp = con_algorithms.slice();
-        var newAlgorithm = { id: id, name: algorithmname, fields: inputFieldsArray, parameters: parametersArray };
+        var newAlgorithm = {id: id, name: algorithmname, fields: inputFieldsArray, parameters: parametersArray};
         temp.push(newAlgorithm);
         setConAlgorithm(temp);
         setId(id + 1);
@@ -31,7 +31,7 @@ const ABTestInputList = ({ abs_algorithms }) => {
         resetInput()
         fetch('/api/get_datasets', {
             method: 'GET',
-            headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
+            headers: {"Content-Type": "application/json", 'Accept': 'application/json'},
             credentials: 'include'
         }).then((res) => res.json())
             .then((data) => {
@@ -56,16 +56,16 @@ const ABTestInputList = ({ abs_algorithms }) => {
             <div className="algorithms">
                 {con_algorithms.map((algorithm) => (
                     <div className="row text-center justify-content-center align-items-center mt-5 mb-2"
-                        key={"algorithm" + algorithm.id}>
+                         key={"algorithm" + algorithm.id}>
 
-                        {<ColoredLine color="purple" />}
+                        {<ColoredLine color="purple"/>}
                         {<h4>{algorithm.name} - Algorithm {algorithm.id} </h4>}
                         {algorithm.fields.map((field) => (
                             field(algorithm.id)
                         ))}
                     </div>
                 ))}
-                {<ColoredLine color="purple" />}
+                {<ColoredLine color="purple"/>}
             </div>
         )
     }
@@ -73,7 +73,7 @@ const ABTestInputList = ({ abs_algorithms }) => {
         setIsPending(true);
         const algorithms = [];
         for (let i = 0; i < con_algorithms.length; i++) {
-            const algorithmParams = { name: con_algorithms[i].name, parameters: {} };
+            const algorithmParams = {name: con_algorithms[i].name, parameters: {}};
             for (let k = 0; k < con_algorithms[i].parameters.length; k++) {
                 const val = document.getElementById(con_algorithms[i].parameters[k] + con_algorithms[i].id).value;
                 if (!val) {
@@ -94,7 +94,7 @@ const ABTestInputList = ({ abs_algorithms }) => {
         if (!start || !end || !topk || !stepsize || !dataset_name) {
             throw Error('Please fill in all the fields');
         } else {
-            const abtest_setup = { start, end, topk, stepsize, dataset_name, algorithms };
+            const abtest_setup = {start, end, topk, stepsize, dataset_name, algorithms};
             const jdata = JSON.stringify(abtest_setup);
 
             console.log(jdata)
@@ -102,7 +102,7 @@ const ABTestInputList = ({ abs_algorithms }) => {
 
             await fetch('/api/start_simulation', {
                 method: 'POST',
-                headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
+                headers: {"Content-Type": "application/json", 'Accept': 'application/json'},
                 credentials: 'include',
                 body: jdata
             }).then((res) => {
@@ -152,17 +152,17 @@ const ABTestInputList = ({ abs_algorithms }) => {
                 </div>
                 <div className="col-6">
                     <label htmlFor="end">End:</label>
-                    <input type="date" className="form-control datefield" id="end" />
+                    <input type="date" className="form-control datefield" id="end"/>
                 </div>
             </div>
             <div className="row text-center align-items-center mb-5">
                 <div className="col-4">
                     <label htmlFor="topk">Top-K:</label>
                     <input type="number" className="form-control" id="topk" min="1"
-                        placeholder="Enter top-k" />
+                           placeholder="Enter top-k"/>
                 </div>
                 <div className="col-4">
-                    <br />
+                    <br/>
                     <select className="selector form-control" id="dataset_name">
                         {datasetsx.map((d) => (
                             <option key={d} value={d}>{d}</option>
@@ -173,7 +173,7 @@ const ABTestInputList = ({ abs_algorithms }) => {
                 <div className="col-4 ">
                     <label htmlFor="stepsize">Step size:</label>
                     <input type="number" className="form-control" id="stepsize" min="1"
-                        placeholder="Enter stepsize" />
+                           placeholder="Enter stepsize"/>
                 </div>
             </div>
             {renderFields()}
@@ -189,7 +189,7 @@ const ABTestInputList = ({ abs_algorithms }) => {
             <div className="row text-center justify-content-center align-items-center mb-5">
                 <div>
                     <button id="addRow" type="submit" onClick={() => handleAddAlgorithm()}
-                        className="button-purple btn-lg">Add
+                            className="button-purple btn-lg">Add
                         Algorithm
                     </button>
                 </div>

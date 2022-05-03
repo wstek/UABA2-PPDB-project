@@ -1,14 +1,16 @@
-from abc import abstractclassmethod
 import base64
+import base64
+from datetime import timedelta
+
 import redis
-from flask import Flask, request, session, redirect, url_for
+from flask import Flask, request, session
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_session import Session
-from Logger import Logger
-from DatabaseConnection import DatabaseConnection
+
 from ABTestSimulation import ABTestSimulation, remove_tuples
-from datetime import date, timedelta
+from DatabaseConnection import DatabaseConnection
+from Logger import Logger
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "changeme"
@@ -31,7 +33,7 @@ database_connection = DatabaseConnection()
 database_connection.connect(filename="config/database.ini")
 database_connection.logVersion()
 cors = CORS(app, supports_credentials=True, resources={
-            '/*': {'origins': 'http://localhost:3000'}})  # https://team6.ua-ppdb.me/
+    '/*': {'origins': 'http://localhost:3000'}})  # https://team6.ua-ppdb.me/
 
 exporting_threads = {}
 LoggedIn = False
@@ -42,7 +44,8 @@ LoggedIn = False
 def get_data():
     global exporting_threads
     if exporting_threads:
-        return {"progress": exporting_threads[0].progress, "topk": exporting_threads[0].temp_topk, "id": exporting_threads[0].id2, "done": exporting_threads[0].done}
+        return {"progress": exporting_threads[0].progress, "topk": exporting_threads[0].temp_topk,
+                "id": exporting_threads[0].id2, "done": exporting_threads[0].done}
     else:
         return {"done": True}
 
@@ -50,7 +53,6 @@ def get_data():
 @app.route("/api/me", methods=['GET'])
 @cross_origin(supports_credentials=True)
 def get_current_user():
-
     user_id = session.get("user_id")
 
     if not user_id:
@@ -66,6 +68,7 @@ def get_current_user():
                    "email": user.email_address, 'admin': admin is not None}
     return returnValue
 
+
 @app.route("/api/abtest/statistics/")
 @cross_origin(supports_credentials=True)
 def get_personal_abtestids():
@@ -79,6 +82,7 @@ def get_personal_abtestids():
     personal_abtestids = [r[0] for r in personal_abtestids]
     return {"personal_abtestids": personal_abtestids}
 
+
 @app.route("/api/abtest/statistics/<int:abtest_id>/<stat>")
 @cross_origin(supports_credentials=True)
 def get_stat(abtest_id, stat):
@@ -87,10 +91,10 @@ def get_stat(abtest_id, stat):
     if not username:
         return {"error": "unauthorized"}, 401
     if stat == "algorithm_information":
-        algorithm_id : int
-        algorithm_name : str
-        parametername : str
-        parametervalue : any
+        algorithm_id: int
+        algorithm_name: str
+        parametername: str
+        parametervalue: any
 
         # alle parameter entries
         # result : list (algorithm_id, algorithm_name, parametername, value)
@@ -106,7 +110,7 @@ def get_stat(abtest_id, stat):
             # if algorithm id was not present in the dictionary
             if not algorithm_id in algorithms.keys():
                 # add the algorithm in the dictionarry and initialize name
-                algorithms[algorithm_id] = { 'name': algorithmname }
+                algorithms[algorithm_id] = {'name': algorithmname}
             algorithms[algorithm_id][parametername] = parametervalue
         return algorithms
 
@@ -159,19 +163,22 @@ def get_stat(abtest_id, stat):
             for k in range(len(parameters)):
                 algorithms[i][parameters[k][0]] = parameters[k][1]
 
-        return {"abtest_summary": {"abtest_id": abtest_summary[0], "top_k": abtest_summary[1], "stepsize": abtest_summary[2], "start": abtest_summary[3],
-                "end": abtest_summary[4], "dataset_name": abtest_summary[5], "created_on": abtest_summary[6], "created_by": abtest_summary[7]}, "algorithms": algorithms}
+        return {"abtest_summary": {"abtest_id": abtest_summary[0], "top_k": abtest_summary[1],
+                                   "stepsize": abtest_summary[2], "start": abtest_summary[3],
+                                   "end": abtest_summary[4], "dataset_name": abtest_summary[5],
+                                   "created_on": abtest_summary[6], "created_by": abtest_summary[7]},
+                "algorithms": algorithms}
 
     if stat == "active_users_over_time":
         datetimes = database_connection.session.execute(
             f"SELECT datetime,COUNT(DISTINCT(customer_id)) FROM statistics join purchase on timestamp = datetime WHERE abtest_id = {abtest_id} group by datetime").fetchall()
-        XFnY = [ [ str(r[0]), r[1] ] for r in datetimes]
-        XFnY.insert(0,['Date', 'Users'])
+        XFnY = [[str(r[0]), r[1]] for r in datetimes]
+        XFnY.insert(0, ['Date', 'Users'])
         return {'graphdata': XFnY}
     if stat == "purchases_over_time":
         datetimes = database_connection.session.execute(
             f"SELECT DISTINCT datetime FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
-        XFnY = [['Date', 'Users'] ]
+        XFnY = [['Date', 'Users']]
         countz: list = []
         for i in range(len(datetimes)):
             if stat == "active_users_over_time":
@@ -202,8 +209,8 @@ def get_stat(abtest_id, stat):
 #     return redirect(url_for('login_user1'))
 
 
-@ app.route("/api/register", methods=["POST"])
-@ cross_origin(supports_credentials=True)
+@app.route("/api/register", methods=["POST"])
+@cross_origin(supports_credentials=True)
 def register_user():
     global LoggedIn
     firstname = request.json["firstname"]
@@ -233,8 +240,8 @@ def register_user():
     return {"username": username, "email": email}
 
 
-@ app.route("/api/login", methods=["POST"])
-@ cross_origin(supports_credentials=True)
+@app.route("/api/login", methods=["POST"])
+@cross_origin(supports_credentials=True)
 def login_user1():
     global LoggedIn
     username = request.json["username"]
@@ -256,8 +263,8 @@ def login_user1():
     return {"username": user.username, "email": user.email_address, "admin": admin is not None}
 
 
-@ app.route("/api/start_simulation", methods=["POST", "OPTIONS"])
-@ cross_origin(supports_credentials=True)
+@app.route("/api/start_simulation", methods=["POST", "OPTIONS"])
+@cross_origin(supports_credentials=True)
 def start_simulation():
     start = request.json["start"]
     end = request.json["end"]
@@ -292,20 +299,23 @@ def start_simulation():
         database_connection.session.commit()
         algorithms[i]["id"] = algorithm_id
         for param, value in algorithms[i]["parameters"].items():
-            database_connection.session.execute("INSERT INTO parameter(parametername, algorithm_id, abtest_id, type, value) VALUES(:parametername, :algorithm_id, :abtest_id, :type, :value)",
-                                                {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "type": "string", "value": value})
+            database_connection.session.execute(
+                "INSERT INTO parameter(parametername, algorithm_id, abtest_id, type, value) VALUES(:parametername, :algorithm_id, :abtest_id, :type, :value)",
+                {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "type": "string",
+                 "value": value})
         database_connection.session.commit()
 
     global exporting_threads
     exporting_threads[0] = ABTestSimulation(database_connection,
-                                            {"abtest_id": abtest_id, "start": start, "end": end, "topk": topk, "stepsize": stepsize,
+                                            {"abtest_id": abtest_id, "start": start, "end": end, "topk": topk,
+                                             "stepsize": stepsize,
                                              "dataset_name": dataset_name, "algorithms": algorithms})
     exporting_threads[0].start()
     return "200"
 
 
-@ app.route("/api/read_csv", methods=["POST"])
-@ cross_origin(supports_credentials=True)
+@app.route("/api/read_csv", methods=["POST"])
+@cross_origin(supports_credentials=True)
 def read_csv():
     datasets = request.json
     for i in range(len(datasets)):
@@ -315,8 +325,8 @@ def read_csv():
     return "200"
 
 
-@ app.route("/api/get_datasets")
-@ cross_origin(supports_credentials=True)
+@app.route("/api/get_datasets")
+@cross_origin(supports_credentials=True)
 def get_datasets():
     datasets = database_connection.session.execute(
         "SELECT * FROM dataset").fetchall()
@@ -326,8 +336,8 @@ def get_datasets():
     return {"all_datasets": datasets}
 
 
-@ app.route("/api/logout")
-@ cross_origin(supports_credentials=True)
+@app.route("/api/logout")
+@cross_origin(supports_credentials=True)
 def logout_user():
     global LoggedIn
     if "user_id" in session:
@@ -336,15 +346,17 @@ def logout_user():
     return "200"
 
 
-@ app.route("/api/aaa", methods=["GET"])
+@app.route("/api/aaa", methods=["GET"])
 def logIpAddress():
     Logger.log("User visited, IP: " +
                request.environ.get('HTTP_X_REAL_IP', request.remote_addr), True)
     return "200"
 
+
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     database_connection.session.remove()
+
 
 # RUN DEV SERVER
 if __name__ == "__main__":

@@ -50,7 +50,7 @@ function Home({setPage}) { // begin van de app wow
                     </div>
 
                     <div className="row text-center align-items-center mt-4">
-                            <img src={tree} className="img-fluid" alt="Italian Trulli"/>
+                        <img src={tree} className="img-fluid" alt="Italian Trulli"/>
                     </div>
                 </div>
             </div>

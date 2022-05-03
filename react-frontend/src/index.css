@@ -69,12 +69,15 @@ body {
 .bg-purple {
     background: rgba(216, 196, 252, 1);
 }
+
 .bg-lightpurple {
     background: rgb(214, 203, 248);
 }
-.border-dark{
-  border-color: #7734E7FF !important;
+
+.border-dark {
+    border-color: #7734E7FF !important;
 }
+
 /*.footer {*/
 /*    max-height: 5vh;*/
 /*    position: fixed;*/
@@ -113,6 +116,7 @@ body {
     max-width: 100%;
     height: auto;
 }
+
 .names {
     position: absolute;
     left: 120px;
@@ -203,7 +207,7 @@ body {
 /*    width: max-content;*/
 /*    !*height: auto;*!*/
 /*}*/
-.vh-2{
+.vh-2 {
     height: 2vh;
 }
 
@@ -445,8 +449,8 @@ gedaan met mohammed zijn troep
     height: 100px;
 }
 
-.purple-color{
-        border-bottom-color: rgba(214, 203, 248) !important;
-        border-top-color: rgba(214, 203, 248) !important;
+.purple-color {
+    border-bottom-color: rgba(214, 203, 248) !important;
+    border-top-color: rgba(214, 203, 248) !important;
     border-left-color: rgba(119, 52, 231) !important;
 }

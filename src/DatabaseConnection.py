@@ -4,14 +4,15 @@ import warnings
 from io import StringIO
 from pathlib import Path
 from typing import List
+
 import pandas as pd
 import sqlalchemy
 from sqlalchemy import MetaData, exc as sa_exc
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import scoped_session, sessionmaker
+
 from Logger import Logger
 from config import configDatabase
-
 
 
 class DatabaseConnection:
@@ -190,8 +191,6 @@ class DatabaseConnection:
         cursor.copy_from(output, "purchase", sep='\t', null='', columns=list(df_purchase_data_table))
 
         return True
-
-
 
 
 if __name__ == '__main__':

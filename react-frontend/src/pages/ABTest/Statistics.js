@@ -4,6 +4,7 @@ import {ColoredLine} from '../../components/ColoredLine';
 import {useEffect, useState} from "react";
 import ABTestPicker from "../../components/ABTestpicker";
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
+
 function Statistics() {
     // Currently selected ab test id
     const [selected_abtest, setSelectedABTest] = useState(null)
@@ -34,7 +35,6 @@ function Statistics() {
     ]
 
 
-
     function fetchCurrentUserABTestIDs() {
         let url = '/api/abtest/statistics/'
         fetchData(url, setPersonalABTests)
@@ -50,7 +50,7 @@ function Statistics() {
 
     function fetchInputActiveUsersOverTime(abortCont) {
         setActiveUsersOverTime(null)
-        fetchData('/api/abtest/statistics/' + selected_abtest + '/active_users_over_time',setActiveUsersOverTime, abortCont)
+        fetchData('/api/abtest/statistics/' + selected_abtest + '/active_users_over_time', setActiveUsersOverTime, abortCont)
     }
 
     function fetchInputPurchasesOverTime(abortCont) {
