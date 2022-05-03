@@ -54,6 +54,7 @@ def remove_tuples(arr):
 
 
 
+
 class ABTestSimulation(threading.Thread):
     def __init__(self, database_connection, abtest):
         self.database_connection = database_connection
@@ -63,7 +64,6 @@ class ABTestSimulation(threading.Thread):
         self.abtest = abtest
         self.progress = 0
         super().__init__()
-
     def insertCustomer(self, customer_id, statistics_id, dataset_name):
         self.database_connection.session.execute(
             "INSERT INTO customer_specific(customer_id, statistics_id,dataset_name) "
@@ -73,12 +73,23 @@ class ABTestSimulation(threading.Thread):
                 "dataset_name": dataset_name
             }
         )
+
     def insertRecommendation(self, recomendation_id, customer_id, statistics_id, dataset_name, article_id):
         self.database_connection.session.execute(
             "INSERT INTO recommendation(recomendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
             {
                 "recommendation_id": recomendation_id, "customer_id": customer_id, "statistics_id": statistics_id,
                 "dataset_name": dataset_name, "article_id": article_id})
+
+    def insertRecommendations(self, recommendations, statistics_id, customer_id):
+        self.insertCustomer(statistics_id=statistics_id, customer_id=customer_id,
+                            dataset_name=self.abtest["dataset_name"])
+
+        for vv in range(len(recommendations)):
+            self.insertRecommendation(recomendation_id=vv + 1, customer_id=customer_id,
+                                      statistics_id=statistics_id, dataset_name=self.abtest["dataset_name"],
+                                      article_id=recommendations[vv])
+        self.database_connection.session.commit()
 
     # TODO: OPMERKING: mogen we data gebruiken voor self.abtest["start"] voor de simulatie?
     def run(self):
@@ -246,12 +257,11 @@ class ABTestSimulation(threading.Thread):
                         self.id2 += 1
 
                         # TODO: print all topk recommendations for all users?
-
                         for cc in range(len(recommendations)):
-                            self.insertCustomer(statistics_id=statistics_id,customer_id=index2item_id[cc], dataset_name=self.abtest["dataset_name"])
-                            for vv in range(k):
-                                self.insertRecommendation(recomendation_id=vv+1, customer_id=index2item_id[cc],statistics_id=statistics_id,dataset_name=self.abtest["dataset_name"],article_id=recommendations[cc][vv])
-                        self.database_connection.session.commit()
+                            self.insertRecommendations(recommendations=recommendations[cc], statistics_id=statistics_id,
+                                                       customer_id=index2item_id[cc])
+
+
                         # data_per_user_over_time_statistics['customer_id'][index2item_id[cc]][-1].algorithm_data.append(KNN_DATA(id=idx, topk=recommendations[cc], history=histories[cc]))
 
                         # top_k_over_time_statistics[idx].append(copy.deepcopy(top_k_over_time_statistics[idx][-1]))
@@ -277,9 +287,10 @@ class ABTestSimulation(threading.Thread):
 
                         # random moet gedaan worden in loop om unieke topk voor elke use te maken maar is trager
                         for i in range(len(active_users)):
-                            self.insertCustomer(statistics_id=statistics_id,customer_id=active_users[i], dataset_name=self.abtest["dataset_name"])
-                            for vv in range(k):
-                                self.insertRecommendation(recomendation_id=vv+1, customer_id=active_users[i],statistics_id=statistics_id,dataset_name=self.abtest["dataset_name"],article_id=top_k_random[vv])
+                            self.insertRecommendations(recommendations=top_k_random, statistics_id=statistics_id,
+                                                   customer_id=active_users[i])
+
+
 
 
 
