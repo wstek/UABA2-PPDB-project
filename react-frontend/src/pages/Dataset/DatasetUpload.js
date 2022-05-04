@@ -1,64 +1,61 @@
 import React, {useState} from 'react';
-import axios from 'axios';
-import csv from 'react-fast-csv'
-import {parseStream} from 'fast-csv';
+import axios from "axios";
+import Papa from "papaparse";
 
 
 export default function DatasetUpload() {
     const [files, setFiles] = useState([]);
-    // const [fileUploadProgress, setFileUploadProgress] = useState(false)
-    // const [fileUploadResponse, setFileUploadResponse] = useState(null)
-
-    // console.log(files.length);
-
-    function parseDatasets(datasets) {
-
-        for (let i = 0; i < datasets.length; i++) {
-            let row_counter = 0;
-
-            let dataset_stream = datasets[i].stream();
-
-            csv
-                .fromStream(dataset_stream, {headers: true})
-                .on("data", function (data) {
-                    row_counter += 1;
-                })
-                .on("end", function () {
-                    console.log("done, counted " + row_counter + " rows");
-                });
-
-            // let CSV_STRING = 'a,b\n' +
-            //     'a1,b1\n' +
-            //     'a2,b2\n';
-            //
-            // csv
-            //     .fromString(CSV_STRING, {headers: true})
-            //     .on("data", function (data) {
-            //         console.log(data);
-            //     })
-            //     .on("end", function () {
-            //         console.log("done");
-            //     });
-        }
-    }
+    const [datasetColumnNames, setDatasetColumnNames] = useState([]);
 
     function handleChange(event) {
         let datasets = event.target.files;
+        setFiles(datasets);
 
-        // check file extension
+        let newDatasetColumnNames = [];
+
         for (let i = 0; i < datasets.length; i++) {
-            // console.log(datasets[i].name.split('.').pop())
-            if (datasets[i].name.split('.').pop() !== 'csv') {
-                alert('invalid file "' + datasets[i].name + '"');
-                // reset form
-                document.getElementById("DatasetUpload").reset();
-                return;
-            }
+            Papa.parse(datasets[i], {
+                // multithreaded
+                worker: true,
+                // includes header in the data
+                header: true,
+                skipEmptyLines: true,
+                // reads only first row (column names) from the data stream
+                preview: 1,
+                complete: function (results) {
+                    const columnNames = [];
+                    // get column names
+                    results.data.map((d) => {
+                        return columnNames.push(Object.keys(d));
+                    });
+
+                    newDatasetColumnNames.push(columnNames[0]);
+                    setDatasetColumnNames(newDatasetColumnNames)
+                },
+            });
+
+            // Papa.parse(datasets[i], {
+            //     worker: true,
+            //     header: true,
+            //     skipEmptyLines: true,
+            //     step: function (results, parser) {
+            //
+            //         //DO MY THING HERE
+            //         // get column names
+            //         results.data.map((d) => {
+            //             rowsArray.push(Object.keys(d));
+            //         });
+            //
+            //         parser.abort();
+            //         results = null;   //Attempting to clear the results from memory
+            //     }, complete: function (results) {
+            //         results = null;   //Attempting to clear the results from memory
+            //     }
+            // });
         }
 
-        setFiles(event.target.files);
-        // console.log()
-        parseDatasets(datasets)
+
+        // console.log(rowsArray);
     }
 
     function handleSubmit(event) {
@@ -83,13 +80,31 @@ export default function DatasetUpload() {
         });
     }
 
+    function displayDatasetColumnNames(props) {
+        return (
+            <div>
+                {props.map((items, index) => {
+                    return (
+                        <ul>
+                            {items.map((subItems, sIndex) => {
+                                return <li> {subItems} </li>;
+                            })}
+
+                        </ul>
+                    );
+                })}
+            </div>
+        );
+    }
+
     return (
         <div className="App">
             <form id="DatasetUpload" onSubmit={handleSubmit}>
-                <h1>React File Upload</h1>
-                <input type="file" name="csv_file" multiple onChange={handleChange}/>
-                <button type="submit">Upload</button>
+                <input type="file" name="csv_file" multiple onChange={handleChange} accept=".csv"
+                       style={{display: "block", margin: "10px auto"}}/>
+                <button type="submit" style={{display: "block", margin: "10px auto"}}>Upload</button>
             </form>
+            {displayDatasetColumnNames(datasetColumnNames)}
         </div>
     );
 }
