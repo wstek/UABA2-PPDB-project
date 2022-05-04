@@ -4,7 +4,6 @@ import React, {useEffect, useState} from "react";
 import Navbar from './components/Navbar';
 import DatasetUpload from './pages/Dataset/DatasetUpload';
 import Footer from './components/Footer';
-import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import SignUp from './pages/Account/SignUp';
 import Account from './pages/Account/Account';
@@ -50,7 +49,7 @@ function App() {
     //     }
     // }, []);
 
-    fetch('/api/aaa')
+
 
     return (
         <Router>

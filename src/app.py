@@ -325,15 +325,18 @@ def start_simulation():
 @cross_origin(supports_credentials=True)
 def uploadCSV():
     for uploaded_file in request.files.getlist('files'):
-        filename = uploaded_file.filename
+        filename = secure_filename(uploaded_file.filename)
         if filename != '':
+            # check file extension
             file_ext = os.path.splitext(filename)[1]
-            if file_ext not in app.config['UPLOAD_EXTENSIONS']:
+            if file_ext not in app.config['UPLOAD_EXTENSIONS'] and file_ext != '.csv':
                 flask.abort(400)
 
             # todo save file with userid
+            # check if the upload directory exists
             if not os.path.exists(app.config['UPLOAD_PATH']):
                 os.makedirs(app.config['UPLOAD_PATH'])
+            # upload the file
             uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
     return "200"
 
