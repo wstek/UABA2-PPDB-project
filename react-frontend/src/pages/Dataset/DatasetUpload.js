@@ -1,14 +1,17 @@
 import React, {useState} from 'react';
 import axios from "axios";
 import Papa from "papaparse";
+import {PurpleSpinner} from "../../components/PurpleSpinner"
 
 
 export default function DatasetUpload() {
     const [files, setFiles] = useState([]);
-    const [datasetColumnNames, setDatasetColumnNames] = useState([]);
+    const [datasetColumnNames, setDatasetColumnNames] = useState({});
+    const [parseProgress, setParseProgress] = useState(false)
 
     const parseDatasets = (datasets) => {
-        const newDatasetColumnNames = [];
+        const newDatasetColumnNames = {};
+        setParseProgress(true);
 
         Promise.all([...datasets].map((dataset) =>
             new Promise((resolve, reject) =>
@@ -31,11 +34,13 @@ export default function DatasetUpload() {
                     return columnNames.push(Object.keys(d));
                 });
 
-                newDatasetColumnNames.push(columnNames[0]);
+                newDatasetColumnNames[datasets[index].name] = columnNames[0];
+                // newDatasetColumnNames.push(columnNames[0]);
                 // newDatasetColumnNames.push(result)
             })
             // now since .then() excutes after all promises are resolved, filesData contains all the parsed files.
             setDatasetColumnNames(newDatasetColumnNames);
+            setParseProgress(false);
         }).catch((err) => console.log('Something went wrong:', err))
     }
 
@@ -89,16 +94,66 @@ export default function DatasetUpload() {
         );
     }
 
+    const displayColumnSelect = (name) => {
+        return (
+            <div>
+                <label>
+                    {name}
+                    <br></br>
+                    <select>
+                        <option value="" disabled selected>Select a column</option>
+                        <option value="">column1</option>
+                        <option value="">column2</option>
+                        <option value="">column3</option>
+                        <option value="">column4</option>
+                        {Object.keys(datasetColumnNames).map((datasetName, datasetNameIndex) => {
+                            {datasetColumnNames[datasetName].map((columnName, columnNameIndex) => {
+                                {console.log(columnName)}
+                                return <option value="">{columnName}</option>
+                            })}
+                        })}
+                    </select>
+                </label>
+            </div>
+        )
+    }
+
     return (
-        <div className="App">
+        <div className="App" style={{textAlign: "center"}}>
+            <h1>Dataset Upload</h1>
+            <input type="file" name="csv_file" multiple onChange={handleChange} accept=".csv"
+                   style={{display: "block", margin: "10px auto"}}/>
             <form id="DatasetUpload" onSubmit={handleSubmit}>
-                <input type="file" name="csv_file" multiple onChange={handleChange} accept=".csv"
-                       style={{display: "block", margin: "10px auto"}}/>
                 <button type="submit" style={{display: "block", margin: "10px auto"}}>Upload</button>
             </form>
             <button style={{display: "block", margin: "10px auto"}} onClick={handleReset}>Reset</button>
-            {/*{datasetColumnNames}*/}
-            {displayDatasetColumnNames(datasetColumnNames)}
+            {parseProgress && PurpleSpinner()}
+
+            {/*purchase data*/}
+            <h3>Purchase data columns</h3>
+            {displayColumnSelect("time")}
+            {displayColumnSelect("price")}
+            {displayColumnSelect("article_id")}
+            {displayColumnSelect("customer_id")}
+
+            {/*metadata*/}
+            <h2>Metadata</h2>
+            <div>
+                <label>
+                    <input type="checkbox"/>
+                    Generate Metadata?
+                </label>
+            </div>
+
+            {/*article metadata*/}
+            <h3>Article metadata columns</h3>
+            {displayColumnSelect("article_id")}
+
+            {/*customer metadata*/}
+            <h3>Customer metadata columns</h3>
+            {displayColumnSelect("customer_id")}
+
+            {datasetColumnNames["testfile.csv"]}
         </div>
     );
 }
