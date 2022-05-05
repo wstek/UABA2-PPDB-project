@@ -7,55 +7,43 @@ export default function DatasetUpload() {
     const [files, setFiles] = useState([]);
     const [datasetColumnNames, setDatasetColumnNames] = useState([]);
 
+    const parseDatasets = (datasets) => {
+        const newDatasetColumnNames = [];
+
+        Promise.all([...datasets].map((dataset) =>
+            new Promise((resolve, reject) =>
+                Papa.parse(dataset, {
+                    // multithreaded
+                    worker: true,
+                    // includes header in the data
+                    header: true,
+                    skipEmptyLines: true,
+                    // reads only first row (column names) from the data stream
+                    preview: 1,
+                    complete: resolve,
+                })
+            )),
+        ).then((results) => {
+            results.forEach((result, index) => {
+                const columnNames = [];
+                // get column names
+                result.data.map((d) => {
+                    return columnNames.push(Object.keys(d));
+                });
+
+                newDatasetColumnNames.push(columnNames[0]);
+                // newDatasetColumnNames.push(result)
+            })
+            // now since .then() excutes after all promises are resolved, filesData contains all the parsed files.
+            setDatasetColumnNames(newDatasetColumnNames);
+        }).catch((err) => console.log('Something went wrong:', err))
+    }
+
     function handleChange(event) {
         let datasets = event.target.files;
         setFiles(datasets);
-
-        let newDatasetColumnNames = [];
-
-        for (let i = 0; i < datasets.length; i++) {
-            Papa.parse(datasets[i], {
-                // multithreaded
-                worker: true,
-                // includes header in the data
-                header: true,
-                skipEmptyLines: true,
-                // reads only first row (column names) from the data stream
-                preview: 1,
-                complete: function (results) {
-                    const columnNames = [];
-                    // get column names
-                    results.data.map((d) => {
-                        return columnNames.push(Object.keys(d));
-                    });
-
-                    newDatasetColumnNames.push(columnNames[0]);
-                    setDatasetColumnNames(newDatasetColumnNames)
-                },
-            });
-
-            // Papa.parse(datasets[i], {
-            //     worker: true,
-            //     header: true,
-            //     skipEmptyLines: true,
-            //     step: function (results, parser) {
-            //
-            //         //DO MY THING HERE
-            //         // get column names
-            //         results.data.map((d) => {
-            //             rowsArray.push(Object.keys(d));
-            //         });
-            //
-            //         parser.abort();
-            //         results = null;   //Attempting to clear the results from memory
-            //     }, complete: function (results) {
-            //         results = null;   //Attempting to clear the results from memory
-            //     }
-            // });
-        }
-
-
-        // console.log(rowsArray);
+        console.log("parsing datasets...")
+        parseDatasets(datasets);
     }
 
     function handleSubmit(event) {
@@ -80,6 +68,11 @@ export default function DatasetUpload() {
         });
     }
 
+    function handleReset() {
+        setDatasetColumnNames([])
+        document.getElementById("DatasetUpload").reset();
+    }
+
     function displayDatasetColumnNames(props) {
         return (
             <div>
@@ -87,9 +80,8 @@ export default function DatasetUpload() {
                     return (
                         <ul>
                             {items.map((subItems, sIndex) => {
-                                return <li> {subItems} </li>;
+                                return <li key={sIndex}> {subItems} </li>;
                             })}
-
                         </ul>
                     );
                 })}
@@ -104,6 +96,8 @@ export default function DatasetUpload() {
                        style={{display: "block", margin: "10px auto"}}/>
                 <button type="submit" style={{display: "block", margin: "10px auto"}}>Upload</button>
             </form>
+            <button style={{display: "block", margin: "10px auto"}} onClick={handleReset}>Reset</button>
+            {/*{datasetColumnNames}*/}
             {displayDatasetColumnNames(datasetColumnNames)}
         </div>
     );
