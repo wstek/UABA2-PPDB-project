@@ -5,6 +5,7 @@ import {useEffect, useState} from "react";
 import ABTestPicker from "../../components/ABTestpicker";
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
 
+import SearchUser from "./SearchUser";
 function Statistics() {
     // Currently selected ab test id
     const [selected_abtest, setSelectedABTest] = useState(null)
@@ -127,6 +128,9 @@ function Statistics() {
                     <div className="col-12 col-lg-6 col-xl-6 col-xxl-6">
                         <LineChart chart_id={2} title={"Purchases"} XFnY={purchases}/>
                     </div>
+                    {/*<div className="col-12 col-lg-6 col-xl-6 col-xxl-6">*/}
+                    {/*    <SearchUser selected_abtest={selected_abtest}/>*/}
+                    {/*</div>*/}
                 </div>
                 <div className="row text-center align-content-center justify-content-center">
                     <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 pl-">
