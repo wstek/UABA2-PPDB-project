@@ -51,10 +51,12 @@ class DatabaseConnection:
         self.engine.execute(table.insert(), values)
 
     def insertRowNoConflict(self, table, values: dict):
-        self.engine.execute(insert(table).values([values]).on_conflict_do_nothing())
+        self.engine.execute(insert(table).values(
+            [values]).on_conflict_do_nothing())
 
     def insertRowsNoConflict(self, table, values: List[dict]):
-        self.engine.execute(insert(table).values(values).on_conflict_do_nothing())
+        self.engine.execute(insert(table).values(
+            values).on_conflict_do_nothing())
 
     def addDataset(self, dataset_name: str, uploader_name: str, purchase_data_filename: str, article_data_filename: str,
                    customer_data_filename: str):
@@ -96,7 +98,8 @@ class DatabaseConnection:
 
         # check if dataset_name already exists
         if self.queryTable(datasets_table, {"name": dataset_name}).first():
-            Logger.logError(f"Couldn't add dataset {dataset_name}, it already exists")
+            Logger.logError(
+                f"Couldn't add dataset {dataset_name}, it already exists")
             return False
 
         self.insertRow(datasets_table, {
@@ -117,14 +120,16 @@ class DatabaseConnection:
 
         # check if meta_data_id atribute exists
         if meta_data_type + "_id" not in attribute_names:
-            Logger.logError(f"Could not find \"{meta_data_type}_id\" column in {dataset_name}")
+            Logger.logError(
+                f"Could not find \"{meta_data_type}_id\" column in {dataset_name}")
             return False
 
         df_meta_data_table = df_csv[[meta_data_type + "_id"]].copy()
         df_meta_data_table["dataset_name"] = dataset_name
 
         output = StringIO()
-        df_meta_data_table.to_csv(output, sep='\t', header=False, encoding="utf8", index=False)
+        df_meta_data_table.to_csv(
+            output, sep='\t', header=False, encoding="utf8", index=False)
         output.seek(0)
 
         cursor.copy_from(output, meta_data_type, sep='\t', null='')
@@ -133,18 +138,22 @@ class DatabaseConnection:
             if attribute_name == meta_data_type + "_id":
                 continue
 
-            df_meta_data_attribute_table = df_csv[[meta_data_type + "_id"]].copy()
+            df_meta_data_attribute_table = df_csv[[
+                meta_data_type + "_id"]].copy()
             df_meta_data_attribute_table["dataset_name"] = dataset_name
             df_meta_data_attribute_table["attribute"] = attribute_name
-            df_meta_data_attribute_table["value"] = df_csv[attribute_name].copy()
+            df_meta_data_attribute_table["value"] = df_csv[attribute_name].copy(
+            )
             # todo add user defined custom type
             df_meta_data_attribute_table["type"] = 0
 
             # drops all rows with a null entry
-            df_meta_data_attribute_table = df_meta_data_attribute_table.dropna(how="any", axis=0)
+            df_meta_data_attribute_table = df_meta_data_attribute_table.dropna(
+                how="any", axis=0)
 
             output = StringIO()
-            df_meta_data_attribute_table.to_csv(output, sep='\t', header=False, encoding="utf8", index=False)
+            df_meta_data_attribute_table.to_csv(
+                output, sep='\t', header=False, encoding="utf8", index=False)
             output.seek(0)
 
             cursor.copy_from(output, meta_data_type + "_attribute", sep='\t', null='',
@@ -164,31 +173,38 @@ class DatabaseConnection:
         # todo variable names for purchase attritubes
         # check if purchase atributes exists
         if "customer_id" not in attribute_names:
-            Logger.logError(f"Could not find \"customer_id\" column in {dataset_name}")
+            Logger.logError(
+                f"Could not find \"customer_id\" column in {dataset_name}")
             return False
         elif "article_id" not in attribute_names:
-            Logger.logError(f"Could not find \"article_id\" column in {dataset_name}")
+            Logger.logError(
+                f"Could not find \"article_id\" column in {dataset_name}")
             return False
         elif "price" not in attribute_names:
-            Logger.logError(f"Could not find \"price\" column in {dataset_name}")
+            Logger.logError(
+                f"Could not find \"price\" column in {dataset_name}")
             return False
         elif "t_dat" not in attribute_names:
-            Logger.logError(f"Could not find \"t_dat\" column in {dataset_name}")
+            Logger.logError(
+                f"Could not find \"t_dat\" column in {dataset_name}")
             return False
 
         df_purchase_data_table["dataset_name"] = dataset_name
 
-        df_purchase_data_table.rename(columns={"t_dat": "timestamp"}, inplace=True)
+        df_purchase_data_table.rename(
+            columns={"t_dat": "timestamp"}, inplace=True)
 
         # drop duplicates but keep the first
         df_purchase_data_table.drop_duplicates(subset=["dataset_name", "customer_id", "article_id", "timestamp"],
                                                inplace=True)
 
         output = StringIO()
-        df_purchase_data_table.to_csv(output, sep='\t', header=False, encoding="utf8", index=False)
+        df_purchase_data_table.to_csv(
+            output, sep='\t', header=False, encoding="utf8", index=False)
         output.seek(0)
 
-        cursor.copy_from(output, "purchase", sep='\t', null='', columns=list(df_purchase_data_table))
+        cursor.copy_from(output, "purchase", sep='\t', null='',
+                         columns=list(df_purchase_data_table))
 
         return True
 
