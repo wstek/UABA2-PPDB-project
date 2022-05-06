@@ -60,8 +60,6 @@ function CollapseButton() {
 
 
 function Navbar({admin, auth}) {
-    // var a = getUserCred()
-    // console.log(a)
     return (
         <nav className="navbar navbar-expand-sm navbar-light bg-purple justify-content-center sticky-top">
             <div className="container-fluid">

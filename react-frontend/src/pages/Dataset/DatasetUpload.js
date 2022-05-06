@@ -78,30 +78,14 @@ export default function DatasetUpload() {
         document.getElementById("DatasetUpload").reset();
     }
 
-    function displayDatasetColumnNames(props) {
-        return (
-            <div>
-                {props.map((items, index) => {
-                    return (
-                        <ul>
-                            {items.map((subItems, sIndex) => {
-                                return <li key={sIndex}> {subItems} </li>;
-                            })}
-                        </ul>
-                    );
-                })}
-            </div>
-        );
-    }
-
     const displayColumnSelect = (name) => {
         return (
             <div>
                 <label>
                     {name}
                     <br></br>
-                    <select>
-                        <option value="" disabled selected>Select a column</option>
+                    <select defaultValue={'DEFAULT'}>
+                        <option value="DEFAULT" disabled>Select a column</option>
                         <option value="">column1</option>
                         <option value="">column2</option>
                         <option value="">column3</option>

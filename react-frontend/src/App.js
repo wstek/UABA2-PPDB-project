@@ -1,5 +1,4 @@
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
-// import {BrowserRouter as useHistory} from 'react-router-dom';
 import React, {useEffect, useState} from "react";
 import Navbar from './components/Navbar';
 import DatasetUpload from './pages/Dataset/DatasetUpload';
@@ -15,6 +14,7 @@ import ProtectedRoute from './utils/ProtectedRoute';
 import Statistics from "./pages/ABTest/Statistics";
 import {handleLoggedIn} from './utils/handleLoggedIn'
 import Simulation from "./pages/Account/Simulation";
+import Home from "./pages/Home";
 
 function App() {
 
@@ -22,34 +22,6 @@ function App() {
     const [auth, setAuthed] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => handleLoggedIn(setAdmin, setAuthed, setIsLoading), [])
-
-    // const history = useHistory();
-
-    // useEffect(() => {
-    //     var cleared = false;
-    //     const interval = setInterval(() => {
-    //         fetch('/api/me', {
-    //             method: 'GET',
-    //             headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
-    //             credentials: 'include'
-    //         }).then((res) => {
-    //             if (res.status === 409) {
-    //                 alert('session has expired')
-    //                 history.push('/sign_in');
-    //             }
-    //         })
-    //             .catch((err) => {
-    //                 // console.log(err.message);
-    //             })
-    //     }, 5000);
-    //     return () => {
-    //         if (!cleared) {
-    //             clearInterval(interval);
-    //         }
-    //     }
-    // }, []);
-
-
 
     return (
         <Router>
@@ -59,7 +31,8 @@ function App() {
                 <div className="content">
                     <Switch>
                         <Route exact path="/">
-                            <DatasetUpload/>
+                            <Home/>
+                            {/*<DatasetUpload/>*/}
                         </Route>
                         <ProtectedRoute component={Account} setAdmin={setAdmin} isLoading={isLoading}
                                         setAuthed={setAuthed} auth={auth} exact
