@@ -139,8 +139,8 @@ class DatabaseConnection:
             df_meta_data_attribute_table = df_csv[[
                 meta_data_type + "_id"]].copy()
             df_meta_data_attribute_table["dataset_name"] = dataset_name
-            df_meta_data_attribute_table["attribute"] = attribute_name
-            df_meta_data_attribute_table["value"] = df_csv[attribute_name].copy(
+            df_meta_data_attribute_table["attribute_name"] = attribute_name
+            df_meta_data_attribute_table["attribute_value"] = df_csv[attribute_name].copy(
             )
             # todo add user defined custom type
             df_meta_data_attribute_table["type"] = 0
@@ -190,10 +190,10 @@ class DatabaseConnection:
         df_purchase_data_table["dataset_name"] = dataset_name
 
         df_purchase_data_table.rename(
-            columns={"t_dat": "timestamp"}, inplace=True)
+            columns={"t_dat": "bought_on"}, inplace=True)
 
         # drop duplicates but keep the first
-        df_purchase_data_table.drop_duplicates(subset=["dataset_name", "customer_id", "article_id", "timestamp"],
+        df_purchase_data_table.drop_duplicates(subset=["dataset_name", "customer_id", "article_id", "bought_on"],
                                                inplace=True)
 
         output = StringIO()
