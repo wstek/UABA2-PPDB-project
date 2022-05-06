@@ -160,7 +160,7 @@ class ABTestSimulation(threading.Thread):
             user_histories = dict()
 
             self.frontend_data.append(
-                f"current total active users: {len(active_users)}")
+                f"\n\ncurrent total active users: {len(active_users)}")
 
             for i in range(len(active_users)):
                 data_per_user_over_time_statistics['customer_id'][active_users[i]].append(
@@ -178,7 +178,7 @@ class ABTestSimulation(threading.Thread):
 
             if len(D_prev_recommendations) == D+1:
                 D_prev_recommendations.pop(0)
-                D_prev_recommendations.append({})
+            D_prev_recommendations.append({})
 
             for algo in range(len(self.abtest["algorithms"])):
                 # print(self.frontend_data)
@@ -203,6 +203,8 @@ class ABTestSimulation(threading.Thread):
                             days=diff)
                         start_date = dynamic_info_algorithms[idx]["dt_start_LookBackWindow"].strftime(
                             '%Y-%m-%d')
+
+                    D_prev_recommendations[-1][idx] = {}
 
                     if n_day:
                         dt_prev_day = dt_current_date - pd.DateOffset(days=1)
@@ -257,8 +259,6 @@ class ABTestSimulation(threading.Thread):
                         recommendations = dynamic_info_algorithms[idx]["KNN"].recommend_all(
                             histories, k)
 
-                        D_prev_recommendations[-1][idx] = []
-
                         clicks = 0
                         recommended_purchases = 0
                         recommended_purchases_prices = 0.0
@@ -283,10 +283,10 @@ class ABTestSimulation(threading.Thread):
                                                             ] = recommendations[cc]
                             for purchased_item in range(len(user_purchased_items)):
                                 out = False
-                                for dayz in range(len(D_prev_recommendations)):
-                                    if index2customer_id[cc] in D_prev_recommendations[dayz][idx]:
+                                for dayzx in range(len(D_prev_recommendations)):
+                                    if index2customer_id[cc] in D_prev_recommendations[dayzx][idx]:
                                         prev_recommendations = D_prev_recommendations[
-                                            dayz][idx][index2customer_id[cc]]
+                                            dayzx][idx][index2customer_id[cc]]
                                         for prev_recommended_item in range(len(prev_recommendations)):
                                             if prev_recommendations[prev_recommended_item] == user_purchased_items[purchased_item]:
                                                 out = True
@@ -305,7 +305,7 @@ class ABTestSimulation(threading.Thread):
                         self.database_connection.session.commit()
 
                         self.frontend_data.append(
-                            f"current_day: {current_date}, algorithm {algo}: CTR: {CTR}, top_k recommendations (BETWEEN {start_date} AND {prev_day}): {recommendations}")
+                            f"current_day: {current_date}, algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k recommendations (BETWEEN {start_date} AND {prev_day}): {recommendations}")
                         D_prev_recommendations[-1][idx]
 
                         # data_per_user_over_time_statistics['customer_id'][index2item_id[cc]][-1].algorithm_data.append(KNN_DATA(id=idx, topk=recommendations[cc], history=histories[cc]))
@@ -351,7 +351,7 @@ class ABTestSimulation(threading.Thread):
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(RANDOM_DATA(id=idx, topk=top_k_random, name="ItemKNN")) #DEEP COPY????????????
 
                         self.frontend_data.append(
-                            f"algorithm {algo}: CTR: {CTR}, top_k random: {top_k_random}")
+                            f"algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k random: {top_k_random}")
 
                         # train KNN algoritme to initialize it:
                         interactions = self.database_connection.session.execute(
@@ -417,9 +417,9 @@ class ABTestSimulation(threading.Thread):
 
                             for purchased_item in range(len(user_purchased_items)):
                                 out = False
-                                for dayz in range(len(D_prev_recommendations)):
+                                for dayzx in range(len(D_prev_recommendations)):
                                     prev_recommendations = D_prev_recommendations[
-                                        dayz][idx]
+                                        dayzx][idx]
                                     for prev_recommended_item in range(len(prev_recommendations)):
                                         if prev_recommendations[prev_recommended_item] == user_purchased_items[purchased_item]:
                                             out = True
@@ -438,7 +438,7 @@ class ABTestSimulation(threading.Thread):
                         self.database_connection.session.commit()
 
                         self.frontend_data.append(
-                            f"current_day: {current_date}, algorithm {algo}: CTR: {CTR}, top_k (BETWEEN {start_date} AND {prev_day}): {top_k_items}")
+                            f"current_day: {current_date}, algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k (BETWEEN {start_date} AND {prev_day}): {top_k_items}")
 
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(
                         #     RECENCY_DATA(id=idx, topk=copy.deepcopy(top_k_items)))
@@ -480,7 +480,7 @@ class ABTestSimulation(threading.Thread):
                         #     RANDOM_DATA(id=idx, topk=copy.deepcopy(top_k_random), name="Recency"))
                         # top_k_over_time_statistics[idx].append(top_k_random)
                         self.frontend_data.append(
-                            f"current_day: {current_date}, algorithm {algo}: CTR: {CTR}, top_k random: {top_k_random}")
+                            f"current_day: {current_date}, algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k random: {top_k_random}")
 
                         # train Recency algoritme to initialize it:
                         top_k = self.database_connection.session.execute(f"SELECT t.article_id, t.timestamp FROM(SELECT article_id,MIN(timestamp) AS timestamp \
@@ -547,9 +547,9 @@ class ABTestSimulation(threading.Thread):
                                     break
                             for purchased_item in range(len(user_purchased_items)):
                                 out = False
-                                for dayz in range(len(D_prev_recommendations)):
+                                for dayzx in range(len(D_prev_recommendations)):
                                     prev_recommendations = D_prev_recommendations[
-                                        dayz][idx]
+                                        dayzx][idx]
                                     for prev_recommended_item in range(len(prev_recommendations)):
                                         if prev_recommendations[prev_recommended_item] == user_purchased_items[purchased_item]:
                                             out = True
@@ -568,7 +568,7 @@ class ABTestSimulation(threading.Thread):
                         self.database_connection.session.commit()
 
                         self.frontend_data.append(
-                            f"algorithm {algo}: CTR: {CTR}, top_k (BETWEEN {start_date} AND {prev_day}): {top_k_items}")
+                            f"algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k (BETWEEN {start_date} AND {prev_day}): {top_k_items}")
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(
                         #     POPULARITY_DATA(id=idx, topk=copy.deepcopy(top_k_items)))
 
@@ -611,7 +611,7 @@ class ABTestSimulation(threading.Thread):
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(
                         #     RANDOM_DATA(id=idx, topk=copy.deepcopy(top_k_random), name="Popularity"))
                         self.frontend_data.append(
-                            f"algorithm {algo}: CTR: {CTR}, top_k random: {top_k_random}")
+                            f"algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k random: {top_k_random}")
 
                         # train Popularity algorithm to initialize it:
                         top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.article_id, count(*) AS popular_items FROM \
