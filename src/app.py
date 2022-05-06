@@ -63,7 +63,7 @@ def get_current_user():
     admin = database_connection.session.execute("SELECT * FROM admin WHERE username = :username",
                                                 {"username": user_id}).fetchone()
     database_connection.session.commit()
-    returnValue = {"username": user.username,
+    returnValue = {"username": user.username, "first_name": user.first_name, "last_name": user.last_name,
                    "email": user.email_address, 'admin': admin is not None}
     return returnValue
 
@@ -96,6 +96,16 @@ def del_abtest(abtest_id):
     database_connection.session.commit()
     return "200"
 
+
+@app.route("/api/abtest/statistics/<int:customer_id>/<int:selected_abtest>")
+@cross_origin(supports_credentials=True)
+def get_user_attributes(customer_id, selected_abtest):
+    attr = database_connection.session.execute(f"select attribute, value from  customer_attribute natural join  \"ABTest\" where customer_id = '{customer_id}'and abtest_id = '{selected_abtest}';").fetchall()
+    response = dict()
+    for r in attr:
+        response[r[0]] = r[1]
+
+    return response
 
 @app.route("/api/abtest/statistics/<int:abtest_id>/<stat>")
 @cross_origin(supports_credentials=True)
@@ -190,6 +200,7 @@ def get_stat(abtest_id, stat):
         datetimes = database_connection.session.execute(
             f"SELECT DISTINCT datetime FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
         XFnY = [['Date', 'Purchases']]
+        XFnY = [['Date', 'Purchases'] ]
         for i in range(len(datetimes)):
             countz = database_connection.session.execute(
                 f"SELECT COUNT(customer_id) FROM purchase WHERE CAST(timestamp as DATE) = '{datetimes[i][0]}'").fetchall()
@@ -224,6 +235,32 @@ def get_stat(abtest_id, stat):
         XFnY.append(Y)
         return {'graphdata': XFnY}
 
+    if stat == "Attribution_rate":
+        XFnY = []
+        # ['Date', 'ClickThroughRate']
+        datetimes = database_connection.session.execute(
+            f"SELECT datetime, algorithm_id,parametervalue FROM statistics NATURAL JOIN \"DynamicStepsizeVar\" NATURAL JOIN  algorithm WHERE abtest_id = {abtest_id} AND paramterername = 'ATTR_RATE' ORDER BY datetime").fetchall()
+        datetime = None
+        Y = []
+        legend = ["Date"]
+        for index in range(len(datetimes)):
+            entry = datetimes[index]
+            algorithm_id = entry[1]
+            if str(algorithm_id) not in legend:
+                legend.append(str(algorithm_id))
+            else:
+                XFnY.append(legend)
+                break
+        for index in range(len(datetimes)):
+            entry = datetimes[index]
+            value = float(entry[2])
+            if datetime != entry[0]:
+                if len(Y):
+                    XFnY.append(Y)
+                datetime = entry[0]
+                Y = [str(datetime)]
+            Y.append(value)
+        XFnY.append(Y)
 
 
 
