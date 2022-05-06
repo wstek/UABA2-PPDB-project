@@ -94,7 +94,7 @@ class ABTestSimulation(threading.Thread):
 
         for i in range(len(self.abtest["algorithms"])):
             idx = int(self.abtest["algorithms"][i]["id"]) - \
-                  int(self.abtest["algorithms"][0]["id"])
+                int(self.abtest["algorithms"][0]["id"])
             top_k_over_time_statistics[idx] = []
 
             if self.abtest["algorithms"][i]["name"] == "ItemKNN":
@@ -117,9 +117,10 @@ class ABTestSimulation(threading.Thread):
 
         # SIMULATION LOOP MAIN
         for n_day in range(0, dayz + 1, int(self.abtest["stepsize"])):
+            print("day:", n_day)
             if n_day:
                 dt_current_date = dt_current_date + \
-                                  pd.DateOffset(days=int(self.abtest["stepsize"]))
+                    pd.DateOffset(days=int(self.abtest["stepsize"]))
 
             current_date = dt_current_date.strftime('%Y-%m-%d')
             # statistics per step per algorithm
@@ -151,10 +152,9 @@ class ABTestSimulation(threading.Thread):
             print("n_users:", len(active_users))
 
             for algo in range(len(self.abtest["algorithms"])):
-
+                print("algo:", algo)
                 statistics_id = self.database_connection.session.execute(
-                    "SELECT nextval('statistics_statistics_id_seq')").fetchone()[0]
-                self.database_connection.session.commit()
+                    'SELECT last_value FROM statistics_statistics_id_seq').fetchone()[0]
 
                 self.database_connection.session.execute("INSERT INTO statistics(datetime, algorithm_id, abtest_id) VALUES(:datetime, :algorithm_id,\
                 :abtest_id)", {"datetime": current_date, "algorithm_id": self.abtest["algorithms"][algo]["id"],
@@ -162,15 +162,15 @@ class ABTestSimulation(threading.Thread):
                 self.database_connection.session.commit()
 
                 idx = int(self.abtest["algorithms"][algo]["id"]) - \
-                      int(self.abtest["algorithms"][0]["id"])
+                    int(self.abtest["algorithms"][0]["id"])
                 k = int(self.abtest["topk"])
                 start_date = dt_start.strftime('%Y-%m-%d')
 
                 if self.abtest["algorithms"][algo]["name"] == "ItemKNN":
 
                     diff = (dt_current_date - dynamic_info_algorithms[idx]["dt_start_LookBackWindow"]).days - \
-                           int(self.abtest["algorithms"][algo]
-                               ["parameters"]["LookBackWindow"])
+                        int(self.abtest["algorithms"][algo]
+                            ["parameters"]["LookBackWindow"])
                     if diff > 0:
                         dynamic_info_algorithms[idx]["dt_start_LookBackWindow"] += pd.DateOffset(
                             days=diff)
@@ -181,7 +181,7 @@ class ABTestSimulation(threading.Thread):
                         dt_prev_day = dt_current_date - pd.DateOffset(days=1)
                         prev_day = dt_prev_day.strftime('%Y-%m-%d')
                         retrain = (
-                                dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
+                            dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         interactions = self.database_connection.session.execute(f"SELECT customer_id, article_id from purchase WHERE \
                             CAST(timestamp as DATE) BETWEEN '{start_date}' AND '{prev_day}'").fetchall()
                         self.database_connection.session.commit()
@@ -223,7 +223,7 @@ class ABTestSimulation(threading.Thread):
                         #         del user_histories[key]
 
                         index2item_id = {index: item_id for index,
-                                                            item_id in enumerate(user_histories)}
+                                         item_id in enumerate(user_histories)}
 
                         # als training mag gebeuren maximaal window_size geleden, moeten we dit dan ook doen met de history van de users of moeten we hun history nemen van het begin
                         histories = list(user_histories.values())
@@ -237,14 +237,14 @@ class ABTestSimulation(threading.Thread):
 
                         for cc in range(len(recommendations)):
                             self.database_connection.session.execute(
-                                "INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)",
+                                "INSERT INTO customer_specific(customer_id, statistics_id, dataset_name) VALUES(:customer_id, :statistics_id, :dataset_name)",
                                 {
-                                    "customer_id": index2item_id[cc], "statistics_id": statistics_id}).fetchall()
+                                    "customer_id": index2item_id[cc], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"]})
                             for vv in range(k):
                                 self.database_connection.session.execute(
-                                    "INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
+                                    "INSERT INTO recommendation(recomendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recomendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
                                     {
-                                        "recommendation_id": vv + 1, "customer_id": index2item_id[cc],
+                                        "recomendation_id": vv + 1, "customer_id": index2item_id[cc],
                                         "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"],
                                         "article_id": recommendations[cc][vv]})
                         self.database_connection.session.commit()
@@ -273,15 +273,17 @@ class ABTestSimulation(threading.Thread):
 
                         # random moet gedaan worden in loop om unieke topk voor elke use te maken maar is trager
                         for i in range(len(active_users)):
+                            print("nigga")
                             self.database_connection.session.execute(
-                                "INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)",
+                                "INSERT INTO customer_specific(customer_id, statistics_id, dataset_name) VALUES(:customer_id, :statistics_id, :dataset_name)",
                                 {
-                                    "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
+                                    "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"]})
+                            print("yo")
                             for vv in range(k):
                                 self.database_connection.session.execute(
-                                    "INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
+                                    "INSERT INTO recommendation(recomendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recomendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
                                     {
-                                        "recommendation_id": vv + 1, "customer_id": active_users[i],
+                                        "recomendation_id": vv + 1, "customer_id": active_users[i],
                                         "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"],
                                         "article_id": top_k_random[vv]})
                         self.database_connection.session.commit()
@@ -330,7 +332,7 @@ class ABTestSimulation(threading.Thread):
                         dt_prev_day = dt_current_date - pd.DateOffset(days=1)
                         prev_day = dt_prev_day.strftime('%Y-%m-%d')
                         retrain = (
-                                dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
+                            dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme
                             top_k = self.database_connection.session.execute(f"SELECT t.article_id, t.timestamp FROM(SELECT article_id,MIN(timestamp) AS timestamp \
@@ -354,14 +356,14 @@ class ABTestSimulation(threading.Thread):
 
                         for i in range(len(active_users)):
                             self.database_connection.session.execute(
-                                "INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)",
+                                "INSERT INTO customer_specific(customer_id, statistics_id, dataset_name) VALUES(:customer_id, :statistics_id, :dataset_name)",
                                 {
-                                    "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
+                                    "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"]})
                             for vv in range(k):
                                 self.database_connection.session.execute(
-                                    "INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
+                                    "INSERT INTO recommendation(recomendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recomendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
                                     {
-                                        "recommendation_id": vv + 1, "customer_id": active_users[i],
+                                        "recomendation_id": vv + 1, "customer_id": active_users[i],
                                         "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"],
                                         "article_id": top_k_random[vv]})
                         self.database_connection.session.commit()
@@ -387,14 +389,14 @@ class ABTestSimulation(threading.Thread):
 
                         for i in range(len(active_users)):
                             self.database_connection.session.execute(
-                                "INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)",
+                                "INSERT INTO customer_specific(customer_id, statistics_id, dataset_name) VALUES(:customer_id, :statistics_id, :dataset_name)",
                                 {
-                                    "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
+                                    "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"]})
                             for vv in range(k):
                                 self.database_connection.session.execute(
-                                    "INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
+                                    "INSERT INTO recommendation(recomendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recomendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
                                     {
-                                        "recommendation_id": vv + 1, "customer_id": active_users[i],
+                                        "recomendation_id": vv + 1, "customer_id": active_users[i],
                                         "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"],
                                         "article_id": top_k_random[vv]})
                         self.database_connection.session.commit()
@@ -432,8 +434,8 @@ class ABTestSimulation(threading.Thread):
                 elif self.abtest["algorithms"][algo]["name"] == "Popularity":
 
                     diff = (dt_current_date - dynamic_info_algorithms[idx]["dt_start_LookBackWindow"]).days - \
-                           int(self.abtest["algorithms"][algo]
-                               ["parameters"]["LookBackWindow"])
+                        int(self.abtest["algorithms"][algo]
+                            ["parameters"]["LookBackWindow"])
                     if diff > 0:
                         dynamic_info_algorithms[idx]["dt_start_LookBackWindow"] += pd.DateOffset(
                             days=diff)
@@ -444,7 +446,7 @@ class ABTestSimulation(threading.Thread):
                         dt_prev_day = dt_current_date - pd.DateOffset(days=1)
                         prev_day = dt_prev_day.strftime('%Y-%m-%d')
                         retrain = (
-                                dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
+                            dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme
                             top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.article_id, count(*) AS popular_items FROM \
@@ -469,14 +471,14 @@ class ABTestSimulation(threading.Thread):
 
                         for i in range(len(active_users)):
                             self.database_connection.session.execute(
-                                "INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)",
+                                "INSERT INTO customer_specific(customer_id, statistics_id, dataset_name) VALUES(:customer_id, :statistics_id, :dataset_name)",
                                 {
-                                    "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
+                                    "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"]})
                             for vv in range(k):
                                 self.database_connection.session.execute(
-                                    "INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
+                                    "INSERT INTO recommendation(recomendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recomendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
                                     {
-                                        "recommendation_id": vv + 1, "customer_id": active_users[i],
+                                        "recomendation_id": vv + 1, "customer_id": active_users[i],
                                         "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"],
                                         "article_id": top_k_random[vv]})
                         self.database_connection.session.commit()
@@ -501,14 +503,14 @@ class ABTestSimulation(threading.Thread):
 
                         for i in range(len(active_users)):
                             self.database_connection.session.execute(
-                                "INSERT INTO customer_specific(customer_id, statistics_id) VALUES(:customer_id, :statistics_id)",
+                                "INSERT INTO customer_specific(customer_id, statistics_id, dataset_name) VALUES(:customer_id, :statistics_id, :dataset_name)",
                                 {
-                                    "customer_id": active_users[i], "statistics_id": statistics_id}).fetchall()
+                                    "customer_id": active_users[i], "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"]})
                             for vv in range(k):
                                 self.database_connection.session.execute(
-                                    "INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
+                                    "INSERT INTO recommendation(recomendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recomendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
                                     {
-                                        "recommendation_id": vv + 1, "customer_id": active_users[i],
+                                        "recomendation_id": vv + 1, "customer_id": active_users[i],
                                         "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"],
                                         "article_id": top_k_random[vv]})
                         self.database_connection.session.commit()
