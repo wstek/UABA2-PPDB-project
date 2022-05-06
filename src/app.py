@@ -9,6 +9,7 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_session import Session
 from werkzeug.utils import secure_filename
+import json
 
 from ABTestSimulation import ABTestSimulation, remove_tuples
 from DatabaseConnection import DatabaseConnection
@@ -321,9 +322,10 @@ def start_simulation():
     return "200"
 
 
-@app.route("/api/uploadCSV", methods=["POST"])
+@app.route("/api/upload_datasets", methods=["POST"])
 @cross_origin(supports_credentials=True)
 def uploadCSV():
+    column_select_data = json.loads(request.form.get('data'))
     for uploaded_file in request.files.getlist('files'):
         filename = secure_filename(uploaded_file.filename)
         if filename != '':

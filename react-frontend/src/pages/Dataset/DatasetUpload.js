@@ -21,24 +21,15 @@ export default function DatasetUpload() {
                     // includes header in the data
                     header: true,
                     skipEmptyLines: true,
-                    // reads only first row (column names) from the data stream
-                    preview: 1,
+                    // reads only the 5 first rows from the data stream
+                    preview: 5,
                     complete: resolve,
                 })
             )),
         ).then((results) => {
             results.forEach((result, index) => {
-                const columnNames = [];
-                // get column names
-                result.data.map((d) => {
-                    return columnNames.push(Object.keys(d));
-                });
-
-                newDatasetColumnNames[datasets[index].name] = columnNames[0];
-                // newDatasetColumnNames.push(columnNames[0]);
-                // newDatasetColumnNames.push(result)
+                newDatasetColumnNames[datasets[index].name] = result.meta['fields'];
             })
-            // now since .then() excutes after all promises are resolved, filesData contains all the parsed files.
             setDatasetColumnNames(newDatasetColumnNames);
             setParseProgress(false);
         }).catch((err) => console.log('Something went wrong:', err))
@@ -47,20 +38,39 @@ export default function DatasetUpload() {
     function handleChange(event) {
         let datasets = event.target.files;
         setFiles(datasets);
-        console.log("parsing datasets...")
         parseDatasets(datasets);
     }
 
     function handleSubmit(event) {
         event.preventDefault();
 
-        const url = '/api/uploadCSV';
+        let column_select_data = {};
+
+        // get selected columndata
+        const purchaseTime = document.getElementById('timeSelect').value;
+        const purchasePrice = document.getElementById('priceSelect').value;
+        const purchaseArticleId = document.getElementById('article_idSelect').value;
+        const purchaseCustomerId = document.getElementById('customer_idSelect').value;
+
+        console.log(purchaseTime[4]);
+
+        column_select_data["purchaseData"] = {
+            "time": {"column_name": purchaseTime[0], "file_name": purchaseTime[1]},
+            "price": {"column_name": purchasePrice[0], "file_name": purchasePrice[1]},
+            "article_id": {"column_name": purchaseArticleId[0], "file_name": purchaseArticleId[1]},
+            "customer_id": {"column_name": purchaseCustomerId[0], "file_name": purchaseCustomerId[1]},
+        }
+
+        console.log(JSON.stringify(column_select_data));
+
+        const url = '/api/upload_datasets';
 
         const formData = new FormData();
-
         for (let i = 0; i < files.length; i++) {
             formData.append('files', files[i]);
         }
+
+        formData.append('data', JSON.stringify(column_select_data))
 
         const config = {
             headers: {
@@ -74,8 +84,10 @@ export default function DatasetUpload() {
     }
 
     function handleReset() {
+        setFiles([])
         setDatasetColumnNames([])
-        document.getElementById("DatasetUpload").reset();
+        setParseProgress(false)
+        document.getElementById("DatasetUploadForm").reset();
     }
 
     const displayColumnSelect = (name) => {
@@ -84,17 +96,20 @@ export default function DatasetUpload() {
                 <label>
                     {name}
                     <br></br>
-                    <select defaultValue={'DEFAULT'}>
-                        <option value="DEFAULT" disabled>Select a column</option>
-                        <option value="">column1</option>
-                        <option value="">column2</option>
-                        <option value="">column3</option>
-                        <option value="">column4</option>
+                    <select id={name + "Select"} defaultValue={'DEFAULT'} form={'DatasetUploadForm'}>
+                        <option value="DEFAULT" disabled hidden>Select a column</option>
                         {Object.keys(datasetColumnNames).map((datasetName, datasetNameIndex) => {
-                            {datasetColumnNames[datasetName].map((columnName, columnNameIndex) => {
-                                {console.log(columnName)}
-                                return <option value="">{columnName}</option>
-                            })}
+                            return (
+                                <optgroup label={datasetName} key={datasetNameIndex}>
+                                    {datasetColumnNames[datasetName].map((columnName, columnNameIndex) => {
+                                        return (
+                                            <option value={columnName + datasetName} key={columnNameIndex}>
+                                                {columnName}
+                                            </option>
+                                        )
+                                    })}
+                                </optgroup>
+                            )
                         })}
                     </select>
                 </label>
@@ -105,36 +120,40 @@ export default function DatasetUpload() {
     return (
         <div className="App" style={{textAlign: "center"}}>
             <h1>Dataset Upload</h1>
-            <input type="file" name="csv_file" multiple onChange={handleChange} accept=".csv"
+            <input type="file" name="csv_file" form={'DatasetUploadForm'} multiple onChange={handleChange} accept=".csv"
                    style={{display: "block", margin: "10px auto"}}/>
-            <form id="DatasetUpload" onSubmit={handleSubmit}>
+            <form id="DatasetUploadForm" onSubmit={handleSubmit}>
                 <button type="submit" style={{display: "block", margin: "10px auto"}}>Upload</button>
             </form>
+            <button style={{display: "block", margin: "10px auto"}} onClick={handleReset}>Reset</button>
             <button style={{display: "block", margin: "10px auto"}} onClick={handleReset}>Reset</button>
             {parseProgress && PurpleSpinner()}
 
             {/*purchase data*/}
-            <h3>Purchase data columns</h3>
+            <h2>Purchase data columns</h2>
             {displayColumnSelect("time")}
             {displayColumnSelect("price")}
             {displayColumnSelect("article_id")}
             {displayColumnSelect("customer_id")}
 
-            {/*metadata*/}
-            <h2>Metadata</h2>
+            {/*article metadata*/}
+            <h2>Article metadata columns</h2>
             <div>
                 <label>
-                    <input type="checkbox"/>
+                    <input id={'GenerateArticleMetadata'} type="checkbox"/>
                     Generate Metadata?
                 </label>
             </div>
-
-            {/*article metadata*/}
-            <h3>Article metadata columns</h3>
             {displayColumnSelect("article_id")}
 
             {/*customer metadata*/}
-            <h3>Customer metadata columns</h3>
+            <h2>Customer metadata columns</h2>
+            <div>
+                <label>
+                    <input id={'GenerateCustomerMetadata'} type="checkbox"/>
+                    Generate Metadata?
+                </label>
+            </div>
             {displayColumnSelect("customer_id")}
 
             {datasetColumnNames["testfile.csv"]}
