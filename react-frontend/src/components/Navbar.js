@@ -4,21 +4,21 @@ import React from 'react';
 
 function LoginButton() {
     return <li className="nav-item">
-        <Link to="/sign_in" className="flexible button-purple">Log in
+        <Link to="/sign_in" className="flexible orange-hover button-purple">Log in
         </Link>
     </li>
 }
 
 function SetupButton() {
     return <li className="nav-item">
-        <Link to="/abtest/setup" className="flexible button-purple">Setup
+        <Link to="/abtest/setup" className="flexible orange-hover button-purple">Setup
         </Link>
     </li>
 }
 
 function AccountButton() {
     return <li className="nav-item">
-        <Link to="/account" className="flexible button-purple">Account
+        <Link to="/account" className="flexible orange-hover button-purple">Account
         </Link>
     </li>
 }
@@ -37,7 +37,7 @@ function Logo() {
 function SignUpButton() {
     return <li className="nav-item">
         <Link to="/sign_up"
-              className="button-purple flexible">Sign Up
+              className="orange-hover button-purple flexible">Sign Up
         </Link>
     </li>
 }
@@ -45,7 +45,7 @@ function SignUpButton() {
 function UploadDataSetButton() {
     return (
         <li className="nav-item">
-            <Link to="/dataset/upload" className="flexible button-purple">Upload Dataset
+            <Link to="/dataset/upload" className="flexible orange-hover button-purple">Upload Dataset
             </Link>
         </li>
     )

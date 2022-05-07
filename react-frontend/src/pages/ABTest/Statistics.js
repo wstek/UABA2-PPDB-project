@@ -5,6 +5,7 @@ import {useEffect, useState} from "react";
 import ABTestPicker from "../../components/ABTestpicker";
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
 
+import SearchUser from "./SearchUser";
 function Statistics() {
     // Currently selected ab test id
     const [selected_abtest, setSelectedABTest] = useState(null)
@@ -34,7 +35,6 @@ function Statistics() {
         // retrain: 40, window: 9, K: 70, Normalize: 1, name: "algorithm3"}
     ]
 
-
     function fetchCurrentUserABTestIDs() {
         let url = '/api/abtest/statistics/'
         fetchData(url, setPersonalABTests)
@@ -57,6 +57,10 @@ function Statistics() {
         setPurchases(null)
         fetchData('/api/abtest/statistics/' + selected_abtest + '/purchases_over_time', setPurchases, abortCont)
     }
+    function fetchCTROverTime(abortCont) {
+        setClickThroughRate(null)
+        fetchData('/api/abtest/statistics/' + selected_abtest + '/CTR_over_time', setClickThroughRate, abortCont)
+    }
 
     useEffect(fetchCurrentUserABTestIDs, [],);
 
@@ -67,17 +71,48 @@ function Statistics() {
             fetchInputParameters(abortCont);
             fetchInputActiveUsersOverTime(abortCont);
             fetchInputPurchasesOverTime(abortCont)
+            fetchCTROverTime(abortCont)
         }
 
         return () => abortCont.abort();
 
     }, [selected_abtest],);
 
+    function handleDeleteABTest() {
+        let api = '/api/abtest/delete/' + selected_abtest + '/'
+        fetch(api, {
+            method: 'DELETE',
+            credentials: 'include',
+        }).then(res => {
+            return res.json()
+
+        }).then(data => {
+            // fetchCurrentUserABTestIDs()
+        }).catch(err => {
+            }
+        )
+        let temp = {...personal_abtests}
+        temp.personal_abtestids = personal_abtests.personal_abtestids.filter((item) =>
+            item !== parseInt(selected_abtest))
+        setPersonalABTests(temp)
+        setSelectedABTest(null)
+    }
+
     return (
         <div className="container-fluid  p-0 my-auto">
-            <div className="row text-center">
-                <ABTestPicker personal_abtests={personal_abtests} setSelectedABTest={setSelectedABTest}/>
+            <div className="row text-center align-items-center mb-3">
+                <ABTestPicker personal_abtests={personal_abtests} setSelectedABTest={setSelectedABTest} selected_abtest={selected_abtest}/>
             </div>
+            {selected_abtest &&
+                <div className="row text-center align-items-end">
+                    <div>
+                        <button className={"red-hover button-purple"}
+                                onClick={() => handleDeleteABTest()}>
+                            Remove ABTest
+                        </button>
+                    </div>
+                </div>
+            }
             {selected_abtest && <>
                 <div className="row text-center align-content-center justify-content-center">
                     <h1>Used algorithms information</h1>
@@ -93,6 +128,17 @@ function Statistics() {
                     <div className="col-12 col-lg-6 col-xl-6 col-xxl-6">
                         <LineChart chart_id={2} title={"Purchases"} XFnY={purchases}/>
                     </div>
+                    {/*<div className="col-12 col-lg-6 col-xl-6 col-xxl-6">*/}
+                    {/*    <SearchUser selected_abtest={selected_abtest}/>*/}
+                    {/*</div>*/}
+                </div>
+                <div className="row text-center align-content-center justify-content-center">
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 pl-">
+                        <LineChart chart_id={3} title="Click Through Rate" XFnY={clickThroughRate}/>
+                    </div>
+                    {/*<div className="col-12 col-lg-6 col-xl-6 col-xxl-6">*/}
+                    {/*    <LineChart chart_id={2} title={"Purchases"} XFnY={purchases}/>*/}
+                    {/*</div>*/}
                 </div>
 
                 {/*<div className="row text-center mt-5 align-content-center justify-content-center">*/}

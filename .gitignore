@@ -24,7 +24,7 @@ uploaded-files
 /sql/DatabaseSchemeTeam6.toc
 
 # Other
-.DS_Store
+datasets/*
 __pycache__
 .idea
 env

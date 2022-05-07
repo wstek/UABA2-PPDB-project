@@ -44,8 +44,8 @@ function Home({setPage}) { // begin van de app wow
                     </div>
                     <br/>
                     <div>
-                        <Link to="/abtest/setup" className="button-purple ">Start</Link>
-                        <Link to="/Statistics" className="button-purple ">Statistics</Link>
+                        <Link to="/abtest/setup" className="orange-hover button-purple ">Start</Link>
+                        <Link to="/Statistics" className="button-purple orange-hover">Statistics</Link>
 
                     </div>
 

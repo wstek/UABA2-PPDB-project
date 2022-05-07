@@ -108,8 +108,8 @@ function SignIn({setAuthed, setAdmin, ...props}) {
                             <Link to="/sign_up">Sign Up!</Link></div>
                     </div>
                     <div className="row mb-0 maxwidth-250 mx-auto">
-                        {!isPending && <button className="button-purple" onClick={handleSubmit}>Log in</button>}
-                        {isPending && <button disabled className="button-purple">Logging in...</button>}
+                        {!isPending && <button className="orange-hover button-purple" onClick={handleSubmit}>Log in</button>}
+                        {isPending && <button disabled className="orange-hover button-purple">Logging in...</button>}
                     </div>
                 </div>
             </div>

@@ -1,10 +1,9 @@
-import React, {useEffect, useState} from "react";
-import {useHistory} from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useHistory } from 'react-router-dom';
 
-const Dashboard = ({setAuthed, setAdmin}) => {
+const Dashboard = ({ setAuthed, setAdmin }) => {
     const [user, setUser] = useState("user");
-    const [id, setId] = useState(-1);
-    const [topk, setTopk] = useState([]);
+    const [displayData, setDisplayData] = useState([]);
     const history = useHistory();
     const [progress, setProgress] = useState(null);
     const [done, setDone] = useState(false);
@@ -35,7 +34,7 @@ const Dashboard = ({setAuthed, setAdmin}) => {
         const interval = setInterval(() => {
             fetch('/api/progress', {
                 method: 'GET',
-                headers: {"Content-Type": "application/json", 'Accept': 'application/json'},
+                headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
                 credentials: 'include'
             }).then((res) => res.json())
                 .then(data => {
@@ -44,16 +43,14 @@ const Dashboard = ({setAuthed, setAdmin}) => {
                         setDone(true);
                         clearInterval(interval);
                     } else {
-                        if (data.id !== id) {
-                            topk.push(data.topk)
-                            setId(data.id);
-                        }
+                        console.log(data.data)
+                        setDisplayData(data.data)
                     }
                 })
                 .catch((err) => {
                     // console.log(err.message);
                 })
-        }, 5000);
+        }, 2000);
         return () => {
             if (!cleared) {
                 clearInterval(interval);
@@ -65,7 +62,7 @@ const Dashboard = ({setAuthed, setAdmin}) => {
         fetch('/api/me', {
             method: 'GET',
             credentials: 'include',
-            headers: {"Content-Type": "application/json", 'Accept': 'application/json'}
+            headers: { "Content-Type": "application/json", 'Accept': 'application/json' }
         }).then(res => res.json())
             .then((data) => {
                 if (data.error) {
@@ -73,9 +70,9 @@ const Dashboard = ({setAuthed, setAdmin}) => {
                 }
                 setUser(data);
             }).catch((err) => {
-            setUser(null);
-            console.log(err);
-        })
+                setUser(null);
+                console.log(err);
+            })
     }
     return (
         <div>
@@ -89,7 +86,7 @@ const Dashboard = ({setAuthed, setAdmin}) => {
                 <h3>Email: {user.email}</h3>
                 <button onClick={logoutUser}>Logout</button>
             </div>}
-            {topk.map((d) =>
+            {displayData.map((d) =>
                 <p> {d} </p>
             )}
         </div>

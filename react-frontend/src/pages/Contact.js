@@ -11,7 +11,7 @@ function Contact() {
                 <input className="contact_email" type="text" id="fname2" placeholder="Enter email" name="fname2"/>
                 <textarea className="contact_text" type="text" id="fname3" placeholder="Type your question/comment"
                           name="fname3"></textarea>
-                <href className="button-purple contact-Submit-btn">Submit</href>
+                <href className="green-hover button-purple contact-Submit-btn">Submit</href>
             </div>
         </div>
     );
