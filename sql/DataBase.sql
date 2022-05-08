@@ -66,7 +66,6 @@ CREATE TABLE "article"
 
 );
 
-drop table article_attribute;
 create table "article_attribute"
 (
     "attribute_name"    varchar not null,
