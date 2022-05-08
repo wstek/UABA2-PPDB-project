@@ -14,7 +14,7 @@ import ProtectedRoute from './utils/ProtectedRoute';
 import Statistics from "./pages/ABTest/Statistics";
 import { handleLoggedIn } from './utils/handleLoggedIn'
 import Simulation from "./pages/Account/Simulation";
-import Home from "./pages/Home";
+import ChangeInfo from "./pages/Account/ChangeInfo";
 import SliderTest from "./pages/SliderTest";
 
 function App() {
@@ -64,9 +64,11 @@ function App() {
                         <ProtectedRoute component={Simulation} isLoading={isLoading} auth={auth} setAuthed={setAuthed}
                             setAdmin={setAdmin} exact path="/simulation" />
                         <ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth} exact
-                                        path="/statistics"/>
+                            path="/statistics" />
                         <ProtectedRoute component={DatasetUpload} isLoading={isLoading} auth={auth} exact
-                                        path="/dataset/upload"/>
+                            path="/dataset/upload" />
+                        <ProtectedRoute component={ChangeInfo} isLoading={isLoading} auth={auth} exact
+                            path="/account/changeinfo" />
                         <Route path="*">
                             <NotFound />
                         </Route>

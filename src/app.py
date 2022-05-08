@@ -354,6 +354,23 @@ def login_user1():
     LoggedIn = True
     return {"username": user.username, "email": user.email_address, "admin": admin is not None}
 
+@ app.route("/account/changeinfo/<stat>/<username>", methods=["POST", "OPTIONS"])
+@ cross_origin(supports_credentials=True)
+def change_info(stat, username):
+    if stat == "first_name":
+        firstname = request.json["changedFirstName"]
+        database_connection.session.execute(f"UPDATE datascientist  SET first_name = '{firstname}' WHERE username = '{username}'")
+        database_connection.session.commit()
+    if stat == "last_name":
+        lastname = request.json["changedLastName"]
+        database_connection.session.execute(f"UPDATE datascientist SET last_name = '{lastname}' WHERE username = '{username}' ")
+        database_connection.session.commit()
+
+    if stat == "email":
+        email = request.json["changedEmail"]
+        database_connection.session.execute(f"UPDATE datascientist SET email_address = '{email}' WHERE username = '{username}'")
+        database_connection.session.commit()
+    return {"succes": "succes"}
 
 @app.route("/api/start_simulation", methods=["POST", "OPTIONS"])
 @cross_origin(supports_credentials=True)

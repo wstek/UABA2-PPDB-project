@@ -57,7 +57,7 @@ function Account({ ...props }) {
                 <label className="Email">Email: {user.email}</label>
             </div>
 
-            <Link to="" className="Change_Info button-purple orange-hover">Change info</Link>
+            <Link to="/account/changeinfo" className="Change_Info button-purple orange-hover">Change info</Link>
             <Link to="/sign_in" onClick={logout} className="button-purple red-hover Log_Out">Log out</Link>
             {!isPending && <Link to="/sign_in" onClick={logout} className="button-purple Log_Out red-hover">Log out</Link>}
             {isPending && <button disabled className="button-purple red-hover Log_Out">Logging out...</button>}
