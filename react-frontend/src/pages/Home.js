@@ -5,7 +5,7 @@ import {ColoredLine} from "../components/ColoredLine";
 import {Link} from "react-router-dom";
 import React from 'react';
 
-function Home({setPage}) { // begin van de app wow
+function Home() {
     return (
         <div className="container-fluid pt-2 pb-5 pl-2 pr-2" id='homepage'>
             <div className="row text-center align-items-center">
@@ -39,7 +39,7 @@ function Home({setPage}) { // begin van de app wow
 
                     <div className="body-header">Setup</div>
                     <div className="body-paragraph">
-                        Our webapplication offers a way to compare recommendation algorithms with each
+                        Our web application offers a way to compare recommendation algorithms with each
                         other, Start now!
                     </div>
                     <br/>

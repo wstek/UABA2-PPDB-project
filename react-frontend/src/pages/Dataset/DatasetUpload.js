@@ -5,12 +5,24 @@ import {PurpleSpinner} from "../../components/PurpleSpinner"
 
 
 export default function DatasetUpload() {
+    // dataset files
     const [files, setFiles] = useState([]);
+
+    // dictionary that maps dataset file to columnnames
     const [datasetColumnNames, setDatasetColumnNames] = useState({});
-    const [parseProgress, setParseProgress] = useState(false)
+    // dictionary that maps "dataset file + columname" to [dataset file, columname]
+    const [datasetColumnNames2, setDatasetColumnNames2] = useState({});
+
+    // dataset files parsing progress
+    const [parseProgress, setParseProgress] = useState(false);
+
+    // checkboxes for generating metadata
+    const [generateArticleMetadata, setGenerateArticleMetadata] = useState(false);
+    const [generateCustomerMetadata, setGenerateCustomerMetadata] = useState(false);
 
     const parseDatasets = (datasets) => {
         const newDatasetColumnNames = {};
+        const newDatasetColumnNames2 = {};
         setParseProgress(true);
 
         Promise.all([...datasets].map((dataset) =>
@@ -28,9 +40,20 @@ export default function DatasetUpload() {
             )),
         ).then((results) => {
             results.forEach((result, index) => {
-                newDatasetColumnNames[datasets[index].name] = result.meta['fields'];
+                const column_names = result.meta['fields'];
+                const dataset_name = datasets[index].name;
+                newDatasetColumnNames[dataset_name] = column_names;
+
+                for (let i = 0; i < column_names.length; i++) {
+                    const column_name = column_names[i];
+                    newDatasetColumnNames2[dataset_name + column_name] = [dataset_name, column_name];
+                }
             })
+
+            // set states
             setDatasetColumnNames(newDatasetColumnNames);
+            setDatasetColumnNames2(newDatasetColumnNames2);
+
             setParseProgress(false);
         }).catch((err) => console.log('Something went wrong:', err))
     }
@@ -47,18 +70,39 @@ export default function DatasetUpload() {
         let column_select_data = {};
 
         // get selected columndata
-        const purchaseTime = document.getElementById('timeSelect').value;
-        const purchasePrice = document.getElementById('priceSelect').value;
-        const purchaseArticleId = document.getElementById('article_idSelect').value;
-        const purchaseCustomerId = document.getElementById('customer_idSelect').value;
+        const purchaseTime = document.getElementById('timeSelect');
+        const purchasePrice = document.getElementById('priceSelect');
+        const purchaseArticleId = document.getElementById('article idSelect');
+        const purchaseCustomerId = document.getElementById('customer idSelect');
 
-        console.log(purchaseTime[4]);
+        // todo check if all fields were selected
+        if (!purchaseTime || !purchasePrice || !purchaseArticleId || !purchaseCustomerId) {
+            console.log("Please fill in all input fields.");
+        }
 
         column_select_data["purchaseData"] = {
-            "time": {"column_name": purchaseTime[0], "file_name": purchaseTime[1]},
-            "price": {"column_name": purchasePrice[0], "file_name": purchasePrice[1]},
-            "article_id": {"column_name": purchaseArticleId[0], "file_name": purchaseArticleId[1]},
-            "customer_id": {"column_name": purchaseCustomerId[0], "file_name": purchaseCustomerId[1]},
+            "time": datasetColumnNames2[purchaseTime.value],
+            "price": datasetColumnNames2[purchasePrice.value],
+            "article_id": datasetColumnNames2[purchaseArticleId.value],
+            "customer_id": datasetColumnNames2[purchaseCustomerId.value],
+        }
+
+        column_select_data["generate_article_metadata"] = generateArticleMetadata;
+        if (!generateArticleMetadata) {
+            const metadataArticleId = document.getElementById('metadata article idSelect');
+
+            column_select_data["articleMetadata"] = {
+                "article_id": datasetColumnNames2[metadataArticleId.value]
+            }
+        }
+
+        column_select_data["generate_customer_metadata"] = generateCustomerMetadata;
+        if (!generateCustomerMetadata) {
+            const metadataCustomerId = document.getElementById('metadata customer idSelect');
+
+            column_select_data["customerMetadata"] = {
+                "customer_id": datasetColumnNames2[metadataCustomerId.value]
+            }
         }
 
         console.log(JSON.stringify(column_select_data));
@@ -96,14 +140,15 @@ export default function DatasetUpload() {
                 <label>
                     {name}
                     <br></br>
-                    <select id={name + "Select"} defaultValue={'DEFAULT'} form={'DatasetUploadForm'}>
+                    <select id={name + "Select"} defaultValue={'DEFAULT'} form={'DatasetUploadForm'}
+                            style={{width: "150px"}}>
                         <option value="DEFAULT" disabled hidden>Select a column</option>
                         {Object.keys(datasetColumnNames).map((datasetName, datasetNameIndex) => {
                             return (
                                 <optgroup label={datasetName} key={datasetNameIndex}>
                                     {datasetColumnNames[datasetName].map((columnName, columnNameIndex) => {
                                         return (
-                                            <option value={columnName + datasetName} key={columnNameIndex}>
+                                            <option value={datasetName + columnName} key={columnNameIndex}>
                                                 {columnName}
                                             </option>
                                         )
@@ -117,6 +162,36 @@ export default function DatasetUpload() {
         )
     }
 
+    const displayGenerateMetadataCheckbox = (label, id, setCheckboxState) => {
+        return (
+            <div>
+                <label>
+                    <input id={id} type="checkbox" onChange={(e) => {
+                        setCheckboxState(e.target.checked)
+                        // console.log(e.target.checked)
+                    }}/>
+                    {label}
+                </label>
+            </div>
+        )
+    }
+
+    const handleAddArticleMetadataAttribute = () => {
+
+    }
+
+    const handleAddCustomerMetadataAttribute = () => {
+
+    }
+
+    const displayArticleMetadataSelections = () => {
+
+    }
+
+    const displayCustomerMetadataSelections = () => {
+
+    }
+
     return (
         <div className="App" style={{textAlign: "center"}}>
             <h1>Dataset Upload</h1>
@@ -126,37 +201,40 @@ export default function DatasetUpload() {
                 <button type="submit" style={{display: "block", margin: "10px auto"}}>Upload</button>
             </form>
             <button style={{display: "block", margin: "10px auto"}} onClick={handleReset}>Reset</button>
-            <button style={{display: "block", margin: "10px auto"}} onClick={handleReset}>Reset</button>
             {parseProgress && PurpleSpinner()}
 
             {/*purchase data*/}
             <h2>Purchase data columns</h2>
             {displayColumnSelect("time")}
             {displayColumnSelect("price")}
-            {displayColumnSelect("article_id")}
-            {displayColumnSelect("customer_id")}
+            {displayColumnSelect("article id")}
+            {displayColumnSelect("customer id")}
 
             {/*article metadata*/}
             <h2>Article metadata columns</h2>
-            <div>
-                <label>
-                    <input id={'GenerateArticleMetadata'} type="checkbox"/>
-                    Generate Metadata?
-                </label>
-            </div>
-            {displayColumnSelect("article_id")}
+            {displayGenerateMetadataCheckbox(
+                "Generate Metadata?",
+                "GenerateArticleMetadata",
+                setGenerateArticleMetadata
+            )}
+            {!generateArticleMetadata && displayColumnSelect("metadata article id")}
+            <button style={{display: "block", margin: "10px auto"}} onClick={handleAddArticleMetadataAttribute}>Add
+                article attribute
+            </button>
+            {displayArticleMetadataSelections}
 
             {/*customer metadata*/}
             <h2>Customer metadata columns</h2>
-            <div>
-                <label>
-                    <input id={'GenerateCustomerMetadata'} type="checkbox"/>
-                    Generate Metadata?
-                </label>
-            </div>
-            {displayColumnSelect("customer_id")}
-
-            {datasetColumnNames["testfile.csv"]}
+            {displayGenerateMetadataCheckbox(
+                "Generate Metadata?",
+                "GenerateCustomerMetadata",
+                setGenerateCustomerMetadata
+            )}
+            {!generateCustomerMetadata && displayColumnSelect("metadata customer id")}
+            <button style={{display: "block", margin: "10px auto"}} onClick={handleAddCustomerMetadataAttribute}>Add
+                customer attribute
+            </button>
+            {displayCustomerMetadataSelections}
         </div>
     );
 }

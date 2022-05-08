@@ -1,14 +1,14 @@
+import json
 import os
 from datetime import timedelta
 
-import redis
 import flask
+import redis
 from flask import Flask, request, session
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_session import Session
 from werkzeug.utils import secure_filename
-import json
 
 from ABTestSimulation import ABTestSimulation, remove_tuples
 from DatabaseConnection import DatabaseConnection
@@ -107,12 +107,14 @@ def del_abtest(abtest_id):
 @app.route("/api/abtest/statistics/<int:customer_id>/<int:selected_abtest>")
 @cross_origin(supports_credentials=True)
 def get_user_attributes(customer_id, selected_abtest):
-    attr = database_connection.session.execute(f"select attribute_name, attribute_value from  customer_attribute natural join  ab_test where customer_id = '{customer_id}'and abtest_id = '{selected_abtest}';").fetchall()
+    attr = database_connection.session.execute(
+        f"select attribute_name, attribute_value from  customer_attribute natural join  ab_test where customer_id = '{customer_id}'and abtest_id = '{selected_abtest}';").fetchall()
     response = dict()
     for r in attr:
         response[r[0]] = r[1]
 
     return response
+
 
 @app.route("/api/abtest/statistics/<int:abtest_id>/<stat>")
 @cross_origin(supports_credentials=True)
@@ -163,12 +165,16 @@ def get_stat(abtest_id, stat):
                 y_stat[x][users_data[y]] = {"history": [], "algorithms": {}}
                 for z in range(len(algorithms_data)):
                     statistics_id = database_connection.session.execute(
-                        f"SELECT statistics_id FROM statistics WHERE date_of = '{date_data[x]}' AND algorithm_id = {algorithms_data[z][0]} AND abtest_id = {abtest_id}").fetchall()
+                        f"SELECT statistics_id FROM statistics WHERE date_of = '{date_data[x]}' AND algorithm_id = "
+                        f"{algorithms_data[z][0]} AND abtest_id = {abtest_id}").fetchall()
                     k_recommendations = database_connection.session.execute(
-                        f"SELECT sub.article_id FROM (SELECT article_id, recommendation_id FROM recommendation WHERE customer_id = {users_data[y]} AND statistics_id = {statistics_id[0][0]} AND dataset_name = '{dataset_name[0][0]}' ORDER BY recommendation_id ASC) AS sub").fetchall()
+                        f"SELECT sub.article_id FROM (SELECT article_id, recommendation_id FROM recommendation WHERE "
+                        f"customer_id = {users_data[y]} AND statistics_id = {statistics_id[0][0]} AND dataset_name = "
+                        f"'{dataset_name[0][0]}' ORDER BY recommendation_id ASC) AS sub").fetchall()
                     remove_tuples(k_recommendations)
                     history = database_connection.session.execute(
-                        f"SELECT article_id FROM purchase WHERE customer_id = {users_data[y]} AND bought_on < '{date_data[x]}'").fetchall()
+                        f"SELECT article_id FROM purchase WHERE customer_id = {users_data[y]} AND bought_on < "
+                        f"'{date_data[x]}'").fetchall()
                     remove_tuples(history)
                     y_stat[x][users_data[y]]["history"] = history
                     y_stat[x][users_data[y]]["algorithms"][algorithms_data[z][
@@ -189,17 +195,22 @@ def get_stat(abtest_id, stat):
             algorithms.append({"algorithm_id": data[
                 i][0], "algorithm_name": data[i][1]})
             parameters = database_connection.session.execute(
-                f"SELECT parameter_name, value FROM parameter WHERE algorithm_id = {data[i][0]} AND abtest_id = {abtest_id}").fetchall()
+                f"SELECT parameter_name, value FROM parameter WHERE algorithm_id = {data[i][0]} AND abtest_id = "
+                f"{abtest_id}").fetchall()
             database_connection.session.commit()
             for k in range(len(parameters)):
                 algorithms[i][parameters[k][0]] = parameters[k][1]
 
-        return {"abtest_summary": {"abtest_id": abtest_summary[0], "top_k": abtest_summary[1], "stepsize": abtest_summary[2], "start": abtest_summary[3],
-                "end": abtest_summary[4], "dataset_name": abtest_summary[5], "created_on": abtest_summary[6], "created_by": abtest_summary[7]}, "algorithms": algorithms}
+        return {"abtest_summary": {"abtest_id": abtest_summary[0], "top_k": abtest_summary[1],
+                                   "stepsize": abtest_summary[2], "start": abtest_summary[3],
+                                   "end": abtest_summary[4], "dataset_name": abtest_summary[5],
+                                   "created_on": abtest_summary[6], "created_by": abtest_summary[7]},
+                "algorithms": algorithms}
 
     if stat == "active_users_over_time":
         datetimes = database_connection.session.execute(
-            f"SELECT date_of,COUNT(DISTINCT(customer_id)) FROM statistics natural join customer_specific_statistics WHERE abtest_id = {abtest_id} group by date_of").fetchall()
+            f"SELECT date_of,COUNT(DISTINCT(customer_id)) FROM statistics natural join customer_specific_statistics "
+            f"WHERE abtest_id = {abtest_id} group by date_of").fetchall()
         XFnY = [[str(r[0]), r[1]] for r in datetimes]
         XFnY.insert(0, ['Date', 'Users'])
         return {'graphdata': XFnY}
@@ -207,7 +218,7 @@ def get_stat(abtest_id, stat):
         datetimes = database_connection.session.execute(
             f"SELECT DISTINCT date_of FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
         XFnY = [['Date', 'Purchases']]
-        XFnY = [['Date', 'Purchases'] ]
+        XFnY = [['Date', 'Purchases']]
         for i in range(len(datetimes)):
             countz = database_connection.session.execute(
                 f"SELECT COUNT(customer_id) FROM purchase WHERE bought_on = '{datetimes[i][0]}'").fetchall()
@@ -218,7 +229,8 @@ def get_stat(abtest_id, stat):
         XFnY = []
         # ['Date', 'ClickThroughRate']
         datetimes = database_connection.session.execute(
-            f"SELECT date_of, algorithm_id,parameter_value FROM statistics NATURAL JOIN dynamic_stepsize_var NATURAL JOIN  algorithm WHERE abtest_id = {abtest_id} AND parameter_name = 'CTR' ORDER BY date_of").fetchall()
+            f"SELECT date_of, algorithm_id,parameter_value FROM statistics NATURAL JOIN dynamic_stepsize_var NATURAL "
+            f"JOIN  algorithm WHERE abtest_id = {abtest_id} AND parameter_name = 'CTR' ORDER BY date_of").fetchall()
         datetime = None
         Y = []
         legend = ["Date"]
@@ -246,7 +258,9 @@ def get_stat(abtest_id, stat):
         XFnY = []
         # ['Date', 'ClickThroughRate']
         datetimes = database_connection.session.execute(
-            f"SELECT date_of, algorithm_id,parameter_value FROM statistics NATURAL JOIN dynamic_stepsize_var NATURAL JOIN  algorithm WHERE abtest_id = {abtest_id} AND parameter_name = 'ATTR_RATE' ORDER BY date_of").fetchall()
+            f"SELECT date_of, algorithm_id,parameter_value FROM statistics NATURAL JOIN dynamic_stepsize_var NATURAL "
+            f"JOIN  algorithm WHERE abtest_id = {abtest_id} AND parameter_name = 'ATTR_RATE' ORDER BY date_of"
+        ).fetchall()
         datetime = None
         Y = []
         legend = ["Date"]
@@ -268,7 +282,6 @@ def get_stat(abtest_id, stat):
                 Y = [str(datetime)]
             Y.append(value)
         XFnY.append(Y)
-
 
 
 # @ app.before_request
@@ -296,12 +309,15 @@ def register_user():
     email = request.json["email"]
     username = request.json["username"]
     password = request.json["password"]
+
     user = database_connection.session.execute(
         "SELECT * FROM datascientist WHERE username = :username OR email_address = :email",
         {"username": username, "email": email}).fetchall()
     database_connection.session.commit()
+
     if user:
         return {"error": "User already exists"}, 409
+
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     database_connection.session.execute(
         "INSERT INTO datascientist("
@@ -375,13 +391,17 @@ def start_simulation():
         database_connection.session.commit()
         algorithms[i]["id"] = algorithm_id
         for param, value in algorithms[i]["parameters"].items():
-            database_connection.session.execute("INSERT INTO parameter(parameter_name, algorithm_id, abtest_id, type, value) VALUES(:parametername, :algorithm_id, :abtest_id, :type, :value)",
-                                                {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "type": "string", "value": value})
+            database_connection.session.execute(
+                "INSERT INTO parameter(parameter_name, algorithm_id, abtest_id, type, value) VALUES(:parametername, "
+                ":algorithm_id, :abtest_id, :type, :value)",
+                {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "type": "string",
+                 "value": value})
         database_connection.session.commit()
 
     global exporting_threads
     exporting_threads[0] = ABTestSimulation(database_connection,
-                                            {"abtest_id": abtest_id, "start": start, "end": end, "topk": topk, "stepsize": stepsize,
+                                            {"abtest_id": abtest_id, "start": start, "end": end, "topk": topk,
+                                             "stepsize": stepsize,
                                              "dataset_name": dataset_name, "algorithms": algorithms})
     exporting_threads[0].start()
     return "200"
