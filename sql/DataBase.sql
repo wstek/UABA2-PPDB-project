@@ -49,8 +49,8 @@ CREATE TABLE "ab_test"
     "abtest_id"    serial primary key,
     "top_k"        nat_int NOT NULL,
     "stepsize"     nat_int NOT NULL,
-    "start"        date    NOT NULL,
-    "end"          date    NOT NULL check (start < "end"),
+    "start_date"        date    NOT NULL,
+    "end_date"          date    NOT NULL check (start_date < "end_date"),
     "dataset_name" varchar NOT NULL references dataset (name) on update cascade on delete cascade,
     "created_on"   date    NOT NULL default now(),
     "created_by"   varchar NOT NULL references "datascientist" (username) on update cascade on delete cascade
