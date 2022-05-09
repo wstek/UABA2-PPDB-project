@@ -142,6 +142,7 @@ def logIpAddress():
                request.environ.get('HTTP_X_REAL_IP', request.remote_addr), True)
     return "200"
 
+
 # dataset
 @app.route("/api/upload_datasets", methods=["POST"])
 def uploadCSV():
@@ -203,7 +204,7 @@ def start_simulation():
 
     database_connection.session.execute(
         'INSERT INTO "ab_test"('
-        'start, "end", top_k, stepsize, dataset_name, created_by) '
+        'start_date, "end_date", top_k, stepsize, dataset_name, created_by) '
         'VALUES(:start, :end, :top_k, :stepsize, :dataset_name, :created_by)',
         {"start": start, "end": end, "top_k": int(topk), "stepsize": int(stepsize), "dataset_name": dataset_name,
          "created_by": session["user_id"]})
@@ -240,6 +241,7 @@ def start_simulation():
     session["simulation"].start()
     return "200"
 
+
 @app.route("/api/progress", methods=['GET'])
 def get_data():
     if ("simulation" in session) and not (session["simulation"].done):
@@ -264,7 +266,8 @@ def get_personal_abtestids():
 
 @app.route("/api/users/<int:abtest_id>", methods=['GET'])
 def get_users(abtest_id):
-    users = database_connection.session.execute(f"SELECT customer_id FROM customer NATURAL JOIN ab_test WHERE abtest_id= '{abtest_id}'").fetchall()
+    users = database_connection.session.execute(
+        f"SELECT customer_id FROM customer NATURAL JOIN ab_test WHERE abtest_id= '{abtest_id}'").fetchall()
     for u in range(len(users)):
         users[u] = users[u][0]
     return {"userlist": users}
@@ -297,10 +300,11 @@ def get_stat(abtest_id, stat):
         top_k = result[0][3]
         dataset_name = result[0][4]
         created_on = result[0][5]
-        returnvalue = {'dates': [], 'start_date': start_date, 'end_date':end_date, 'top-k': top_k, 'dataset-name': dataset_name, 'created-on': created_on}
+        returnvalue = {'dates': [], 'start_date': start_date, 'end_date': end_date, 'top-k': top_k,
+                       'dataset-name': dataset_name, 'created-on': created_on}
 
         for n in range(int((end_date - start_date).days)):
-            date = (start_date + timedelta(stepsize*n))
+            date = (start_date + timedelta(stepsize * n))
 
             returnvalue['dates'].append(date)
         return returnvalue
