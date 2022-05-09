@@ -7,38 +7,25 @@ import Widget from "../../components/widget/Widget";
 import "./dashboard.css"
 // const Dashboard = ({ setAuthed, setAdmin }) => {
 const Dashboard = () => {
-    // const [displayData, setDisplayData] = useState([]);
     const history = useHistory();
-    const [progress, setProgress] = useState({start:0, end:0});
+    const [progress, setProgress] = useState({ start: 0, end: 0 });
 
     useEffect(() => {
-        var cleared = false;
-        const interval = setInterval(() => {
-            fetch('/api/progress', {
-                method: 'GET',
-                headers: { "Content-Type": "application/json", 'Accept': 'application/json' },
-                credentials: 'include'
-            }).then((res) => res.json())
-                .then(data => {
-                    if (data.done === true) {
-                        cleared = true
-                        const new_start = progress.end
-                        setProgress({start:new_start, end:100})
-                        clearInterval(interval);
-                    } else {
-                        const new_start = progress.end
-                        setProgress({start:new_start, end:data.progress})
-                    }
-                })
-                .catch((err) => {
-                    console.log(err.message);
-                })
-        }, 2000);
-        return () => {
-            if (!cleared) {
-                clearInterval(interval);
-            }
+        const sse = new EventSource("/api/stream",
+            { withCredentials: true });
+
+        sse.addEventListener("simulation_progress", (e) => {
+            const new_start = progress.end
+            setProgress({ start: new_start, end: e.data })
+        })
+
+        sse.onerror = (e) => {
+            // error log here
+            sse.close();
         }
+        return () => {
+            sse.close();
+        };
     }, []);
 
     return (

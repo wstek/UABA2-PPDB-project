@@ -7,6 +7,8 @@ import {fetchData} from "../../utils/fetchAndExecuteWithData";
 import DateSlider from "../../components/DateSlider";
 
 import SearchUser from "./SearchUser";
+import UserTable from "./UserTable";
+
 
 function Statistics() {
     // Currently selected ab test id
@@ -101,7 +103,6 @@ function Statistics() {
         setSelectedABTest(null)
     }
 
-    // console.log(ABTest_data && ABTest_data.dates)
     return (
         <div className="container-fluid  p-0 my-auto">
             <div className="row text-center align-items-center mb-3">
@@ -154,7 +155,11 @@ function Statistics() {
                     {/*    <LineChart chart_id={2} title={"Purchases"} XFnY={purchases}/>*/}
                     {/*</div>*/}
                 </div>
-
+                <div className="row text-center align-content-center justify-content-center">
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 pl-">
+                        <UserTable abtest_id={selected_abtest}/>
+                    </div>
+                </div>
                 {/*<div className="row text-center mt-5 align-content-center justify-content-center">*/}
                 {/*    <h4>Click Through Rate</h4>*/}
                 {/*    <LineChart chart_id={3} title={"CTR"} google={google} algorithms={algorithms} matrix={matrix}/>*/}
