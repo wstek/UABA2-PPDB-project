@@ -3,6 +3,8 @@ import axios from "axios";
 import Papa from "papaparse";
 import {PurpleSpinner} from "../../components/PurpleSpinner"
 
+// todo: limit selection to not selected columns and columns from the same csv file
+// todo: don't upload and process csv files that are not used
 
 export default function DatasetUpload() {
     // dataset files
@@ -58,13 +60,13 @@ export default function DatasetUpload() {
         }).catch((err) => console.log('Something went wrong:', err))
     }
 
-    function handleChange(event) {
+    function handleFileselect(event) {
         let datasets = event.target.files;
         setFiles(datasets);
         parseDatasets(datasets);
     }
 
-    function handleSubmit(event) {
+    function handleUpload(event) {
         event.preventDefault();
 
         let column_select_data = {};
@@ -195,9 +197,9 @@ export default function DatasetUpload() {
     return (
         <div className="App" style={{textAlign: "center"}}>
             <h1>Dataset Upload</h1>
-            <input type="file" name="csv_file" form={'DatasetUploadForm'} multiple onChange={handleChange} accept=".csv"
+            <input type="file" name="csv_file" form={'DatasetUploadForm'} multiple onChange={handleFileselect} accept=".csv"
                    style={{display: "block", margin: "10px auto"}}/>
-            <form id="DatasetUploadForm" onSubmit={handleSubmit}>
+            <form id="DatasetUploadForm" onSubmit={handleUpload}>
                 <button type="submit" style={{display: "block", margin: "10px auto"}}>Upload</button>
             </form>
             <button style={{display: "block", margin: "10px auto"}} onClick={handleReset}>Reset</button>

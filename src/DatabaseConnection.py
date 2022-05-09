@@ -15,7 +15,6 @@ from Logger import Logger
 from config import configDatabase
 
 
-
 class DatabaseConnection:
     def __init__(self):
         self.engine = None
@@ -41,6 +40,11 @@ class DatabaseConnection:
         """
         db_version = self.session.execute("SELECT version()").fetchone()[0]
         Logger.log("PostgreSQL database version:" + db_version)
+
+    def reflectMetaData(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=sa_exc.SAWarning)
+            self.meta_data.reflect()
 
     def queryTable(self, table, query_data: dict):
         return self.session.query(table).filter_by(**query_data)
@@ -139,8 +143,7 @@ class DatabaseConnection:
             if attribute_name == meta_data_type + "_id":
                 continue
 
-            df_meta_data_attribute_table = df_csv[[
-                meta_data_type + "_id"]].copy()
+            df_meta_data_attribute_table = df_csv[[meta_data_type + "_id"]].copy()
             df_meta_data_attribute_table["dataset_name"] = dataset_name
             df_meta_data_attribute_table["attribute_name"] = attribute_name
             df_meta_data_attribute_table["attribute_value"] = df_csv[attribute_name].copy(
