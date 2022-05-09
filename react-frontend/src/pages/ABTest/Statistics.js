@@ -65,6 +65,10 @@ function Statistics() {
         setClickThroughRate(null)
         fetchData('/api/abtest/statistics/' + selected_abtest + '/CTR_over_time', setClickThroughRate, abortCont)
     }
+    function fetchAttRateOverTime(abortCont) {
+        setAttributionRate(null)
+        fetchData('/api/abtest/statistics/' + selected_abtest + '/AttrRate_over_time', setAttributionRate, abortCont)
+    }
 
     useEffect(fetchCurrentUserABTestIDs, [],);
     useEffect(() => {
@@ -76,6 +80,7 @@ function Statistics() {
             fetchInputActiveUsersOverTime(abortCont);
             fetchInputPurchasesOverTime(abortCont)
             fetchCTROverTime(abortCont)
+            fetchAttRateOverTime(abortCont)
 
         }
 
@@ -131,7 +136,7 @@ function Statistics() {
                                 setEndIndex={setEndIndex}>
                     </DateSlider>
                 </div>
-                <div className="row text-center mt-5 align-content-center justify-content-center">
+                <div className="row text-center align-content-center justify-content-center">
                     <h1>Charts</h1>
                 </div>
                 <div className="row text-center align-content-center justify-content-center">
@@ -151,9 +156,9 @@ function Statistics() {
                         <LineChart chart_id={3} title="Click Through Rate" xMin={StartIndex} xMax={EndIndex}
                                    XFnY={clickThroughRate}/>
                     </div>
-                    {/*<div className="col-12 col-lg-6 col-xl-6 col-xxl-6">*/}
-                    {/*    <LineChart chart_id={2} title={"Purchases"} XFnY={purchases}/>*/}
-                    {/*</div>*/}
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6">
+                        <LineChart chart_id={2} title={"Attribution Rate"} xMin={StartIndex} xMax={EndIndex} XFnY={attributionRate}/>
+                    </div>
                 </div>
                 <div className="row text-center align-content-center justify-content-center">
                     <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 pl-">

@@ -303,9 +303,8 @@ def get_stat(abtest_id, stat):
             date = (start_date + timedelta(stepsize*n))
 
             returnvalue['dates'].append(date)
-
-
         return returnvalue
+
     if stat == "algorithm_information":
         algorithm_id: int
         algorithm_name: str
@@ -407,6 +406,34 @@ def get_stat(abtest_id, stat):
             XFnY.append([str(datetimes[i][0]), countz[0][0]])
         return {'graphdata': XFnY}
 
+    if stat == "AttrRate_over_time":
+        XFnY = []
+        # ['Date', 'ClickThroughRate']
+        datetimes = database_connection.session.execute(
+            f"SELECT date_of, algorithm_id,parameter_value FROM statistics NATURAL JOIN dynamic_stepsize_var NATURAL "
+            f"JOIN  algorithm WHERE abtest_id = {abtest_id} AND parameter_name = 'ATTR_RATE' ORDER BY date_of").fetchall()
+        datetime = None
+        Y = []
+        legend = ["Date"]
+        for index in range(len(datetimes)):
+            entry = datetimes[index]
+            algorithm_id = entry[1]
+            if str(algorithm_id) not in legend:
+                legend.append(str(algorithm_id))
+            else:
+                XFnY.append(legend)
+                break
+        for index in range(len(datetimes)):
+            entry = datetimes[index]
+            value = float(entry[2])
+            if datetime != entry[0]:
+                if len(Y):
+                    XFnY.append(Y)
+                datetime = entry[0]
+                Y = [str(datetime)]
+            Y.append(value)
+        XFnY.append(Y)
+        return {'graphdata': XFnY}
     if stat == "CTR_over_time":
         XFnY = []
         # ['Date', 'ClickThroughRate']
