@@ -5,11 +5,6 @@ from iknn import ItemKNNIterative
 import random
 import numpy
 from psycopg2.extensions import register_adapter, AsIs
-# import copy
-# from pydoc import cli
-# import time
-# from DatabaseConnection import DatabaseConnection
-# from iknn import ItemKNN
 
 
 def addapt_numpy_float64(numpy_float64):
@@ -23,8 +18,8 @@ def addapt_numpy_int64(numpy_int64):
 register_adapter(numpy.float64, addapt_numpy_float64)
 register_adapter(numpy.int64, addapt_numpy_int64)
 
-
 # TODO als er data is achter de start date van de simulatie mogen we deze data dan gebruiken (bv voor training, etc)
+
 
 class UserDataPerStep:
     def __init__(self, step_date, active):
@@ -39,13 +34,20 @@ def remove_tuples(arr):
 
 
 class ABTestSimulation(threading.Thread):
-    def __init__(self, database_connection, abtest):
-        self.database_connection = database_connection
+    def __init__(self, database_connection, sse, app, abtest):
+        super().__init__()
+        self.sse = sse
+        self.app = app
         self.frontend_data = []
         self.done = False
         self.abtest = abtest
-        self.progress = 0
-        super().__init__()
+        self.database_connection = database_connection
+
+    def __getstate__(self):
+        return (self.frontend_data, self.done, self.abtest, self.progress)
+
+    def __setstate__(self, state):
+        self.frontend_data, self.done, self.abtest, self.progress = state
 
     def insertCustomer(self, customer_id, statistics_id, dataset_name):
         self.database_connection.session.execute(
@@ -622,8 +624,8 @@ class ABTestSimulation(threading.Thread):
                         for i in range(len(top_k)):
                             top_k_items.append(top_k[i][0])
                         dynamic_info_algorithms[idx]["prev_top_k"] = top_k_items
-
-                self.progress = round(n_day/float(dayz), 2)*100.0
-                # str(round(answer, 2))
+                with self.app.app_context():
+                    self.sse.publish(
+                        round(n_day/float(dayz), 2)*100.0, type='simulation_progress')
         self.done = True
         return

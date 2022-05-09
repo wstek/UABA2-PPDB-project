@@ -1,5 +1,6 @@
 from abc import abstractclassmethod
 from datetime import timedelta
+from time import sleep
 import redis
 from flask import Flask, request, session
 from flask_bcrypt import Bcrypt
@@ -10,6 +11,8 @@ from werkzeug.utils import secure_filename
 from ABTestSimulation import ABTestSimulation, remove_tuples
 from DatabaseConnection import DatabaseConnection
 from Logger import Logger
+from flask_sse import sse
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "changeme"
@@ -26,6 +29,9 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 # app.config['SESSION_PERMANENT'] = False
 # app.config['SESSION_USE_SIGNER'] = True
 
+app.register_blueprint(sse, url_prefix='/api/stream')
+app.config["REDIS_URL"] = "redis://localhost:6379"
+
 # 2 gigabyte file upload limit
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 2000
 app.config['UPLOAD_EXTENSIONS'] = ['.csv']
@@ -39,18 +45,21 @@ database_connection.logVersion()
 cors = CORS(app, supports_credentials=True, resources={
     '/*': {'origins': 'http://localhost:3000'}})  # https://team6.ua-ppdb.me/
 
-exporting_threads = {}
-LoggedIn = False
-
 
 @app.route("/api/progress", methods=['GET'])
 @cross_origin(supports_credentials=True)
 def get_data():
-    global exporting_threads
-    if exporting_threads and not(exporting_threads[0].done):
-        return {"data": exporting_threads[0].frontend_data, "progress": exporting_threads[0].progress}
+    if ("simulation" in session) and not(session["simulation"].done):
+        return {"data": session["simulation"].frontend_data, "progress": session["simulation"].progress}
     else:
         return {"done": True}
+
+
+@app.route('/api/hello')
+def publish1(val):
+    with app.app_context():
+        sse.publish({'message': val}, type='simulation_progress')
+    return "200"
 
 
 @app.route("/api/me", methods=['GET'])
@@ -299,7 +308,6 @@ def get_stat(abtest_id, stat):
 @app.route("/api/register", methods=["POST"])
 @cross_origin(supports_credentials=True)
 def register_user():
-    global LoggedIn
     firstname = request.json["firstname"]
     lastname = request.json["lastname"]
     birthdate = request.json["birthdate"]
@@ -326,14 +334,12 @@ def register_user():
     session["user_id"] = username
 
     session.permanent = True
-    LoggedIn = True
     return {"username": username, "email": email}
 
 
 @app.route("/api/login", methods=["POST"])
 @cross_origin(supports_credentials=True)
 def login_user1():
-    global LoggedIn
     username = request.json["username"]
     password = request.json["password"]
     user = database_connection.session.execute(
@@ -349,7 +355,6 @@ def login_user1():
 
     session.permanent = True
     session["user_id"] = user.username
-    LoggedIn = True
     return {"username": user.username, "email": user.email_address, "admin": admin is not None}
 
 
@@ -373,6 +378,7 @@ def change_info(stat, username):
             f"UPDATE datascientist SET email_address = '{email}' WHERE username = '{username}'")
         database_connection.session.commit()
     return {"succes": "succes"}
+
 
 @app.route("/api/start_simulation", methods=["POST", "OPTIONS"])
 @cross_origin(supports_credentials=True)
@@ -417,12 +423,11 @@ def start_simulation():
                  "value": value})
         database_connection.session.commit()
 
-    global exporting_threads
-    exporting_threads[0] = ABTestSimulation(database_connection,
-                                            {"abtest_id": abtest_id, "start": start, "end": end, "topk": topk,
-                                             "stepsize": stepsize,
-                                             "dataset_name": dataset_name, "algorithms": algorithms})
-    exporting_threads[0].start()
+    simul = ABTestSimulation(database_connection, sse, app, {"abtest_id": abtest_id, "start": start, "end": end, "topk": topk,
+                                                             "stepsize": stepsize,
+                                                             "dataset_name": dataset_name, "algorithms": algorithms})
+    session["simulation"] = simul
+    session["simulation"].start()
     return "200"
 
 
@@ -443,7 +448,8 @@ def uploadCSV():
             if not os.path.exists(app.config['UPLOAD_PATH']):
                 os.makedirs(app.config['UPLOAD_PATH'])
             # upload the file
-            uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+            uploaded_file.save(os.path.join(
+                app.config['UPLOAD_PATH'], filename))
     return "200"
 
 
@@ -461,9 +467,7 @@ def get_datasets():
 @app.route("/api/logout")
 @cross_origin(supports_credentials=True)
 def logout_user():
-    global LoggedIn
     if "user_id" in session:
-        LoggedIn = False
         session.pop("user_id")
     return "200"
 
