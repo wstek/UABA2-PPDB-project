@@ -65,10 +65,12 @@ body {
     background: #cc4f0e;
     transition: all 0.3s ease;
 }
+
 .red-hover:hover {
     background: #e80f0f;
     transition: all 0.3s ease;
 }
+
 .green-hover:hover {
     background: #0bcc62;
     transition: all 0.3s ease;
@@ -233,7 +235,7 @@ body {
     justify-content: center;
     width: 250px;
     height: 130px;
-    border: 1px solid #000;
+    border: 1px solid rgba(0, 0, 0, 0.246);
 }
 
 .info {
@@ -317,7 +319,8 @@ mohammed zijn troep
 }
 
 
-body, html {
+body,
+html {
     font-family: 'Karla', sans-serif;
 }
 

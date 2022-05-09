@@ -623,6 +623,7 @@ class ABTestSimulation(threading.Thread):
                             top_k_items.append(top_k[i][0])
                         dynamic_info_algorithms[idx]["prev_top_k"] = top_k_items
 
-                self.progress = n_day*100.0/float(dayz)
+                self.progress = round(n_day/float(dayz), 2)*100.0
+                # str(round(answer, 2))
         self.done = True
         return

@@ -1,8 +1,5 @@
-import json
-import os
+from abc import abstractclassmethod
 from datetime import timedelta
-
-import flask
 import redis
 from flask import Flask, request, session
 from flask_bcrypt import Bcrypt
@@ -50,8 +47,8 @@ LoggedIn = False
 @cross_origin(supports_credentials=True)
 def get_data():
     global exporting_threads
-    if exporting_threads:
-        return {"data": exporting_threads[0].frontend_data}
+    if exporting_threads and not(exporting_threads[0].done):
+        return {"data": exporting_threads[0].frontend_data, "progress": exporting_threads[0].progress}
     else:
         return {"done": True}
 
@@ -339,7 +336,8 @@ def login_user1():
     global LoggedIn
     username = request.json["username"]
     password = request.json["password"]
-    user = database_connection.session.execute(f"SELECT * FROM datascientist WHERE username = '{username}'").fetchone()
+    user = database_connection.session.execute(
+        f"SELECT * FROM datascientist WHERE username = '{username}'").fetchone()
     database_connection.session.commit()
     if not user:
         return {"error": "Account Does Not Exist"}, 401
@@ -354,21 +352,25 @@ def login_user1():
     LoggedIn = True
     return {"username": user.username, "email": user.email_address, "admin": admin is not None}
 
+
 @ app.route("/account/changeinfo/<stat>/<username>", methods=["POST", "OPTIONS"])
 @ cross_origin(supports_credentials=True)
 def change_info(stat, username):
     if stat == "first_name":
         firstname = request.json["changedFirstName"]
-        database_connection.session.execute(f"UPDATE datascientist  SET first_name = '{firstname}' WHERE username = '{username}'")
+        database_connection.session.execute(
+            f"UPDATE datascientist  SET first_name = '{firstname}' WHERE username = '{username}'")
         database_connection.session.commit()
     if stat == "last_name":
         lastname = request.json["changedLastName"]
-        database_connection.session.execute(f"UPDATE datascientist SET last_name = '{lastname}' WHERE username = '{username}' ")
+        database_connection.session.execute(
+            f"UPDATE datascientist SET last_name = '{lastname}' WHERE username = '{username}' ")
         database_connection.session.commit()
 
     if stat == "email":
         email = request.json["changedEmail"]
-        database_connection.session.execute(f"UPDATE datascientist SET email_address = '{email}' WHERE username = '{username}'")
+        database_connection.session.execute(
+            f"UPDATE datascientist SET email_address = '{email}' WHERE username = '{username}'")
         database_connection.session.commit()
     return {"succes": "succes"}
 

@@ -1,62 +1,62 @@
-.container {
+.multirangeslider .container {
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.slider {
+.multirangeslider .container .slider {
   position: relative;
   width: 200px;
 }
 
-.slider__track,
-.slider__range,
-.slider__left-value,
-.slider__right-value {
+.multirangeslider .container .slider .slider__track,
+.multirangeslider .container .slider .slider__range,
+.multirangeslider .container .slider .slider__left-value,
+.multirangeslider .container .slider .slider__right-value {
   position: absolute;
 }
 
-.slider__track,
-.slider__range {
+.multirangeslider .container .slider .slider__track,
+.multirangeslider .container .slider .slider__range {
   border-radius: 3px;
   height: 5px;
 }
 
-.slider__track {
+.multirangeslider .container .slider .slider__track {
   background-color: #ced4da;
   width: 100%;
   z-index: 1;
 }
 
-.slider__range {
+.multirangeslider .container .slider .slider__range {
   background-color: #7734E7FF;
   z-index: 2;
 }
 
-.slider__left-value,
-.slider__right-value {
+.multirangeslider .container .slider .slider__left-value,
+.multirangeslider .container .slider .slider__right-value {
   color: #7f7f7f;
   font-size: 12px;
   margin-top: 20px;
 }
 
-.slider__left-value {
+.multirangeslider .container .slider .slider__left-value {
   left: 6px;
 }
 
-.slider__right-value {
+.multirangeslider .container .slider .slider__right-value {
   right: -4px;
 }
 
 /* Removing the default appearance */
-.thumb,
-.thumb::-webkit-slider-thumb {
+.multirangeslider .container .thumb,
+.multirangeslider .container .thumb::-webkit-slider-thumb {
   -webkit-appearance: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-.thumb {
+.multirangeslider .container .thumb {
   pointer-events: none;
   position: absolute;
   height: 0;
@@ -64,20 +64,20 @@
   outline: none;
 }
 
-.thumb--zindex-3 {
+.multirangeslider .container .thumb--zindex-3 {
   z-index: 3;
 }
 
-.thumb--zindex-4 {
+.multirangeslider .container .thumb--zindex-4 {
   z-index: 4;
 }
 
-.thumb--zindex-5 {
+.multirangeslider .container .thumb--zindex-5 {
   z-index: 5;
 }
 
 /* For Chrome browsers */
-.thumb::-webkit-slider-thumb {
+.multirangeslider .container .thumb::-webkit-slider-thumb {
   background-color: #f1f5f7;
   border: none;
   border-radius: 50%;
@@ -91,7 +91,7 @@
 }
 
 /* For Firefox browsers */
-.thumb::-moz-range-thumb {
+.multirangeslider .container .thumb::-moz-range-thumb {
   background-color: #f1f5f7;
   border: none;
   border-radius: 50%;
