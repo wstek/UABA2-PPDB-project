@@ -1,7 +1,6 @@
 import "../index.css"
 import React, {useEffect, useState} from "react";
 import ua_logo from "../images/ua_logo.png"
-import {Link} from "react-router-dom";
 
 function Footer() {
     const [isMobile, setIsMobile] = useState(false)
@@ -28,12 +27,13 @@ function Footer() {
                                 <img src={ua_logo} className="vh-2" alt="pic" id="footer"/>
                             </div>
                             <div className="col-8 ">
-        @Jorden Van Handenhoven, Mohammed Shakleya, Said Yandarbiev, Sam Roggeman, William Steklein
+                                @Jorden Van Handenhoven, Mohammed Shakleya, Said Yandarbiev, Sam Roggeman, William
+                                Steklein
 
                             </div>
-{/*                            <div className="col-2 align-right">*/}
-{/*<Link to="/contact" className="">Contact</Link>*/}
-{/*                            </div>*/}
+                            {/*                            <div className="col-2 align-right">*/}
+                            {/*<Link to="/contact" className="">Contact</Link>*/}
+                            {/*                            </div>*/}
 
                         </div>
                     </div>

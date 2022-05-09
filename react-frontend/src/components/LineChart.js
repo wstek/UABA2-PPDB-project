@@ -7,9 +7,8 @@ function LineChart({XFnY, title}) {
         curveType: 'function',
         legend: {position: 'bottom'}
     };
-    if ( ! XFnY) return            <> <h3>{title}</h3><PurpleSpinner/></>
+    if (!XFnY) return <> <h3>{title}</h3><PurpleSpinner/></>
     else if (XFnY.graphdata.length <= 1) return <><h3>{title}</h3><h5>No Data Points Provided</h5></>
-
 
 
     return (

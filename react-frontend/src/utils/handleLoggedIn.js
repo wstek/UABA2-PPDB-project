@@ -1,4 +1,4 @@
-export function handleLoggedIn(setAdmin, setAuthed, setIsLoading,setJustLoggedIn) {
+export function handleLoggedIn(setAdmin, setAuthed, setIsLoading, setJustLoggedIn) {
     setIsLoading(true);
     fetch('/api/me', {
         method: 'GET',

@@ -4,8 +4,8 @@ import React from 'react'
 import {PurpleSpinner} from "./PurpleSpinner"
 
 function Overview({input_algorithms}) {
-    if ( ! input_algorithms ) return <PurpleSpinner />
-    if ( Object.getOwnPropertyNames(input_algorithms).length === 0 ) return <h2>No Algorithms Provided</h2>
+    if (!input_algorithms) return <PurpleSpinner/>
+    if (Object.getOwnPropertyNames(input_algorithms).length === 0) return <h2>No Algorithms Provided</h2>
     return (
         <table className="pt-3">
             <thead className="thead-dark">

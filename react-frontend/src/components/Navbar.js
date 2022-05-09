@@ -25,7 +25,7 @@ function AccountButton() {
 
 function Logo() {
     return <div className="d-flex">
-        <Link to="/" >
+        <Link to="/">
 
             <img src={logo} height="50"
                  alt="pic">
@@ -60,14 +60,12 @@ function CollapseButton() {
 
 
 function Navbar({admin, auth}) {
-    // var a = getUserCred()
-    // console.log(a)
     return (
         <nav className="navbar navbar-expand-sm navbar-light bg-purple justify-content-center sticky-top">
             <div className="container-fluid">
                 <CollapseButton/>
                 <div className="navbar-collapse collapse w-100" id="collapsenavbar">
-                    <ul  className="navbar-nav w-100 justify-content-center">
+                    <ul className="navbar-nav w-100 justify-content-center">
                         <Logo/>
                     </ul>
                     <ul className="navbar-nav w-100 justify-content-center ">
