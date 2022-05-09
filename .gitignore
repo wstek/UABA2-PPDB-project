@@ -13,8 +13,7 @@ react-frontend/build
 
 # datasets
 datasets
-/react-frontend/.eslintcache
-/react-frontend/package-lock.json
+uploaded-files
 
 # Database rapport
 /sql/DatabaseSchemeTeam6.aux
@@ -30,4 +29,4 @@ __pycache__
 .idea
 env
 react-frontend/package-lock.json
-/react-frontend/src/setupPoxy.js
+/react-frontend/.eslintcache
