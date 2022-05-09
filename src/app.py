@@ -54,6 +54,13 @@ def get_data():
     else:
         return {"done": True}
 
+@app.route("/api/users/<int:abtest_id>", methods=['GET'])
+@cross_origin(supports_credentials=True)
+def get_users(abtest_id):
+    users = database_connection.session.execute(f"SELECT customer_id FROM customer NATURAL JOIN ab_test WHERE abtest_id= '{abtest_id}'").fetchall()
+    for u in range(len(users)):
+        users[u] = users[u][0]
+    return {"userlist": users}
 
 @app.route('/api/hello')
 def publish1(val):
