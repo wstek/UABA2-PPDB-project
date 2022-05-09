@@ -55,7 +55,7 @@ function Footer() {
             </footer>
         )
     } else {
-        return <div/>
+        return <>< />
     }
 }
 

@@ -27,7 +27,7 @@ export default function DateSlider({dates, setStartIndex, setEndIndex}) {
                 <div className={"col-12 col-lg-6 col-xl-6 col-xxl-6 align-content-center center text-center justify-content-center my-auto pt-sm-5 pb-sm-5"}>
                     <MultiRangeSlider min={0} max={dates.length} onChange={sliderChanged}/>
                 </div>
-                <div className={"col-12 align-items-md-center col-lg-3 col-xl-3 col-xxl-3 text-lg-start"}>
+                <div className={"col-12 align-items-md-center col-lg-3 col-xl-3 col-xxl-3 text-lg-start my-auto"}>
                     <input type="date" value={currentEndDate} id="end" name="trip-start " className={"button-purple"} readOnly={true}/>
                 </div>
             </>

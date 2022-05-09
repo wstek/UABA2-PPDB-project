@@ -104,7 +104,7 @@ function Statistics() {
     }
 
     return (
-        <div className="container-fluid  p-0 my-auto">
+        <div className="container-fluid my-auto">
             <div className="row text-center align-items-center mb-3">
                 <ABTestPicker personal_abtests={personal_abtests} setSelectedABTest={setSelectedABTest}
                               selected_abtest={selected_abtest}/>
