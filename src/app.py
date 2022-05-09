@@ -120,6 +120,25 @@ def get_stat(abtest_id, stat):
 
     if not username:
         return {"error": "unauthorized"}, 401
+
+    if stat == "ABTest_information":
+        result = database_connection.session.execute(
+            f"select start_date, end_date, stepsize,top_k,dataset_name,created_on from ab_test where abtest_id = {abtest_id};").fetchall()
+        start_date = result[0][0]
+        end_date = result[0][1]
+        stepsize = result[0][2]
+        top_k = result[0][3]
+        dataset_name = result[0][4]
+        created_on = result[0][5]
+        returnvalue = {'dates': [], 'start_date': start_date, 'end_date':end_date, 'top-k': top_k, 'dataset-name': dataset_name, 'created-on': created_on}
+
+        for n in range(int((end_date - start_date).days)):
+            date = (start_date + timedelta(stepsize*n))
+
+            returnvalue['dates'].append(date)
+
+
+        return returnvalue
     if stat == "algorithm_information":
         algorithm_id: int
         algorithm_name: str
