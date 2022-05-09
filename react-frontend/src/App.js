@@ -15,7 +15,6 @@ import Statistics from "./pages/ABTest/Statistics";
 import {handleLoggedIn} from './utils/handleLoggedIn'
 import Simulation from "./pages/Account/Simulation";
 import ChangeInfo from "./pages/Account/ChangeInfo";
-import SliderTest from "./pages/SliderTest";
 import Home from "./pages/Home";
 
 function App() {
@@ -35,9 +34,6 @@ function App() {
                         <Route exact path="/">
                             <Home/>
                             {/*<DatasetUpload/>*/}
-                        </Route>
-                        <Route exact path="/slidertest">
-                            <SliderTest/>
                         </Route>
                         <ProtectedRoute component={Account} setAdmin={setAdmin} isLoading={isLoading}
                                         setAuthed={setAuthed} auth={auth} exact
