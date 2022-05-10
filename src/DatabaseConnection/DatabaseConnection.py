@@ -11,8 +11,8 @@ from sqlalchemy import MetaData, exc as sa_exc
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from Logger import Logger
-from config import configDatabase
+from src.utils.Logger import Logger
+from src.config.config import configDatabase
 
 
 class DatabaseConnection:
@@ -226,7 +226,7 @@ class DatabaseConnection:
 
 if __name__ == '__main__':
     db_con = DatabaseConnection()
-    db_con.connect(filename="config/database.ini")
+    db_con.connect(filename="../config/database.ini")
     db_con.logVersion()
     db_con.addDataset("H_M", "mosh", "../datasets/H_M/purchases.csv", "../datasets/H_M/articles.csv",
                       "../datasets/H_M/customers.csv")

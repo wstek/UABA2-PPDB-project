@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse
 
-from Algorithm import Algorithm
+from src.ABTestSimulation.Algorithms.Algorithm import Algorithm
 
 
 class ItemKNN(Algorithm):

@@ -1,20 +1,19 @@
 import json
 import os
-import threading
 from datetime import timedelta
 
 import flask
 import redis
 from flask import Flask, request, session
 from flask_bcrypt import Bcrypt
-from flask_cors import cross_origin
 from flask_session import Session
 from flask_sse import sse
 from werkzeug.utils import secure_filename
 
-from ABTestSimulation import ABTestSimulation, remove_tuples
-from DatabaseConnection import DatabaseConnection
-from Logger import Logger
+from src.ABTestSimulation.ABTestSimulation import remove_tuples
+from src.DatabaseConnection.DatabaseConnection import DatabaseConnection
+from src.utils.Logger import Logger
+from src.utils.pathParser import getAbsPathFromRelSrc
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "changeme"
@@ -32,26 +31,22 @@ app.register_blueprint(sse, url_prefix='/api/stream')
 # 2 gigabyte file upload limit
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 2000
 app.config['UPLOAD_EXTENSIONS'] = ['.csv']
-app.config['UPLOAD_PATH'] = '../uploaded-files'
+app.config['UPLOAD_PATH'] = getAbsPathFromRelSrc("uploaded-files")
 
 bcrypt = Bcrypt(app)
 server_session = Session(app)
 database_connection: DatabaseConnection = DatabaseConnection()
-database_connection.connect(filename="config/database.ini")
+database_connection.connect(filename=getAbsPathFromRelSrc("config/database.ini"))
 database_connection.logVersion()
-
-lock = threading.Lock()
-
-thread_per_user = {}
 
 
 @app.route("/api/progress", methods=['GET'])
 def get_data():
-    if session["user_id"] in thread_per_user:
-        return {'start': thread_per_user[session["user_id"]].prev_progress,
-                'end': thread_per_user[session["user_id"]].current_progress, 'started': True}
-    else:
-        return {'start': 0, 'end': 0, 'started': False}
+    # if session["user_id"] in thread_per_user:
+    #     return {'start': thread_per_user[session["user_id"]].prev_progress,
+    #             'end': thread_per_user[session["user_id"]].current_progress, 'started': True}
+    # else:
+    return {'start': 0, 'end': 0, 'started': False}
 
 
 # account
@@ -239,13 +234,16 @@ def start_simulation():
                 {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "type": "string",
                  "value": value})
         database_connection.session.commit()
-    with lock:
-        thread_per_user[session["user_id"]] = ABTestSimulation(database_connection, sse, app,
-                                                               {"abtest_id": abtest_id, "start": start, "end": end,
-                                                                "topk": topk,
-                                                                "stepsize": stepsize,
-                                                                "dataset_name": dataset_name, "algorithms": algorithms})
-    thread_per_user[session["user_id"]].start()
+
+
+    # todo backround-task
+    # with lock:
+    #     thread_per_user[session["user_id"]] = ABTestSimulation(database_connection, sse, app,
+    #                                                            {"abtest_id": abtest_id, "start": start, "end": end,
+    #                                                             "topk": topk,
+    #                                                             "stepsize": stepsize,
+    #                                                             "dataset_name": dataset_name, "algorithms": algorithms})
+    # thread_per_user[session["user_id"]].start()
     return "200"
 
 
@@ -497,13 +495,12 @@ def get_stat(abtest_id, stat):
 
 
 @app.route("/api/logout")
-@cross_origin(supports_credentials=True)
 def logout_user():
     if "user_id" in session:
-        if session["user_id"] in thread_per_user:
-            thread_per_user[session["user_id"]].join()
-            with lock:
-                thread_per_user.pop(session["user_id"])
+        # if session["user_id"] in thread_per_user:
+        #     thread_per_user[session["user_id"]].join()
+        #     with lock:
+        #         thread_per_user.pop(session["user_id"])
         session.pop("user_id")
     return "200"
 

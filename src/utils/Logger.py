@@ -2,15 +2,16 @@ import datetime
 import logging
 import os
 
-from config import configLogger
+from src.utils.pathParser import getAbsPathFromRelSrc
+from src.config.config import configLogger
 
-CONFIG_FILE = "./config/logger.ini"
+CONFIG_FILE = "config/logger.ini"
 
 
 class Logger:
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.ERROR)
 
-    params = configLogger(CONFIG_FILE)
+    params = configLogger(getAbsPathFromRelSrc(CONFIG_FILE))
 
     directory = params["directory"]
     silence_log_console = params["silence_log_console"] == "True"
@@ -23,7 +24,7 @@ class Logger:
 
     @classmethod
     def __logFile(cls, message):
-        path = "../logs"
+        path = getAbsPathFromRelSrc("../logs")
 
         # create a new directory if it does not exist
         exists = os.path.exists(path)

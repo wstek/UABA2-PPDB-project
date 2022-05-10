@@ -1,7 +1,7 @@
 # config files
 src/config/*
 !src/config/__init__.py
-!src/config.py
+!src/config/config.py
 !src/config/logger.ini
 
 # logs
@@ -13,7 +13,7 @@ react-frontend/build
 
 # datasets
 datasets
-uploaded-files
+src/uploaded-files
 
 # Database rapport
 /sql/DatabaseSchemeTeam6.aux
