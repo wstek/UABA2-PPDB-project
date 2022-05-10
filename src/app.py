@@ -1,19 +1,20 @@
-from abc import abstractclassmethod
+import json
+import os
+import threading
 from datetime import timedelta
-from time import sleep
+
+import flask
 import redis
 from flask import Flask, request, session
 from flask_bcrypt import Bcrypt
-from flask_cors import CORS, cross_origin
+from flask_cors import cross_origin
 from flask_session import Session
+from flask_sse import sse
 from werkzeug.utils import secure_filename
 
 from ABTestSimulation import ABTestSimulation, remove_tuples
 from DatabaseConnection import DatabaseConnection
 from Logger import Logger
-from flask_sse import sse
-import threading
-
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "changeme"
@@ -38,20 +39,20 @@ server_session = Session(app)
 database_connection: DatabaseConnection = DatabaseConnection()
 database_connection.connect(filename="config/database.ini")
 database_connection.logVersion()
-cors = CORS(app, supports_credentials=True, resources={
-    '/*': {'origins': 'http://localhost:3000'}})  # https://team6.ua-ppdb.me/
 
 lock = threading.Lock()
 
 thread_per_user = {}
 
+
 @app.route("/api/progress", methods=['GET'])
-@cross_origin(supports_credentials=True)
 def get_data():
     if session["user_id"] in thread_per_user:
-        return {'start': thread_per_user[session["user_id"]].prev_progress, 'end': thread_per_user[session["user_id"]].current_progress, 'started':True}
+        return {'start': thread_per_user[session["user_id"]].prev_progress,
+                'end': thread_per_user[session["user_id"]].current_progress, 'started': True}
     else:
-        return {'start': 0, 'end': 0, 'started':False}
+        return {'start': 0, 'end': 0, 'started': False}
+
 
 # account
 @app.route("/api/me", methods=['GET'])
@@ -119,6 +120,7 @@ def login_user1():
     session["user_id"] = user.username
     return {"username": user.username, "email": user.email_address, "admin": admin is not None}
 
+
 @app.route("/account/changeinfo/<stat>/<username>", methods=["POST", "OPTIONS"])
 def change_info(stat, username):
     if stat == "first_name":
@@ -166,6 +168,7 @@ def uploadCSV():
             # upload the file
             uploaded_file.save(os.path.join(
                 app.config['UPLOAD_PATH'], filename))
+
     return "200"
 
 
@@ -238,10 +241,10 @@ def start_simulation():
         database_connection.session.commit()
     with lock:
         thread_per_user[session["user_id"]] = ABTestSimulation(database_connection, sse, app,
-                                                            {"abtest_id": abtest_id, "start": start, "end": end,
-                                                            "topk": topk,
-                                                            "stepsize": stepsize,
-                                                            "dataset_name": dataset_name, "algorithms": algorithms})
+                                                               {"abtest_id": abtest_id, "start": start, "end": end,
+                                                                "topk": topk,
+                                                                "stepsize": stepsize,
+                                                                "dataset_name": dataset_name, "algorithms": algorithms})
     thread_per_user[session["user_id"]].start()
     return "200"
 

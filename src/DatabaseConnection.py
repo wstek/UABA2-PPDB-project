@@ -114,6 +114,17 @@ class DatabaseConnection:
 
         return True
 
+    def insertPdDataframeInTable(self, df, table_name):
+        # todo add error handling
+        cursor = self.session.connection().connection.cursor()
+
+        output = StringIO()
+        df.to_csv(
+            output, sep='\t', header=False, encoding="utf8", index=False)
+        output.seek(0)
+
+        cursor.copy_from(output, table_name, sep='\t', null='')
+
     def __addMetaDataset(self, dataset_name: str, meta_data_filename: str, meta_data_type: str):
         self.meta_data.reflect()
         cursor = self.session.connection().connection.cursor()
