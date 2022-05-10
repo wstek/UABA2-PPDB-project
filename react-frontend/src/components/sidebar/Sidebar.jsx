@@ -19,24 +19,38 @@ const Sidebar = () => {
             {/* <hr className="sidebar-hr" /> */}
             <div className="center">
                 <ul className="sidebar-ul">
+
                     <p className="title">MAIN</p>
+
+                    <Link to="/dashboard" style={{textDecoration: "none"}}>
                     <li className="sidebar-li">
                         <DashboardIcon className="icon" />
                         <span className="sidebar-span" >Abtest</span>
                     </li>
+                    </Link>
+
                     <p className="title">LISTS</p>
+
+                    <Link to="/stats" style={{textDecoration: "none"}}>
                     <li className="sidebar-li">
                         <SsidChartIcon className="icon" />
                         <span className="sidebar-span" >Stats</span>
                     </li>
+                    </Link>
+
+                    <Link to="/users" style={{textDecoration: "none"}}>
                     <li className="sidebar-li">
                         <PersonOutlineOutlinedIcon className="icon" />
                         <span className="sidebar-span" >Users</span>
                     </li>
+                    </Link>
+
+                    <Link to="/items" style={{textDecoration: "none"}}>
                     <li className="sidebar-li">
                         <AutoAwesomeMotionIcon className="icon" />
                         <span className="sidebar-span" > Items</span>
                     </li>
+                    </Link>
                 </ul>
             </div>
             <div className="bottom">

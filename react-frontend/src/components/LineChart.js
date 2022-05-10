@@ -18,7 +18,7 @@ function LineChart({XFnY, title, xMin = 0, xMax = 10}) {
                 }
             }
         );
-    }, [setOptions, xMin, xMax, title],)
+    }, [setOptions, xMin, xMax, title])
 
     if (!XFnY) return <> <h3>{title}</h3><PurpleSpinner/></>
     else if (XFnY.graphdata.length <= 1) return <><h3>{title}</h3><h5>No Data Points Provided</h5></>

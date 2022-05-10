@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from 'react-router-dom';
-import Chart from "../../components/chart/Chart";
+import Chartx from "../../components/chart/Chartx";
 import Featured from "../../components/featured/Featured";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Widget from "../../components/widget/Widget";
+import Tablex from "../../components/table/Tablex";
 import "./dashboard.css"
 const Dashboard = () => {
     const history = useHistory();
@@ -59,7 +60,11 @@ const Dashboard = () => {
                 </div>
                 <div className="charts">
                     <Featured progress={progress} />
-                    <Chart />
+                    <Chartx title="active users over time"/>
+                </div>
+                <div className="listContainer">
+                    <div className="listTitle">Latest Transactions</div>
+                    <Tablex />
                 </div>
             </div>
         </div>
