@@ -14,6 +14,7 @@ from src.ABTestSimulation.ABTestSimulation import remove_tuples
 from src.DatabaseConnection.DatabaseConnection import DatabaseConnection
 from src.utils.Logger import Logger
 from src.utils.pathParser import getAbsPathFromRelSrc
+from src.API.account import account_blueprint
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "changeme"
@@ -137,11 +138,7 @@ def change_info(stat, username):
     return {"succes": "succes"}
 
 
-@app.route("/api/aaa", methods=["GET"])
-def logIpAddress():
-    Logger.log("User visited, IP: " +
-               request.environ.get('HTTP_X_REAL_IP', request.remote_addr), True)
-    return "200"
+app.register_blueprint(account_blueprint)
 
 
 # dataset
