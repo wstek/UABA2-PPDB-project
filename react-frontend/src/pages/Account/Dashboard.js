@@ -5,18 +5,39 @@ import Featured from "../../components/featured/Featured";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Widget from "../../components/widget/Widget";
 import "./dashboard.css"
-// const Dashboard = ({ setAuthed, setAdmin }) => {
 const Dashboard = () => {
     const history = useHistory();
     const [progress, setProgress] = useState({ start: 0, end: 0 });
+    const [mounted, setMounted] = useState(false);
+
+    if (!mounted) {
+        fetch('/api/progress', {
+            method: 'GET',
+            headers: {"Content-Type": "application/json", 'Accept': 'application/json'},
+            credentials: 'include'
+        }).then(res => res.json())
+        .then(data => {
+            setProgress({start:data.start, end:data.end})
+        })
+        .catch(err => console.log(err.message))
+    }
 
     useEffect(() => {
+        setMounted(true)
+        if (progress.end === 100) {
+            console.log("ended")
+            return;
+        }
         const sse = new EventSource("/api/stream",
             { withCredentials: true });
 
         sse.addEventListener("simulation_progress", (e) => {
             const new_start = progress.end
             setProgress({ start: new_start, end: e.data })
+            if (e === 100) {
+                sse.close();
+                return;
+            }
         })
 
         sse.onerror = (e) => {
@@ -44,27 +65,5 @@ const Dashboard = () => {
         </div>
     );
 }
-//     return (
-//         <div className="dashboard">
-//             <Sidebar />
-//             <div className="top">logo</div>
-//             <div className="center">list</div>
-//             <div className="bottom">color options</div>
-//             <h3>Welcome</h3>
-//             <button onClick={handlea}>check</button>
-//             {done && <div>
-//                 {handlea}
-//                 <h1>Dashboard</h1>
-//                 <h2>Logged in</h2>
-//                 <h3>username: {user.username}</h3>
-//                 <h3>Email: {user.email}</h3>
-//                 <button onClick={logoutUser}>Logout</button>
-//             </div>}
-//             {displayData.map((d) =>
-//                 <p> {d} </p>
-//             )}
-//         </div>
-//     );
-// }
 
 export default Dashboard;

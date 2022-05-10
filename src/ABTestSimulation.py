@@ -1,5 +1,6 @@
 from operator import index
 import threading
+from flask import session
 import pandas as pd
 from iknn import ItemKNNIterative
 import random
@@ -43,11 +44,16 @@ class ABTestSimulation(threading.Thread):
         self.abtest = abtest
         self.database_connection = database_connection
 
-    def __getstate__(self):
-        return (self.frontend_data, self.done, self.abtest, self.progress)
+        self.prev_progress = 0
+        self.current_progress = 0
 
-    def __setstate__(self, state):
-        self.frontend_data, self.done, self.abtest, self.progress = state
+    # def __getstate__(self):
+    #     # print("aaaaaaaaaaaaaaaaaaaaaaa")
+    #     return (self.frontend_data, self.done, self.abtest)
+
+    # def __setstate__(self, state):
+    #     # print("ssssssssssssssssssssss")
+    #     self.frontend_data, self.done, self.abtest = state
 
     def insertCustomer(self, customer_id, statistics_id, dataset_name):
         self.database_connection.session.execute(
@@ -229,16 +235,6 @@ class ABTestSimulation(threading.Thread):
                             dynamic_info_algorithms[idx]["dt_start_RetrainInterval"] = dt_current_date - pd.DateOffset(
                                 days=(retrain-int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])-1))
                             # 2020-01-01 - 2020-01-05 = 4 -> 2 keer trainen?   momenten waarop getrain moet worden: 2020-01-01, 2020-01-03, 2020-01-05
-                        # gives all users in (start.date, prev.date) => not only the active users!
-                        # users_with_not_enough_interactions = self.database_connection.session.execute(
-                        #     f"SELECT sub.cust, COUNT(DISTINCT(sub2.article_id)) FROM (select d.customer_id as cust, o.customer_id \
-                        #         FROM (SELECT customer_id, article_id from purchase WHERE CAST(timestamp as DATE) BETWEEN '{start_date}' \
-                        #             AND '{prev_day}') AS d INNER JOIN (SELECT customer_id, article_id from purchase WHERE CAST(timestamp \
-                        #                 as DATE) BETWEEN '{start_date}' AND '{prev_day}') AS o ON (d.article_id = o.article_id and d.customer_id \
-                        #                     != o.customer_id)) AS sub INNER JOIN (SELECT customer_id, article_id from purchase WHERE CAST(timestamp \
-                        #                         as DATE) BETWEEN '{start_date}' AND '{prev_day}') as sub2 ON sub.customer_id = sub2.customer_id GROUP \
-                        #                             BY sub.cust HAVING COUNT(DISTINCT(sub2.article_id)) > {k-1}").fetchall()
-                        # print("last time trained:", last_time_train)
                         for cc in range(len(interactions)):
                             if interactions[cc][0] in user_histories:
                                 user_histories[interactions[cc][0]].append(
@@ -624,8 +620,16 @@ class ABTestSimulation(threading.Thread):
                         for i in range(len(top_k)):
                             top_k_items.append(top_k[i][0])
                         dynamic_info_algorithms[idx]["prev_top_k"] = top_k_items
+
+                self.prev_progress = self.current_progress
+                self.current_progress = round(n_day/float(dayz), 2)*100.0
                 with self.app.app_context():
                     self.sse.publish(
-                        round(n_day/float(dayz), 2)*100.0, type='simulation_progress')
+                        self.current_progress, type='simulation_progress')
+
         self.done = True
+        with self.app.app_context():
+            self.sse.publish(100, type='simulation_progress')
+        self.prev_progress = 0
+        self.current_progress = 100
         return

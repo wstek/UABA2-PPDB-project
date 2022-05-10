@@ -48,7 +48,7 @@ const Featured = ({ progress }) => {
 
             {/* <p className="title">Tyotal sales made toda</p>
             <p className="amount">$420</p> */}
-            <p className="desc">Simulation is in progress... (calculating stats, users, items)</p>
+            { progress.end === 100 ? <p className="desc">Simulation succesfully finished</p> : <p className="desc">Simulation is in progress... (calculating stats, users, items)</p> }
 
             <div className="summary">
 

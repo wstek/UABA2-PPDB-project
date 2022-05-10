@@ -1,22 +1,24 @@
-import json
-import os
+from abc import abstractclassmethod
 from datetime import timedelta
-
-import flask
+from time import sleep
 import redis
 from flask import Flask, request, session
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS, cross_origin
 from flask_session import Session
-from flask_sse import sse
 from werkzeug.utils import secure_filename
 
 from ABTestSimulation import ABTestSimulation, remove_tuples
 from DatabaseConnection import DatabaseConnection
 from Logger import Logger
+from flask_sse import sse
+import threading
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "changeme"
 app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_PERMANENT'] = True
 app.config['SESSION_REDIS'] = redis.from_url('redis://localhost:6379')
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "None"
@@ -36,7 +38,20 @@ server_session = Session(app)
 database_connection: DatabaseConnection = DatabaseConnection()
 database_connection.connect(filename="config/database.ini")
 database_connection.logVersion()
+cors = CORS(app, supports_credentials=True, resources={
+    '/*': {'origins': 'http://localhost:3000'}})  # https://team6.ua-ppdb.me/
 
+lock = threading.Lock()
+
+thread_per_user = {}
+
+@app.route("/api/progress", methods=['GET'])
+@cross_origin(supports_credentials=True)
+def get_data():
+    if session["user_id"] in thread_per_user:
+        return {'start': thread_per_user[session["user_id"]].prev_progress, 'end': thread_per_user[session["user_id"]].current_progress, 'started':True}
+    else:
+        return {'start': 0, 'end': 0, 'started':False}
 
 # account
 @app.route("/api/me", methods=['GET'])
@@ -83,8 +98,6 @@ def register_user():
          "username": username, "password": hashed_password})
     database_connection.session.commit()
     session["user_id"] = username
-
-    session.permanent = True
     return {"username": username, "email": email}
 
 
@@ -103,17 +116,8 @@ def login_user1():
     admin = database_connection.session.execute("SELECT * FROM admin WHERE username = :username",
                                                 {"username": username}).fetchone()
 
-    session.permanent = True
     session["user_id"] = user.username
     return {"username": user.username, "email": user.email_address, "admin": admin is not None}
-
-
-@app.route("/api/logout")
-def logout_user():
-    if "user_id" in session:
-        session.pop("user_id")
-    return "200"
-
 
 @app.route("/account/changeinfo/<stat>/<username>", methods=["POST", "OPTIONS"])
 def change_info(stat, username):
@@ -232,22 +236,14 @@ def start_simulation():
                 {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "type": "string",
                  "value": value})
         database_connection.session.commit()
-
-    simul = ABTestSimulation(database_connection, sse, app,
-                             {"abtest_id": abtest_id, "start": start, "end": end, "topk": topk,
-                              "stepsize": stepsize,
-                              "dataset_name": dataset_name, "algorithms": algorithms})
-    session["simulation"] = simul
-    session["simulation"].start()
+    with lock:
+        thread_per_user[session["user_id"]] = ABTestSimulation(database_connection, sse, app,
+                                                            {"abtest_id": abtest_id, "start": start, "end": end,
+                                                            "topk": topk,
+                                                            "stepsize": stepsize,
+                                                            "dataset_name": dataset_name, "algorithms": algorithms})
+    thread_per_user[session["user_id"]].start()
     return "200"
-
-
-@app.route("/api/progress", methods=['GET'])
-def get_data():
-    if ("simulation" in session) and not (session["simulation"].done):
-        return {"data": session["simulation"].frontend_data, "progress": session["simulation"].progress}
-    else:
-        return {"done": True}
 
 
 # statistics
@@ -495,6 +491,18 @@ def get_stat(abtest_id, stat):
                 Y = [str(datetime)]
             Y.append(value)
         XFnY.append(Y)
+
+
+@app.route("/api/logout")
+@cross_origin(supports_credentials=True)
+def logout_user():
+    if "user_id" in session:
+        if session["user_id"] in thread_per_user:
+            thread_per_user[session["user_id"]].join()
+            with lock:
+                thread_per_user.pop(session["user_id"])
+        session.pop("user_id")
+    return "200"
 
 
 @app.teardown_appcontext
