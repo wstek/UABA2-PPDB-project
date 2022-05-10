@@ -18,6 +18,7 @@ import ChangeInfo from "./pages/Account/ChangeInfo";
 import Home from "./pages/Home";
 import List from "./pages/list/List"
 import Single from './pages/single/Single';
+import Stats from './pages/stats/Stats';
 
 function App() {
 
@@ -85,6 +86,10 @@ function App() {
 
                         <Route exact path="/items">
                             <List />
+                        </Route>
+
+                        <Route exact path="/stats">
+                            <Stats />
                         </Route>
                         
                         <Route exact path="/users/:userId">
