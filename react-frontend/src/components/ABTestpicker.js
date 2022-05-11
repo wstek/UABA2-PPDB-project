@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {PurpleSpinner} from "./PurpleSpinner"
 
-export default function ABTestPicker({setSelectedABTest, personal_abtests,selected_abtest}) {
+export default function ABTestPicker({setSelectedABTest, personal_abtests, selected_abtest}) {
     const [personal_idtests_id_components, setPersonalABTestsElements] = useState([])
     let value = selected_abtest
     if (!value) value = 0
@@ -25,20 +25,23 @@ export default function ABTestPicker({setSelectedABTest, personal_abtests,select
         //     selector.options.namedItem("0").selected = true;
         // }
     }
+
     useEffect(personalABTests, [personal_abtests],);
+
     function handleChange(e) {
         setSelectedABTest(e.target.value)
     }
 
-    if ( ! personal_abtests ) return <PurpleSpinner />
+    if (!personal_abtests) return <PurpleSpinner/>
     return (
-            <div className={"col-auto mx-auto"}>
-                <h1>Select AB-Test</h1>
-                <select id="abtestIds" value={value} name="abtestIds" className="custom-select bg-purple form-select-lg" onChange={handleChange}>
-                    <option disabled value={0}> -- select an option -- </option>
-                    {personal_idtests_id_components.length && personal_idtests_id_components}
-                </select>
-            </div>
+        <div className={"col-auto mx-auto"}>
+            <h1>Select AB-Test</h1>
+            <select id="abtestIds" value={value} name="abtestIds" className="custom-select bg-purple form-select-lg"
+                    onChange={handleChange}>
+                <option disabled value={0}> -- select an option --</option>
+                {personal_idtests_id_components.length && personal_idtests_id_components}
+            </select>
+        </div>
     )
 }
 

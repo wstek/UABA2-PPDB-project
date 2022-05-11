@@ -1,16 +1,13 @@
-import React from 'react';
-import {Dropdown, DropdownButton} from "react-bootstrap";
-import {useEffect, useState} from "react";
-import data from "bootstrap/js/src/dom/data";
+import React, {useState} from 'react';
 
 
 function SearchUser({selected_abtest}) { // begin van de app wow
-    const [selectedUser,setSelectedUser] = useState(null)
-    const [validSelectedUser,setValidSelectedUser ] = useState(false)
-    const [customer,setCustomer] = useState(null)
+    const [selectedUser, setSelectedUser] = useState(null)
+    const [validSelectedUser, setValidSelectedUser] = useState(false)
+    const [customer, setCustomer] = useState(null)
 
-    function loopDict(){
-        var string= ""
+    function loopDict() {
+        var string = ""
         if (customer) {
             for (const [key, value] of Object.entries(customer)) {
                 string += key
@@ -18,10 +15,10 @@ function SearchUser({selected_abtest}) { // begin van de app wow
                 string += value
             }
         }
-        return(<label>{string}</label>)
+        return (<label>{string}</label>)
     }
 
-    function fetchUserValues(customer_id){
+    function fetchUserValues(customer_id) {
         var s = '/api/abtest/statistics/'
         s += customer_id
         fetch('/api/abtest/statistics/' + customer_id + "/" + selected_abtest, {
@@ -37,9 +34,9 @@ function SearchUser({selected_abtest}) { // begin van de app wow
             })
     }
 
-    function valuesOfUser(customer_id){
+    function valuesOfUser(customer_id) {
         fetchUserValues(customer_id)
-        return(<div>
+        return (<div>
             <div>
                 <label>Attributes:</label>
                 {loopDict()}
@@ -47,11 +44,11 @@ function SearchUser({selected_abtest}) { // begin van de app wow
         </div>)
     }
 
-    function changeSelected(){
+    function changeSelected() {
         setSelectedUser(document.getElementById("searchuser"))
     }
 
-    function getUsers(){
+    function getUsers() {
         setValidSelectedUser(true)
     }
 
@@ -60,9 +57,9 @@ function SearchUser({selected_abtest}) { // begin van de app wow
             <input id="searchuser" onChange={changeSelected} placeholder="Enter wanted user id"/>
             <button onClick={getUsers}>Search User</button>
             {validSelectedUser &&
-            <div id="values">
-                {valuesOfUser(document.getElementById("searchuser").value)}
-            </div>}
+                <div id="values">
+                    {valuesOfUser(document.getElementById("searchuser").value)}
+                </div>}
         </div>
     );
 }

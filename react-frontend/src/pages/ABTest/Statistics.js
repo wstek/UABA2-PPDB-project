@@ -1,12 +1,10 @@
 import Overview from "../../components/Overview";
 import LineChart from "../../components/LineChart";
 import {ColoredLine} from '../../components/ColoredLine';
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useState} from "react";
 import ABTestPicker from "../../components/ABTestpicker";
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
 import DateSlider from "../../components/DateSlider";
-
-import SearchUser from "./SearchUser";
 import UserTable from "./UserTable";
 
 
@@ -65,6 +63,7 @@ function Statistics() {
         setClickThroughRate(null)
         fetchData('/api/abtest/statistics/' + selected_abtest + '/CTR_over_time', setClickThroughRate, abortCont)
     }
+
     function fetchAttRateOverTime(abortCont) {
         setAttributionRate(null)
         fetchData('/api/abtest/statistics/' + selected_abtest + '/AttrRate_over_time', setAttributionRate, abortCont)
@@ -157,7 +156,8 @@ function Statistics() {
                                    XFnY={clickThroughRate}/>
                     </div>
                     <div className="col-12 col-lg-6 col-xl-6 col-xxl-6">
-                        <LineChart chart_id={2} title={"Attribution Rate"} xMin={StartIndex} xMax={EndIndex} XFnY={attributionRate}/>
+                        <LineChart chart_id={2} title={"Attribution Rate"} xMin={StartIndex} xMax={EndIndex}
+                                   XFnY={attributionRate}/>
                     </div>
                 </div>
                 <div className="row text-center align-content-center justify-content-center">

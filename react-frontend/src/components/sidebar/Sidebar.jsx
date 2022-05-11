@@ -3,7 +3,6 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import SsidChartIcon from '@mui/icons-material/SsidChart';
-import {Link} from "react-router-dom"
 
 const Sidebar = () => {
     return (
@@ -21,21 +20,21 @@ const Sidebar = () => {
                 <ul className="sidebar-ul">
                     <p className="title">MAIN</p>
                     <li className="sidebar-li">
-                        <DashboardIcon className="icon" />
-                        <span className="sidebar-span" >Abtest</span>
+                        <DashboardIcon className="icon"/>
+                        <span className="sidebar-span">Abtest</span>
                     </li>
                     <p className="title">LISTS</p>
                     <li className="sidebar-li">
-                        <SsidChartIcon className="icon" />
-                        <span className="sidebar-span" >Stats</span>
+                        <SsidChartIcon className="icon"/>
+                        <span className="sidebar-span">Stats</span>
                     </li>
                     <li className="sidebar-li">
-                        <PersonOutlineOutlinedIcon className="icon" />
-                        <span className="sidebar-span" >Users</span>
+                        <PersonOutlineOutlinedIcon className="icon"/>
+                        <span className="sidebar-span">Users</span>
                     </li>
                     <li className="sidebar-li">
-                        <AutoAwesomeMotionIcon className="icon" />
-                        <span className="sidebar-span" > Items</span>
+                        <AutoAwesomeMotionIcon className="icon"/>
+                        <span className="sidebar-span"> Items</span>
                     </li>
                 </ul>
             </div>

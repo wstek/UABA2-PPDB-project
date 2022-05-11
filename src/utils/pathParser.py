@@ -1,5 +1,5 @@
-import pathlib
 import os
+import pathlib
 
 REL_PATH_TO_ROOT_FOLDER = "./../"
 

@@ -197,7 +197,8 @@ export default function DatasetUpload() {
     return (
         <div className="App" style={{textAlign: "center"}}>
             <h1>Dataset Upload</h1>
-            <input type="file" name="csv_file" form={'DatasetUploadForm'} multiple onChange={handleFileselect} accept=".csv"
+            <input type="file" name="csv_file" form={'DatasetUploadForm'} multiple onChange={handleFileselect}
+                   accept=".csv"
                    style={{display: "block", margin: "10px auto"}}/>
             <form id="DatasetUploadForm" onSubmit={handleUpload}>
                 <button type="submit" style={{display: "block", margin: "10px auto"}}>Upload</button>

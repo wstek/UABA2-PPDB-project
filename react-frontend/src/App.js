@@ -63,11 +63,11 @@ function App() {
                         <ProtectedRoute component={Simulation} isLoading={isLoading} auth={auth} setAuthed={setAuthed}
                                         setAdmin={setAdmin} exact path="/simulation"/>
                         <ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth} exact
-                            path="/statistics" />
+                                        path="/statistics"/>
                         <ProtectedRoute component={DatasetUpload} isLoading={isLoading} auth={auth} exact
-                            path="/dataset/upload" />
+                                        path="/dataset/upload"/>
                         <ProtectedRoute component={ChangeInfo} isLoading={isLoading} auth={auth} exact
-                            path="/account/changeinfo" />
+                                        path="/account/changeinfo"/>
                         <Route path="*">
                             <NotFound/>
                         </Route>

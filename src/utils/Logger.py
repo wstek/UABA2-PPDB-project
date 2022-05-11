@@ -2,8 +2,8 @@ import datetime
 import logging
 import os
 
-from src.utils.pathParser import getAbsPathFromRelSrc
 from src.utils.configParser import configLogger
+from src.utils.pathParser import getAbsPathFromRelSrc
 
 CONFIG_FILE = "config/logger.ini"
 
