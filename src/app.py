@@ -6,7 +6,9 @@ from src.api.apiAccount import api_account
 from src.api.apiDataset import api_dataset
 from src.api.apiSimulation import api_simulation
 from src.api.apiStatistics import api_statistics
+from src.api.apiTask import api_task
 from src.appConfig import Config
+from src.appVar import celery
 from src.appVar import database_connection
 from src.appVar import flask_bcrypt
 from src.appVar import flask_session
@@ -25,12 +27,16 @@ def create_app(config):
     # server side event
     flask_app.register_blueprint(sse, url_prefix='/api/stream')
 
+    # celery
+    celery.conf.update(flask_app.config)
+
     # api blueprints
     flask_app.register_blueprint(api_account)
     flask_app.register_blueprint(api_dataset)
     flask_app.register_blueprint(api_abtest)
     flask_app.register_blueprint(api_simulation)
     flask_app.register_blueprint(api_statistics)
+    flask_app.register_blueprint(api_task)
 
     @flask_app.teardown_appcontext
     def shutdown_session(exception=None):

@@ -16,6 +16,7 @@ import {handleLoggedIn} from './utils/handleLoggedIn'
 import Simulation from "./pages/Account/Simulation";
 import ChangeInfo from "./pages/Account/ChangeInfo";
 import Home from "./pages/Home";
+import TaskTest from "./TaskTest";
 
 function App() {
 
@@ -32,8 +33,9 @@ function App() {
                 <div className="content">
                     <Switch>
                         <Route exact path="/">
-                            <Home/>
+                            {/*<Home/>*/}
                             {/*<DatasetUpload/>*/}
+                            <TaskTest/>
                         </Route>
                         <ProtectedRoute component={Account} setAdmin={setAdmin} isLoading={isLoading}
                                         setAuthed={setAuthed} auth={auth} exact

@@ -109,7 +109,7 @@ export default function DatasetUpload() {
 
         console.log(JSON.stringify(column_select_data));
 
-        const url = '/api/upload_datasets';
+        const url = '/api/upload_dataset';
 
         const formData = new FormData();
         for (let i = 0; i < files.length; i++) {

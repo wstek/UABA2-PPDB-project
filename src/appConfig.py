@@ -22,3 +22,7 @@ class Config(object):
     MAX_CONTENT_LENGTH = 1024 * 1024 * 2000
     UPLOAD_EXTENSIONS = ['.csv']
     UPLOAD_PATH = getAbsPathFromRelSrc("uploaded-files")
+
+    # celery
+    CELERY_BROKER_URL = "redis://localhost:6379"
+    RESULT_BACKEND = "redis://localhost:6379"

@@ -9,8 +9,8 @@ from src.appVar import database_connection
 api_dataset = Blueprint("api_dataset", __name__)
 
 
-@api_dataset.route("/api/upload_datasets", methods=["POST"])
-def uploadCSV():
+@api_dataset.route("/api/upload_dataset", methods=["POST"])
+def upload_dataset():
     column_select_data = json.loads(request.form.get('data'))
     for uploaded_file in request.files.getlist('files'):
         filename = secure_filename(uploaded_file.filename)
