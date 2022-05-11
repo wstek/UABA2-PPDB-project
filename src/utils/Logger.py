@@ -3,7 +3,7 @@ import logging
 import os
 
 from src.utils.pathParser import getAbsPathFromRelSrc
-from src.config.config import configLogger
+from src.utils.configParser import configLogger
 
 CONFIG_FILE = "config/logger.ini"
 

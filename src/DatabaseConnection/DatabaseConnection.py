@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from src.utils.Logger import Logger
-from src.config.config import configDatabase
+from src.utils.configParser import configDatabase
 
 
 class DatabaseConnection:
