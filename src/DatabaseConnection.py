@@ -7,7 +7,7 @@ from typing import List
 
 import pandas as pd
 import sqlalchemy
-from sqlalchemy import MetaData, exc as sa_exc
+from sqlalchemy import MetaData, exc as sa_exc, Column, Integer, String, Sequence
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -139,16 +139,17 @@ class DatabaseConnection:
             Logger.logError(
                 f"Could not find \"{meta_data_type}_id\" column in {dataset_name}")
             return False
-
+        USER_ID_SEQ = Sequence('user_id_seq')
         df_meta_data_table = df_csv[[meta_data_type + "_id"]].copy()
         df_meta_data_table["dataset_name"] = dataset_name
+        # df_meta_data_table["unique_" + meta_data_type+"_id"] = Column(Integer, USER_ID_SEQ, primary_key=True, server_default=USER_ID_SEQ.next_value())
 
         output = StringIO()
         df_meta_data_table.to_csv(
             output, sep='\t', header=False, encoding="utf8", index=False)
         output.seek(0)
-
-        cursor.copy_from(output, meta_data_type, sep='\t', null='')
+        columns = [meta_data_type + "_id", "dataset_name"]
+        cursor.copy_from(output, meta_data_type, sep='\t', null='', columns=columns)
 
         for attribute_name in attribute_names:
             if attribute_name == meta_data_type + "_id":

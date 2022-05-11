@@ -402,7 +402,6 @@ def get_stat(abtest_id, stat):
         datetimes = database_connection.session.execute(
             f"SELECT DISTINCT date_of FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
         XFnY = [['Date', 'Purchases']]
-        XFnY = [['Date', 'Purchases']]
         for i in range(len(datetimes)):
             countz = database_connection.session.execute(
                 f"SELECT COUNT(customer_id) FROM purchase WHERE bought_on = '{datetimes[i][0]}'").fetchall()

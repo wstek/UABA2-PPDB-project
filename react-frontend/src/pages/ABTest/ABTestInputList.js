@@ -201,7 +201,7 @@ const ABTestInputList = ({ abs_algorithms }) => {
             <div className="row text-center justify-content-center align-items-center mb-5">
                 <div>
                     <button id="addRow" type="submit" onClick={() => handleAddAlgorithm()}
-                        className="orange-hover button-purple btn-lg">Add Algorithm
+                        className="green-hover button-purple btn-lg">Add Algorithm
                     </button>
                 </div>
             </div>

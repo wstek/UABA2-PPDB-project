@@ -57,17 +57,16 @@ class ABTestSimulation(threading.Thread):
 
     def insertCustomer(self, customer_id, statistics_id, dataset_name):
         self.database_connection.session.execute(
-            "INSERT INTO customer_specific_statistics(customer_id, statistics_id,dataset_name) "
-            "VALUES(:customer_id, :statistics_id, :dataset_name)",
+            "INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) "
+            "VALUES(:customer_id, :statistics_id)",
             {
-                "customer_id": customer_id, "statistics_id": statistics_id,
-                "dataset_name": dataset_name
+                "customer_id": customer_id, "statistics_id": statistics_id
             }
         )
 
     def insertRecommendation(self, recommendation_id, customer_id, statistics_id, dataset_name, article_id):
         self.database_connection.session.execute(
-            "INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
+            "INSERT INTO recommendation(recommendation_id, unique_customer_id, statistics_id, unique_article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :article_id)",
             {
                 "recommendation_id": recommendation_id, "customer_id": customer_id, "statistics_id": statistics_id,
                 "dataset_name": dataset_name, "article_id": article_id})
@@ -453,8 +452,8 @@ class ABTestSimulation(threading.Thread):
                             self.insertCustomer(
                                 dataset_name=self.abtest["dataset_name"], statistics_id=statistics_id, customer_id=customer_id)
                             for vv in range(k):
-                                self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)", {
-                                    "recommendation_id": vv+1, "customer_id": customer_id, "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"], "article_id": top_k_random[vv]})
+                                self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, unique_customer_id, statistics_id, unique_article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :article_id)", {
+                                    "recommendation_id": vv+1, "customer_id": customer_id, "statistics_id": statistics_id, "article_id": top_k_random[vv]})
                             out = False
                             for purchased_item in range(len(user_purchased_items)):
                                 for recommended_item in range(len(top_k_random)):
