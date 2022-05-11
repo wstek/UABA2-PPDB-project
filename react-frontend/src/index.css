@@ -18,10 +18,6 @@ body {
 
 .footer-text {
     color: #12375c;
-    /*font-weight: 500;*/
-    /*max-height: 10vh;*/
-    /*height: auto;*/
-    /*width: auto;*/
     min-font-size: 1vh;
     max-font-size: 3vh;
 }
@@ -36,10 +32,12 @@ body {
 
 .content {
     height: 70vh;
-    width: 100%;
+    width: 100vw;
     padding: 20px;
     display: flex;
     flex-direction: column;
+    max-width: 100vw;
+
 }
 
 .flexible {
@@ -65,10 +63,12 @@ body {
     background: #cc4f0e;
     transition: all 0.3s ease;
 }
+
 .red-hover:hover {
     background: #e80f0f;
     transition: all 0.3s ease;
 }
+
 .green-hover:hover {
     background: #0bcc62;
     transition: all 0.3s ease;
@@ -77,12 +77,15 @@ body {
 .bg-purple {
     background: rgba(216, 196, 252, 1);
 }
+
 .bg-lightpurple {
     background: rgb(214, 203, 248);
 }
-.border-dark{
-  border-color: #7734E7FF !important;
+
+.border-dark {
+    border-color: #7734E7FF !important;
 }
+
 /*.footer {*/
 /*    max-height: 5vh;*/
 /*    position: fixed;*/
@@ -121,6 +124,7 @@ body {
     max-width: 100%;
     height: auto;
 }
+
 .names {
     position: absolute;
     left: 120px;
@@ -211,7 +215,7 @@ body {
 /*    width: max-content;*/
 /*    !*height: auto;*!*/
 /*}*/
-.vh-2{
+.vh-2 {
     height: 2vh;
 }
 
@@ -229,7 +233,7 @@ body {
     justify-content: center;
     width: 250px;
     height: 130px;
-    border: 1px solid #000;
+    border: 1px solid rgba(0, 0, 0, 0.246);
 }
 
 .info {
@@ -296,152 +300,26 @@ body {
 
 
 
-/*
-mohammed zijn troep
- */
-
-/* base styles */
 * {
     margin: 0;
-    font-family: "Quicksand";
+    font-family: "Quicksand", serif;
     color: #333;
 }
 
-.whaty {
-    font-size: 16px;
-    cursor: pointer;
-}
 
-
-body, html {
-    font-family: 'Karla', sans-serif;
-}
-
-.message-container {
-    width: 250px;
-    max-width: 90vw;
-}
-
-.message-container--error {
-    background-color: rgba(255, 0, 0, 0.5);
-    border-radius: 8px;
-    padding: 5px;
-}
-
-.message {
-    font-size: 20px;
-    padding: 5px;
-    font-weight: 700;
-    color: #000000;
-    text-align: center;
-}
-
-.message2 {
-    font-size: 15px;
-    padding: 3px;
-    font-weight: 100;
-    color: #000000;
-    text-align: center;
-}
-
-.form-container {
-    display: flex;
-    flex-direction: column;
-    width: 420px;
-    max-width: 90vw;
-    height: 400px;
-    margin: 30px auto;
-    align-items: center;
-    justify-content: center;
-    border-radius: 30px;
-}
-
-.inputs-container {
-    display: flex;
-    flex-direction: column;
-}
-
-.input {
-    width: 270px;
-    height: 35px;
-    margin: 10px;
-    max-width: 80vw;
-
-    font-size: 16px;
-    border: 1px solid #d0d7e0;
-    border-radius: 3px;
-    text-indent: 10px;
-}
-
-.input:focus {
-    text-indent: 10px;
-    outline: none;
-    transition: 0.2s linear;
-    box-shadow: 0px 0px 18px -2px rgba(0, 0, 0, 0.15);
-}
-
-.input::placeholder {
-    color: #b8bec6;
-    text-indent: 10px;
-}
-
-.input:placeholder-shown {
-    text-indent: 10px;
-}
-
-.input:nth-child(1) {
-    margin-top: 20px;
-}
-
-.buttons-container {
-    display: flex;
-    flex-direction: row;
-}
-
-.option {
-    width: 125px;
-    height: 40px;
-    margin: 10px;
-    border: none;
-    border-radius: 15px;
-    font-size: 16px;
-    background-color: #f1356d;
-    color: #ffffff;
-    outline: none;
-    cursor: pointer;
-}
-
-.option:hover {
-    transition: 0.25s linear all;
-    background-color: #000000;
-    color: #fff;
-}
-
-.input--error {
-    border: 1px solid red;
-    box-shadow: 0px 0px 20px 0px rgba(255, 0, 0, 0.2);
-}
-
-.i-forgot {
-    cursor: pointer;
-    text-decoration: underline;
-}
 
 .maxwidth-250 {
     max-width: 250px;
 }
 
-/*
-gedaan met mohammed zijn troep
- */
 
 .clear {
     clear: both;
     height: 100px;
 }
 
-.purple-color{
-        border-bottom-color: rgba(214, 203, 248) !important;
-        border-top-color: rgba(214, 203, 248) !important;
+.purple-color {
+    border-bottom-color: rgba(214, 203, 248) !important;
+    border-top-color: rgba(214, 203, 248) !important;
     border-left-color: rgba(119, 52, 231) !important;
 }

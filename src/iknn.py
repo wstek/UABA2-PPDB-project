@@ -111,7 +111,7 @@ class ItemKNNIterative(ItemKNN):
             if self.normalize:
                 total = values.sum()
                 if total == 0:
-                    total = 1   # safe divide
+                    total = 1  # safe divide
                 values = values / total
 
             col_ind.append(cols)

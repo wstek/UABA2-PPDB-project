@@ -4,11 +4,13 @@ import warnings
 from io import StringIO
 from pathlib import Path
 from typing import List
+
 import pandas as pd
 import sqlalchemy
 from sqlalchemy import MetaData, exc as sa_exc
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import scoped_session, sessionmaker
+
 from Logger import Logger
 from config import configDatabase
 
@@ -38,6 +40,11 @@ class DatabaseConnection:
         """
         db_version = self.session.execute("SELECT version()").fetchone()[0]
         Logger.log("PostgreSQL database version:" + db_version)
+
+    def reflectMetaData(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=sa_exc.SAWarning)
+            self.meta_data.reflect()
 
     def queryTable(self, table, query_data: dict):
         return self.session.query(table).filter_by(**query_data)
@@ -107,6 +114,17 @@ class DatabaseConnection:
 
         return True
 
+    def insertPdDataframeInTable(self, df, table_name):
+        # todo add error handling
+        cursor = self.session.connection().connection.cursor()
+
+        output = StringIO()
+        df.to_csv(
+            output, sep='\t', header=False, encoding="utf8", index=False)
+        output.seek(0)
+
+        cursor.copy_from(output, table_name, sep='\t', null='')
+
     def __addMetaDataset(self, dataset_name: str, meta_data_filename: str, meta_data_type: str):
         self.meta_data.reflect()
         cursor = self.session.connection().connection.cursor()
@@ -136,11 +154,10 @@ class DatabaseConnection:
             if attribute_name == meta_data_type + "_id":
                 continue
 
-            df_meta_data_attribute_table = df_csv[[
-                meta_data_type + "_id"]].copy()
+            df_meta_data_attribute_table = df_csv[[meta_data_type + "_id"]].copy()
             df_meta_data_attribute_table["dataset_name"] = dataset_name
-            df_meta_data_attribute_table["attribute"] = attribute_name
-            df_meta_data_attribute_table["value"] = df_csv[attribute_name].copy(
+            df_meta_data_attribute_table["attribute_name"] = attribute_name
+            df_meta_data_attribute_table["attribute_value"] = df_csv[attribute_name].copy(
             )
             # todo add user defined custom type
             df_meta_data_attribute_table["type"] = 0
@@ -190,10 +207,10 @@ class DatabaseConnection:
         df_purchase_data_table["dataset_name"] = dataset_name
 
         df_purchase_data_table.rename(
-            columns={"t_dat": "timestamp"}, inplace=True)
+            columns={"t_dat": "bought_on"}, inplace=True)
 
         # drop duplicates but keep the first
-        df_purchase_data_table.drop_duplicates(subset=["dataset_name", "customer_id", "article_id", "timestamp"],
+        df_purchase_data_table.drop_duplicates(subset=["dataset_name", "customer_id", "article_id", "bought_on"],
                                                inplace=True)
 
         output = StringIO()

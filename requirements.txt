@@ -12,3 +12,4 @@ redis
 pandas
 numpy
 scipy
+flask_sse
