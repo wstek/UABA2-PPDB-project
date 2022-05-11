@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import pathlib
 
 from src.utils.configParser import configLogger
 from src.utils.pathParser import getAbsPathFromRelSrc
@@ -32,7 +33,8 @@ class Logger:
             os.makedirs(path)
 
         currtime = datetime.datetime.now()
-        f = open("../logs/" + "log_" + currtime.strftime('%Y-%m-%d'), 'a')
+
+        f = open(pathlib.Path(str(path), "log_" + currtime.strftime('%Y-%m-%d')).resolve(), 'a')
         f.write(currtime.strftime("%H:%M:%S") + " " + message + '\n')
         f.close()
 

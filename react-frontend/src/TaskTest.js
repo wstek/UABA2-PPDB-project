@@ -12,6 +12,7 @@ function TaskTest() {
 
                 const config = {
             headers: {
+                'method': 'post',
                 'content-type': 'multipart/form-data',
             },
         };

@@ -1,5 +1,11 @@
+import os
+import sys
+
 from flask import Flask
 from flask_sse import sse
+
+# appends parent directory to the python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.api.apiABTest import api_abtest
 from src.api.apiAccount import api_account
@@ -8,7 +14,7 @@ from src.api.apiSimulation import api_simulation
 from src.api.apiStatistics import api_statistics
 from src.api.apiTask import api_task
 from src.appConfig import Config
-from src.appVar import celery
+from src.celeryTasks.celery import celery
 from src.appVar import database_connection
 from src.appVar import flask_bcrypt
 from src.appVar import flask_session
