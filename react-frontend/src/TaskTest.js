@@ -1,8 +1,30 @@
-import React from 'react';
+import React, {useEffect} from "react";
 import axios from "axios";
 
 
 function TaskTest() {
+    useEffect(() => {
+        const sse = new EventSource("/api/stream",
+            {withCredentials: true});
+
+        sse.addEventListener("tasttest", (e) => {
+            // alert(e.data);
+            console.log(e.data);
+        })
+
+        sse.onerror = (e) => {
+            // error log here
+            console.log(e)
+            console.log(e.data)
+
+            sse.close();
+        }
+        return () => {
+            sse.close();
+        };
+    }, []);
+
+
     const handleReset = () => {
         const duration = document.getElementById("duration").value;
         console.log("starting task with " + duration + " seconds duration");
@@ -10,14 +32,13 @@ function TaskTest() {
         const formData = new FormData();
         formData.append('duration', duration);
 
-                const config = {
+        const config = {
             headers: {
                 'method': 'post',
-                'content-type': 'multipart/form-data',
             },
         };
 
-        axios.post("/api/tasks", formData,  config).then((response) => {
+        axios.post("/api/tasks", formData, config).then((response) => {
             console.log(response.data);
         });
     }
