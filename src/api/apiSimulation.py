@@ -1,6 +1,6 @@
 from flask import Blueprint, request, session
 
-from src.appVar import database_connection
+from src.extensions import database_connection
 
 api_simulation = Blueprint("api_simulation", __name__)
 

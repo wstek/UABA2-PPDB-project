@@ -3,7 +3,7 @@ from datetime import timedelta
 from flask import Blueprint, session
 
 from src.ABTestSimulation.ABTestSimulation import remove_tuples
-from src.appVar import database_connection
+from src.extensions import database_connection
 
 api_statistics = Blueprint("api_statistics", __name__)
 

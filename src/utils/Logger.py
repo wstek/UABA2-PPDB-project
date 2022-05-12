@@ -6,7 +6,7 @@ import pathlib
 from src.utils.configParser import configLogger
 from src.utils.pathParser import getAbsPathFromRelSrc
 
-CONFIG_FILE = "config/logger.ini"
+CONFIG_FILE = "configFiles/logger.ini"
 
 
 class Logger:

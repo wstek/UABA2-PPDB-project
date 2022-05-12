@@ -9,4 +9,4 @@ def getAbsPathFromRelSrc(rel_path: str):
 
 
 if __name__ == "__main__":
-    print(getAbsPathFromRelSrc("config"))
+    print(getAbsPathFromRelSrc("configFiles"))

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, session
 
-from src.appVar import database_connection
-from src.appVar import flask_bcrypt
+from src.extensions import database_connection
+from src.extensions import flask_bcrypt
 from src.utils.Logger import Logger
 
 api_account = Blueprint("api_account", __name__)

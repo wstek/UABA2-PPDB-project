@@ -1,8 +1,8 @@
-# config files
-src/config/*
-!src/config/__init__.py
+# configFiles files
+src/configFiles/*
+!src/configFiles/__init__.py
 !src/utils/configParser.py
-!src/config/logger.ini
+!src/configFiles/logger.ini
 
 # logs
 logs

@@ -4,7 +4,7 @@ import os
 from flask import Blueprint, request, abort, current_app
 from werkzeug.utils import secure_filename
 
-from src.appVar import database_connection
+from src.extensions import database_connection
 
 api_dataset = Blueprint("api_dataset", __name__)
 
