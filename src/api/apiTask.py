@@ -1,6 +1,5 @@
-from flask import Blueprint, request, jsonify
-# from src.celeryTasks.tasks import long_task
-from src.celeryTasks.celery import long_task
+from flask import Blueprint, jsonify
+from src.celeryTasks.tasks import long_task
 
 api_task = Blueprint("api_task", __name__)
 

@@ -14,7 +14,7 @@ from src.api.apiSimulation import api_simulation
 from src.api.apiStatistics import api_statistics
 from src.api.apiTask import api_task
 from src.appConfig import Config
-from src.celeryTasks.celery import celery
+from src.celeryTasks.tasks import celery
 from src.appVar import database_connection
 from src.appVar import flask_bcrypt
 from src.appVar import flask_session
@@ -27,10 +27,10 @@ def create_app(config):
     # bcrypt
     flask_bcrypt.init_app(flask_app)
 
-    # session
+    # sessions
     flask_session.init_app(flask_app)
 
-    # server side event
+    # server side events
     flask_app.register_blueprint(sse, url_prefix='/api/stream')
 
     # celery
