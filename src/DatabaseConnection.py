@@ -25,7 +25,7 @@ class DatabaseConnection:
         # read connection parameters
         params = configDatabase(filename, section)
 
-        self.engine = sqlalchemy.create_engine(f"postgresql://{params['user']}@localHost:5432/{params['dbname']}",
+        self.engine: sqlalchemy.engine = sqlalchemy.create_engine(f"postgresql://{params['user']}@localHost:5432/{params['dbname']}",
                                                executemany_mode='batch')
         self.session = scoped_session(sessionmaker(bind=self.engine))
         self.meta_data = MetaData(bind=self.engine)

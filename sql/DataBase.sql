@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS "dataset"
     "name"        varchar primary key,
     "uploaded_by" varchar NOT NULL references admin (username) on update cascade on delete cascade
 );
+create index idx_dataset_uploader on dataset(uploaded_by);
+
 
 CREATE TABLE IF NOT EXISTS "customer"
 (
@@ -45,6 +47,8 @@ CREATE TABLE IF NOT EXISTS "customer"
     primary key (unique_customer_id)
 
 );
+create index idx_customer_dataset_id on customer(customer_id, dataset_name);
+create index idx_customer_unique_id on customer(unique_customer_id);
 
 CREATE TABLE IF NOT EXISTS "ab_test"
 (
@@ -58,6 +62,9 @@ CREATE TABLE IF NOT EXISTS "ab_test"
     "created_by"   varchar NOT NULL references "datascientist" (username) on update cascade on delete cascade
 );
 
+create index idx_ab_test on ab_test(created_by,abtest_id);
+
+
 
 
 CREATE TABLE IF NOT EXISTS "article"
@@ -70,6 +77,8 @@ CREATE TABLE IF NOT EXISTS "article"
     primary key (unique_article_id)
 
 );
+
+
 
 CREATE TABLE IF NOT EXISTS "article_attribute"
 (
