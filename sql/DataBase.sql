@@ -1,15 +1,4 @@
-DROP SCHEMA public CASCADE;
-CREATE SCHEMA public;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA public TO public;
 
-create domain algorithmname varchar check (VALUE IN ('ItemKNN', 'Popularity', 'Recency'));
-
-CREATE EXTENSION if not exists citext;
-CREATE DOMAIN email AS citext
-    CHECK ( value ~
-            '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
-CREATE DOMAIN nat_int int check ( value >= 0 );
 
 CREATE TABLE IF NOT EXISTS "datascientist"
 (
@@ -35,7 +24,6 @@ CREATE TABLE IF NOT EXISTS "dataset"
     "name"        varchar primary key,
     "uploaded_by" varchar NOT NULL references admin (username) on update cascade on delete cascade
 );
-create index idx_dataset_uploader on dataset(uploaded_by);
 
 
 CREATE TABLE IF NOT EXISTS "customer"
@@ -47,8 +35,6 @@ CREATE TABLE IF NOT EXISTS "customer"
     primary key (unique_customer_id)
 
 );
-create index idx_customer_dataset_id on customer(customer_id, dataset_name);
-create index idx_customer_unique_id on customer(unique_customer_id);
 
 CREATE TABLE IF NOT EXISTS "ab_test"
 (
@@ -62,7 +48,6 @@ CREATE TABLE IF NOT EXISTS "ab_test"
     "created_by"   varchar NOT NULL references "datascientist" (username) on update cascade on delete cascade
 );
 
-create index idx_ab_test on ab_test(created_by,abtest_id);
 
 
 
@@ -118,6 +103,8 @@ CREATE TABLE IF NOT EXISTS "purchase"
     PRIMARY KEY ("dataset_name", "customer_id", "article_id", "bought_on")
 );
 
+
+
 CREATE TABLE IF NOT EXISTS "algorithm"
 (
     "algorithm_id"   serial        not null,
@@ -127,6 +114,7 @@ CREATE TABLE IF NOT EXISTS "algorithm"
     "algorithm_name" algorithmname NOT NULL,
     PRIMARY KEY ("algorithm_id", "abtest_id")
 );
+
 
 CREATE TABLE IF NOT EXISTS "parameter"
 (
@@ -139,6 +127,8 @@ CREATE TABLE IF NOT EXISTS "parameter"
     "value"          varchar not null,
     PRIMARY KEY ("parameter_name", "algorithm_id", "abtest_id")
 );
+
+
 CREATE TABLE IF NOT EXISTS "statistics"
 (
     "statistics_id" serial PRIMARY KEY,
@@ -150,6 +140,8 @@ CREATE TABLE IF NOT EXISTS "statistics"
 
     foreign key (algorithm_id, abtest_id) references algorithm (algorithm_id, abtest_id) on update cascade on delete cascade
 );
+
+
 CREATE TABLE IF NOT EXISTS "customer_specific_statistics"
 (
     "unique_customer_id" nat_int NOT NULL,
@@ -172,11 +164,13 @@ CREATE TABLE IF NOT EXISTS "recommendation"
     PRIMARY KEY ("recommendation_id", "unique_customer_id", "statistics_id")
 );
 
+
 CREATE TABLE IF NOT EXISTS "dynamic_stepsize_var"
 (
     statistics_id   int references statistics (statistics_id),
     parameter_name  varchar,
-    parameter_value varchar
+    parameter_value varchar,
+    PRIMARY KEY (statistics_id,parameter_name)
 );
 
 

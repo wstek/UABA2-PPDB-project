@@ -47,10 +47,10 @@ const ABTestInputList = ({ abs_algorithms }) => {
     const resetInput = () => {
         setId(0);
         setConAlgorithm([])
-        document.getElementById('stepsize').value = ''
-        document.getElementById('topk').value = ''
-        document.getElementById('start').value = ''
-        document.getElementById('end').value = ''
+        document.getElementById('stepsize').value = '1'
+        document.getElementById('topk').value = '10'
+        document.getElementById('start').value = '2020-01-01'
+        document.getElementById('end').value = '2020-01-10'
     }
 
     const renderFields = () => {

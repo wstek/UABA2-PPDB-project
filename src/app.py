@@ -15,6 +15,8 @@ from werkzeug.utils import secure_filename
 from ABTestSimulation import ABTestSimulation, remove_tuples
 from DatabaseConnection import DatabaseConnection
 from Logger import Logger
+import time
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "changeme"
@@ -175,10 +177,10 @@ def uploadCSV():
 @app.route("/api/get_datasets")
 def get_datasets():
     datasets = database_connection.session.execute(
-        "SELECT * FROM dataset").fetchall()
-    database_connection.session.commit()
+        f"SELECT name FROM dataset").fetchall()
     for i in range(len(datasets)):
         datasets[i] = str(datasets[i].name)
+
     return {"all_datasets": datasets}
 
 
@@ -403,7 +405,7 @@ def get_stat(abtest_id, stat):
         XFnY = [['Date', 'Purchases']]
         for i in range(len(datetimes)):
             countz = database_connection.session.execute(
-                f"SELECT COUNT(customer_id) FROM purchase WHERE bought_on = '{datetimes[i][0]}'").fetchall()
+                f"SELECT COUNT(customer_id) FROM purchase WHERE bought_on = '{datetimes[i][0]}' and abtest_id = {abtest_id} ").fetchall()
             XFnY.append([str(datetimes[i][0]), countz[0][0]])
         return {'graphdata': XFnY}
 
