@@ -12,6 +12,6 @@ def dummy_task(duration):
     message = f"slept {duration} seconds"
     Logger.log(message)
 
-    sse.publish("Hello world!", type='tasttest')
+    sse.publish("Hello world!", type='tasktest')
 
     return message

@@ -7,7 +7,7 @@ function TaskTest() {
         const sse = new EventSource("/api/stream",
             {withCredentials: true});
 
-        sse.addEventListener("tasttest", (e) => {
+        sse.addEventListener("tasktest", (e) => {
             // alert(e.data);
             console.log(e.data);
         })
