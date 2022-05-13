@@ -9,6 +9,7 @@ react-frontend/node_modules
 react-frontend/build
 react-frontend/package-lock.json
 react-frontend/.eslintcache
+react-frontend/.DS_Store
 
 # Datasets
 datasets
