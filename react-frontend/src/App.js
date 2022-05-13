@@ -22,17 +22,20 @@ import Stats from './pages/stats/Stats';
 import TaskTest from "./pages/TaskTest";
 
 function App() {
-
+    const integer = new RegExp("^[0-9]+")
     const [admin, setAdmin] = useState(false);
     const [auth, setAuthed] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => handleLoggedIn(setAdmin, setAuthed, setIsLoading), [])
+    const a = "/api/" + integer + "/" + integer
     console.log(window.location.pathname)
+    console.log(a)
     return (
         <Router>
 
             <div className="App">
-                {window.location.pathname === "/api/^(?:-?[1-9]\\d*$)|(?:^0)$/^(?:-?[1-9]\\d*$)|(?:^0)$" }
+
+                {window.location.pathname === "/api/" + integer + "/" + integer }
                 <Navbar admin={admin} auth={auth}/>
 
                 <div className="content">

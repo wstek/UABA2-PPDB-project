@@ -18,10 +18,22 @@ def get_personal_abtestids():
     personal_abtestids = database_connection.session.execute(
         f"select abtest_id from ab_test where created_by = '{username}';").fetchall()
     personal_abtestids = [r[0] for r in personal_abtestids]
-    return {"personal_abtestids": personal_abtestids}
+    return {"personal_abtestids": personal_abtestids}\
+
+@api_statistics.route("/api/abtest/statistics/<int:abtest_id>")
+def get_personal_algorithms(abtest_id):
+    username = session.get("user_id")
+
+    if not username:
+        return {"error": "unauthorized"}, 401
+
+    personal_algorithms = database_connection.session.execute(
+        f"select algorithm_id from ab_test natural join algorithm where abtest_id = '{abtest_id}' and created_by = '{username}';").fetchall()
+    personal_algorithms = [r[0] for r in personal_algorithms]
+    return {"personal_algorithms": personal_algorithms}
 
 
-@api_statistics.route("/api/users/<int:abtest_id>", methods=['GET'])
+@api_statistics.route("/api/users/<int:abtest_id>/<int:algorithm_id>", methods=['GET'])
 def get_users(abtest_id):
     users = database_connection.session.execute(
         f"SELECT customer_id FROM customer NATURAL JOIN ab_test WHERE abtest_id= '{abtest_id}'").fetchall()

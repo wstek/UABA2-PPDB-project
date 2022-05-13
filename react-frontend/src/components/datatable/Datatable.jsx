@@ -11,7 +11,7 @@ function Datatable({abtest_id,algorithm_id}) {
     const [select, setSelection] = React.useState([]);
     const [allRows, setAllRows] = useState(null);
         useEffect(() => {
-        fetch('/api/users/' + abtest_id, {
+        fetch('/api/users/' + abtest_id + "/" + algorithm_id, {
             method: 'GET',
             credentials: 'include',
             headers: {"Content-Type": "application/json", 'Accept': 'application/json'}
@@ -38,6 +38,7 @@ function Datatable({abtest_id,algorithm_id}) {
     const columns = [
         {field: 'id', headerName: 'ID', width: 70}
     ];
+
     // const actionColumn = [
     //     {ield:"action", headerName:"Action", width:200, renderCell:()=>{
     //         return (

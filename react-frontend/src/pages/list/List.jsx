@@ -16,7 +16,7 @@ const List = () => {
 
     function fetchCurrentUserAlgorithm() {
         if(selected_abtest) {
-            let url = '/api/algorithm/statistics/' + selected_abtest
+            let url = '/api/abtest/statistics/' + selected_abtest
             fetchData(url, setPersonalAlgorithms)
 
         }
