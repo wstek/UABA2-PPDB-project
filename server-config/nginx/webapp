@@ -22,10 +22,7 @@ server {
         include proxy_params;
 
         proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        chunked_transfer_encoding off;
-        proxy_buffering off;
-        proxy_cache off;
+        proxy_set_header Connection '';
 
         proxy_pass http://unix:/home/app/Programming-project-databases/flask-backend/src/webapp.sock;
     }
