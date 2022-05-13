@@ -43,5 +43,15 @@ create index idx_statistics_abtest_algorithm_date on statistics(abtest_id, algor
 
 drop index if exists idx_statistics_statistics_id;
 create index idx_statistics_statistics_id on statistics(statistics_id);
+
 drop index if exists idx_user_username_id;
 create index idx_user_username_id on datascientist(username);
+
+drop index if exists idx_ab_test_by_id;
+create index idx_ab_test_by_id on ab_test(abtest_id);
+
+drop index if exists idx_statistics_on_id;
+create index idx_statistics_on_id on statistics(statistics_id);
+
+drop index if exists idx_customer_specific_on_stat_id;
+create index idx_customer_specific_on_stat_id on customer_specific_statistics(statistics_id);
