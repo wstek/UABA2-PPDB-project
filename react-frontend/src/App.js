@@ -35,12 +35,11 @@ function App() {
 
             <div className="App">
 
-                {window.location.pathname === "/api/" + integer + "/" + integer }
+                {/*{window.location.pathname === "/api/" + integer + "/" + integer  && <Navbar admin={admin} auth={auth}></Navbar>}*/}
                 <Navbar admin={admin} auth={auth}/>
 
                 <div className="content">
                     <Switch>
-
                         <Route exact path="/tasktest">
                             <TaskTest/>
                         </Route>
