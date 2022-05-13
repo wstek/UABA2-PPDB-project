@@ -157,11 +157,11 @@ def get_stat(abtest_id, stat):
         return {'graphdata': XFnY}
     if stat == "purchases_over_time":
         datetimes = database_connection.session.execute(
-            f"SELECT DISTINCT date_of FROM statistics WHERE abtest_id = {abtest_id}").fetchall()
+            f"SELECT DISTINCT date_of,dataset_name FROM statistics natural join ab_test WHERE abtest_id = {abtest_id}").fetchall()
         XFnY = [['Date', 'Purchases']]
         for i in range(len(datetimes)):
             countz = database_connection.session.execute(
-                f"SELECT COUNT(customer_id) FROM purchase WHERE bought_on = '{datetimes[i][0]}' and abtest_id = {abtest_id} ").fetchall()
+                f"SELECT COUNT(customer_id) FROM purchase WHERE bought_on = '{datetimes[i][0]}' and dataset_name = '{datetimes[i][1]}' ").fetchall()
             XFnY.append([str(datetimes[i][0]), countz[0][0]])
         return {'graphdata': XFnY}
 
