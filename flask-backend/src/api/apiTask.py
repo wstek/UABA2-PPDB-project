@@ -1,13 +1,14 @@
 from flask import Blueprint, jsonify
 
 from src.celeryTasks.tasks import dummy_task
+from flask import session
 
 api_task = Blueprint("api_task", __name__)
 
 
 @api_task.route("/api/tasks", methods=["POST"])
 def run_task():
-    task = dummy_task.delay(5)
+    task = dummy_task.delay(session["user_id"], 5)
 
     return jsonify({"task_id": task.id}), 202
 

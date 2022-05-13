@@ -20,9 +20,6 @@ register_adapter(numpy.float64, addapt_numpy_float64)
 register_adapter(numpy.int64, addapt_numpy_int64)
 
 
-# TODO als er data is achter de start date van de simulatie mogen we deze data dan gebruiken (bv voor training, etc)
-
-
 class UserDataPerStep:
     def __init__(self, step_date, active):
         self.step_date = step_date
@@ -35,11 +32,14 @@ def remove_tuples(arr):
         arr[i] = arr[i][0]
 
 
+def generateRandomTopK(listx, items):
+    return random.sample(listx, items)
+
+
 class ABTestSimulation(threading.Thread):
-    def __init__(self, database_connection, sse, app, abtest):
+    def __init__(self, database_connection, sse, abtest):
         super().__init__()
         self.sse = sse
-        self.app = app
         self.frontend_data = []
         self.done = False
         self.abtest = abtest
@@ -47,14 +47,6 @@ class ABTestSimulation(threading.Thread):
 
         self.prev_progress = 0
         self.current_progress = 0
-
-    # def __getstate__(self):
-    #     # print("aaaaaaaaaaaaaaaaaaaaaaa")
-    #     return (self.frontend_data, self.done, self.abtest)
-
-    # def __setstate__(self, state):
-    #     # print("ssssssssssssssssssssss")
-    #     self.frontend_data, self.done, self.abtest = state
 
     def insertCustomer(self, unique_customer_id, statistics_id):
         self.database_connection.session.execute(
@@ -67,7 +59,8 @@ class ABTestSimulation(threading.Thread):
 
     def insertRecommendation(self, recommendation_id, unique_customer_id, statistics_id, unique_article_id):
         self.database_connection.session.execute(
-            "INSERT INTO recommendation(recommendation_id, unique_customer_id, statistics_id, unique_article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :unique_article_id)",
+            "INSERT INTO recommendation(recommendation_id, unique_customer_id, statistics_id, unique_article_id) "
+            "VALUES(:recommendation_id, :customer_id, :statistics_id, :unique_article_id)",
             {
                 "recommendation_id": recommendation_id, "customer_id": unique_customer_id,
                 "statistics_id": statistics_id, "unique_article_id": unique_article_id
@@ -82,10 +75,6 @@ class ABTestSimulation(threading.Thread):
                                       statistics_id=statistics_id,
                                       unique_article_id=recommendations[vv])
         self.database_connection.session.commit()
-
-    def generateRandomTopK(self, listx, items):
-        return random.sample(listx, items)
-        # TODO: OPMERKING: mogen we data gebruiken voor self.abtest["start"] voor de simulatie?
 
     def run(self):
 
@@ -151,15 +140,16 @@ class ABTestSimulation(threading.Thread):
                                   pd.DateOffset(days=int(self.abtest["stepsize"]))
 
             current_date = dt_current_date.strftime('%Y-%m-%d')
-            # statistics per step per algorithm
-            # customer_specific_statistics per active user (als n = active_users dan is er n customer_specific_statistics rows)
-            # k recommendations per active user
-            active_users = self.database_connection.session.execute(f"SELECT DISTINCT SUBQUERY.unique_customer_id FROM (SELECT * FROM \
+            # statistics per step per algorithm customer_specific_statistics per active user (als n = active_users
+            # dan is er n customer_specific_statistics rows) k recommendations per active user
+            active_users = self.database_connection.session.execute(f"SELECT DISTINCT SUBQUERY.unique_customer_id FROM "
+                                                                    f"(SELECT * FROM \
                     purchase natural join customer WHERE bought_on = '{current_date}') AS SUBQUERY").fetchall()
             self.database_connection.session.commit()
 
             purchases = self.database_connection.session.execute(
-                f"SELECT customer_id, article_id, unique_customer_id, unique_article_id  FROM purchase natural join customer natural join article WHERE bought_on = '{current_date}'").fetchall()
+                f"SELECT customer_id, article_id, unique_customer_id, unique_article_id  FROM purchase natural join "
+                f"customer natural join article WHERE bought_on = '{current_date}'").fetchall()
 
             user2purchasedItems = dict()
 
@@ -248,18 +238,20 @@ class ABTestSimulation(threading.Thread):
                                 user_histories[interactions[cc][0]].append(
                                     interactions[cc][1])
 
-                        # top_k_random = db_engine.session.execute(f"SELECT SUBQUERY.article_id FROM (SELECT article_id FROM article ORDER BY RANDOM() LIMIT {k}) as SUBQUERY ORDER BY article_id ASC").fetchall()
-                        # remove_tuples(top_k_random)
+                        # top_k_random = db_engine.session.execute(f"SELECT SUBQUERY.article_id FROM (SELECT
+                        # article_id FROM article ORDER BY RANDOM() LIMIT {k}) as SUBQUERY ORDER BY article_id
+                        # ASC").fetchall() remove_tuples(top_k_random)
 
-                        # for key in list(user_histories.keys()): #random moet gedaan worden in loop om unieke topk voor elke use te maken maar is trager
-                        #     if not(user_histories[key]):
-                        #         data_per_user_over_time_statistics['customer_id'][key][-1].algorithm_data.append(RANDOM_DATA(id=idx, topk=top_k_random, name="ItemKNN"))
-                        #         del user_histories[key]
+                        # for key in list(user_histories.keys()): #random moet gedaan worden in loop om unieke topk
+                        # voor elke use te maken maar is trager if not(user_histories[key]):
+                        # data_per_user_over_time_statistics['customer_id'][key][-1].algorithm_data.append(
+                        # RANDOM_DATA(id=idx, topk=top_k_random, name="ItemKNN")) del user_histories[key]
 
                         index2customer_id = {index: customer_id for index,
                                                                     customer_id in enumerate(user_histories)}
 
-                        # als training mag gebeuren maximaal window_size geleden, moeten we dit dan ook doen met de history van de users of moeten we hun history nemen van het begin
+                        # als training mag gebeuren maximaal window_size geleden, moeten we dit dan ook doen met de
+                        # history van de users of moeten we hun history nemen van het begin
                         histories = list(user_histories.values())
                         # print(histories)
                         recommendations = dynamic_info_algorithms[idx]["KNN"].recommend_all(
@@ -270,7 +262,7 @@ class ABTestSimulation(threading.Thread):
                         recommended_purchases_prices = 0.0
                         for cc in range(len(recommendations)):
                             # print(cc)
-                            recommendations[cc] += self.generateRandomTopK(
+                            recommendations[cc] += generateRandomTopK(
                                 all_unique_item_ids, k - len(recommendations[cc]))
                             self.insertRecommendations(recommendations=recommendations[cc], statistics_id=statistics_id,
                                                        unique_customer_id=index2customer_id[cc])
@@ -324,7 +316,7 @@ class ABTestSimulation(threading.Thread):
 
                         # SELECT customer_id, array_to_string(array_agg(article_id), ' ') FROM test3 WHERE CAST(timestamp as DATE) BETWEEN '2020-01-01' and '2020-01-03' GROUP BY customer_id;
                     else:
-                        top_k_random = self.generateRandomTopK(
+                        top_k_random = generateRandomTopK(
                             all_unique_item_ids, k)
                         # top_k_random = self.database_connection.session.execute(
                         #     f"SELECT SUBQUERY.article_id FROM (SELECT article_id FROM article ORDER BY RANDOM() LIMIT {k}) as SUBQUERY ORDER BY article_id ASC").fetchall()
@@ -462,7 +454,7 @@ class ABTestSimulation(threading.Thread):
                         #     RECENCY_DATA(id=idx, topk=copy.deepcopy(top_k_items)))
 
                     else:
-                        top_k_random = self.generateRandomTopK(
+                        top_k_random = generateRandomTopK(
                             all_unique_item_ids, k)
 
                         D_prev_recommendations[-1][idx] = top_k_random
@@ -602,7 +594,7 @@ class ABTestSimulation(threading.Thread):
                         #     POPULARITY_DATA(id=idx, topk=copy.deepcopy(top_k_items)))
 
                     else:
-                        top_k_random = self.generateRandomTopK(
+                        top_k_random = generateRandomTopK(
                             all_unique_item_ids, k)
 
                         D_prev_recommendations[-1][idx] = top_k_random
@@ -656,13 +648,10 @@ class ABTestSimulation(threading.Thread):
 
                 self.prev_progress = self.current_progress
                 self.current_progress = round(n_day / float(dayz), 2) * 100.0
-                with self.app.app_context():
-                    self.sse.publish(
-                        self.current_progress, type='simulation_progress')
+                self.sse.publish(self.current_progress, type='simulation_progress')
 
         self.done = True
-        with self.app.app_context():
-            self.sse.publish(100, type='simulation_progress')
+        self.sse.publish(100, type='simulation_progress')
         self.prev_progress = 0
         self.current_progress = 100
         return

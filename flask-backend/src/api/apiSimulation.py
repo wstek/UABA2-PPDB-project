@@ -1,5 +1,6 @@
 from flask import Blueprint, request, session
 
+from src.celeryTasks.tasks import start_simulation as background_start_simulation
 from src.extensions import database_connection
 
 api_simulation = Blueprint("api_simulation", __name__)
@@ -14,8 +15,6 @@ def start_simulation():
     dataset_name = request.json["dataset_name"]
     algorithms = request.json["algorithms"]
 
-    # abtest_id = database_connection.session.execute("SELECT nextval('ab_test_abtest_id_seq')").fetchone()[0]
-
     database_connection.session.execute(
         'INSERT INTO "ab_test"('
         'start_date, "end_date", top_k, stepsize, dataset_name, created_by) '
@@ -29,15 +28,15 @@ def start_simulation():
     database_connection.session.commit()
 
     for i in range(len(algorithms)):
-        # algorithm_id = database_connection.session.execute("SELECT nextval(
-        # 'algorithm_algorithm_id_seq')").fetchone()[0]
         database_connection.session.execute(
             "INSERT INTO algorithm(abtest_id, algorithm_name) VALUES(:abtest_id, :algorithm_name)",
             {"abtest_id": abtest_id, "algorithm_name": algorithms[i]["name"]})
         database_connection.session.commit()
+
         algorithm_id = database_connection.session.execute(
             'SELECT max(algorithm_id) FROM algorithm').fetchone()[0]
         database_connection.session.commit()
+
         algorithms[i]["id"] = algorithm_id
         for param, value in algorithms[i]["parameters"].items():
             database_connection.session.execute(
@@ -46,20 +45,23 @@ def start_simulation():
                 {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "type": "string",
                  "value": value})
         database_connection.session.commit()
-    # with lock:
-    #     thread_per_user[session["user_id"]] = ABTestSimulation(database_connection, sse, app,
-    #                                                            {"abtest_id": abtest_id, "start": start, "end": end,
-    #                                                             "topk": topk,
-    #                                                             "stepsize": stepsize,
-    #                                                             "dataset_name": dataset_name, "algorithms": algorithms})
-    # thread_per_user[session["user_id"]].start()
-    return "200"
+
+    simulation_input = {
+        "abtest_id": abtest_id,
+        "start": start,
+        "end": end,
+        "topk": topk,
+        "stepsize": stepsize,
+        "dataset_name": dataset_name,
+        "algorithms": algorithms
+    }
+
+    task = background_start_simulation.delay(user_id=session["user_id"],
+                                             simulation_input=simulation_input)
+
+    return {"task_id": task.id}, 202
 
 
 @api_simulation.route("/api/progress", methods=['GET'])
 def get_data():
-    # if session["user_id"] in thread_per_user:
-    #     return {'start': thread_per_user[session["user_id"]].prev_progress,
-    #             'end': thread_per_user[session["user_id"]].current_progress, 'started': True}
-    # else:
     return {'start': 0, 'end': 0, 'started': False}
