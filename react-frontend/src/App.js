@@ -15,7 +15,6 @@ import Statistics from "./pages/ABTest/Statistics";
 import {handleLoggedIn} from './utils/handleLoggedIn'
 import Simulation from "./pages/Account/Simulation";
 import ChangeInfo from "./pages/Account/ChangeInfo";
-import Home from "./pages/Home";
 import TaskTest from "./TaskTest";
 
 function App() {

@@ -4,15 +4,15 @@ import os
 import pathlib
 
 from src.utils.configParser import configLogger
-from src.utils.pathParser import getAbsPathFromRelSrc
+from src.utils.pathParser import getAbsPathFromProjectRoot
 
-CONFIG_FILE = "configFiles/logger.ini"
+CONFIG_FILE = "config-files/logger.ini"
 
 
 class Logger:
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.ERROR)
 
-    params = configLogger(getAbsPathFromRelSrc(CONFIG_FILE))
+    params = configLogger(getAbsPathFromProjectRoot(CONFIG_FILE))
 
     directory = params["directory"]
     silence_log_console = params["silence_log_console"] == "True"
@@ -25,7 +25,7 @@ class Logger:
 
     @classmethod
     def __logFile(cls, message):
-        path = getAbsPathFromRelSrc("../logs")
+        path = getAbsPathFromProjectRoot("logs")
 
         # create a new directory if it does not exist
         exists = os.path.exists(path)

@@ -1,19 +1,17 @@
-# configFiles files
-src/configFiles/*
-!src/configFiles/__init__.py
-!src/utils/configParser.py
-!src/configFiles/logger.ini
+# Backend
+flask-backend/config-files/*
+!flask-backend/config-files/logger.ini
+flask-backend/logs
+flask-backend/uploaded-files
 
-# logs
-logs
-
-# react
+# Frontend
 react-frontend/node_modules
 react-frontend/build
+react-frontend/package-lock.json
+react-frontend/.eslintcache
 
-# datasets
+# Datasets
 datasets
-src/uploaded-files
 
 # Database rapport
 /sql/DatabaseSchemeTeam6.aux
@@ -24,9 +22,6 @@ src/uploaded-files
 /sql/DatabaseSchemeTeam6.toc
 
 # Other
-datasets/*
 __pycache__
 .idea
 env
-react-frontend/package-lock.json
-/react-frontend/.eslintcache

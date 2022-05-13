@@ -2,7 +2,7 @@ from datetime import timedelta
 
 import redis
 
-from src.utils.pathParser import getAbsPathFromRelSrc
+from src.utils.pathParser import getAbsPathFromProjectRoot
 
 
 class Config(object):
@@ -21,7 +21,7 @@ class Config(object):
     # file upload
     MAX_CONTENT_LENGTH = 1024 * 1024 * 2000
     UPLOAD_EXTENSIONS = ['.csv']
-    UPLOAD_PATH = getAbsPathFromRelSrc("uploaded-files")
+    UPLOAD_PATH = getAbsPathFromProjectRoot("uploaded-files")
 
     # celery
     CELERY_BROKER_URL = "redis://localhost:6379"

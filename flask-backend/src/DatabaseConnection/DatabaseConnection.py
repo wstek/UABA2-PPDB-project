@@ -226,7 +226,7 @@ class DatabaseConnection:
 
 if __name__ == '__main__':
     db_con = DatabaseConnection()
-    db_con.connect(filename="../configFiles/database.ini")
+    db_con.connect(filename="../../config-files/database.ini")
     db_con.logVersion()
     db_con.addDataset("H_M", "mosh", "../datasets/H_M/purchases.csv", "../datasets/H_M/articles.csv",
                       "../datasets/H_M/customers.csv")

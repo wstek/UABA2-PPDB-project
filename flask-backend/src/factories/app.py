@@ -11,7 +11,7 @@ from src.factories.appConfig import Config
 from src.extensions import database_connection
 from src.extensions import flask_bcrypt
 from src.extensions import flask_session
-from src.utils.pathParser import getAbsPathFromRelSrc
+from src.utils.pathParser import getAbsPathFromProjectRoot
 
 
 def create_app() -> Flask:
@@ -19,7 +19,7 @@ def create_app() -> Flask:
     flask_app.config.from_object(Config)
 
     # databse
-    database_connection.connect(filename=getAbsPathFromRelSrc("configFiles/database.ini"))
+    database_connection.connect(filename=getAbsPathFromProjectRoot("config-files/database.ini"))
 
     # bcrypt
     flask_bcrypt.init_app(flask_app)
