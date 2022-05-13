@@ -28,6 +28,11 @@ def create_app() -> Flask:
     flask_session.init_app(flask_app)
 
     # server side events
+    @sse.after_request
+    def add_header(response):
+        response.headers["X-Accel-Buffering"] = "no"
+        return response
+
     flask_app.register_blueprint(sse, url_prefix='/api/stream')
 
     # api blueprints
