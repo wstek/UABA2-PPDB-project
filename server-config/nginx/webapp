@@ -20,19 +20,14 @@ server {
     # Backend Python Flask micro web framework
     location /api/ {
         include proxy_params;
-        proxy_pass http://unix:/home/app/Programming-project-databases/flask-backend/src/webapp.sock;
-    }
 
-    location /api/stream/ {
-        include proxy_params;
-        proxy_pass http://unix:/home/app/Programming-project-databases/flask-backend/src/webapp.sock;
-
-        # server-sent events
-        proxy_set_header Connection '';
         proxy_http_version 1.1;
+        proxy_set_header Connection "";
         chunked_transfer_encoding off;
         proxy_buffering off;
         proxy_cache off;
+
+        proxy_pass http://unix:/home/app/Programming-project-databases/flask-backend/src/webapp.sock;
     }
 
     # GitHub CI/CD webhook
