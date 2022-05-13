@@ -1,4 +1,6 @@
 import math
+import os
+import sys
 import time
 import warnings
 from io import StringIO
@@ -10,6 +12,9 @@ import sqlalchemy
 from sqlalchemy import MetaData, exc as sa_exc, Sequence
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import scoped_session, sessionmaker
+
+# appends parent directory to the python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from src.utils.Logger import Logger
 from src.utils.configParser import configDatabase
@@ -231,5 +236,6 @@ if __name__ == '__main__':
     db_con = DatabaseConnection()
     db_con.connect(filename=getAbsPathFromProjectRoot("config-files/database.ini"))
     db_con.logVersion()
-    db_con.addDataset("H_M", "xSamx33", "../datasets/H_M/purchases.csv", "../datasets/H_M/articles.csv",
-                      "../datasets/H_M/customers.csv")
+    db_con.addDataset("H_M", "xSamx33", getAbsPathFromProjectRoot("../datasets/H_M/purchases.csv"),
+                      getAbsPathFromProjectRoot("../datasets/H_M/articles.csv"),
+                      getAbsPathFromProjectRoot("../datasets/H_M/customers.csv"))
