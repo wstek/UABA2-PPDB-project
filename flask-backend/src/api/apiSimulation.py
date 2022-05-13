@@ -56,8 +56,7 @@ def start_simulation():
         "algorithms": algorithms
     }
 
-    task = background_start_simulation.delay(user_id=session["user_id"],
-                                             simulation_input=simulation_input)
+    task = background_start_simulation.delay(user_id=session["user_id"], simulation_input=simulation_input)
 
     return {"task_id": task.id}, 202
 
