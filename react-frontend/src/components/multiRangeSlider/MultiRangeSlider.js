@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState, useRef} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import classnames from "classnames";
 import PropTypes from "prop-types";
 import "./multiRangeSlider.css";
@@ -50,34 +50,34 @@ const MultiRangeSlider = ({min, max, onChange}) => {
         <div className="multirangeslider">
             <div className="container">
                 {/*<div className="container w-100">*/}
-                    <input
-                        type="range"
-                        min={min}
-                        max={max}
-                        value={minVal}
-                        ref={minValRef}
-                        onChange={(event) => {
-                            const value = Math.min(+event.target.value, maxVal - 1);
-                            setMinVal(value);
-                            event.target.value = value.toString();
-                        }}
-                        className={classnames("thumb w-100 float-start thumb--zindex-3", {
-                            "thumb--zindex-5": minVal > max - 100
-                        })}
-                    />
-                    <input
-                        type="range"
-                        min={min}
-                        max={max}
-                        value={maxVal}
-                        ref={maxValRef}
-                        onChange={(event) => {
-                            const value = Math.max(+event.target.value, minVal + 1);
-                            setMaxVal(value);
-                            event.target.value = value.toString();
-                        }}
-                        className=" float-end thumb thumb--zindex-4 w-100"
-                    />
+                <input
+                    type="range"
+                    min={min}
+                    max={max}
+                    value={minVal}
+                    ref={minValRef}
+                    onChange={(event) => {
+                        const value = Math.min(+event.target.value, maxVal - 1);
+                        setMinVal(value);
+                        event.target.value = value.toString();
+                    }}
+                    className={classnames("thumb w-100 float-start thumb--zindex-3", {
+                        "thumb--zindex-5": minVal > max - 100
+                    })}
+                />
+                <input
+                    type="range"
+                    min={min}
+                    max={max}
+                    value={maxVal}
+                    ref={maxValRef}
+                    onChange={(event) => {
+                        const value = Math.max(+event.target.value, minVal + 1);
+                        setMaxVal(value);
+                        event.target.value = value.toString();
+                    }}
+                    className=" float-end thumb thumb--zindex-4 w-100"
+                />
 
                 {/*</div>*/}
                 <div className="slider w-100">

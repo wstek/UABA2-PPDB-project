@@ -1,10 +1,8 @@
 import React from "react";
 import "./widget.css"
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
-import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
-import { Link } from "react-router-dom";
-const Widget = ({ type }) => {
+import {Link} from "react-router-dom";
+
+const Widget = ({type}) => {
     let data;
 
     const amount = 100;
@@ -35,7 +33,7 @@ const Widget = ({ type }) => {
                 <span className="title">{data.title}</span>
                 <span className="counter">{amount}</span>
                 <Link to={`/${data.title}`} style={{textDecoration: "none"}} className="icon">
-                <span className="link">{data.link}</span>
+                    <span className="link">{data.link}</span>
                 </Link>
             </div>
             {/* <div className="right">
@@ -43,7 +41,7 @@ const Widget = ({ type }) => {
                     <KeyboardArrowUpIcon />
                     {diff}%
                 </div> */}
-                {/* {data.icon} */}
+            {/* {data.icon} */}
             {/* </div> */}
         </div>
     );

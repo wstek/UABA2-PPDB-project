@@ -18,8 +18,7 @@ body {
 
 .footer-text {
     color: #12375c;
-    min-font-size: 1vh;
-    max-font-size: 3vh;
+    font-size: 1.0vw;
 }
 
 .align-left {
@@ -299,13 +298,11 @@ body {
 }
 
 
-
 * {
     margin: 0;
     font-family: "Quicksand", serif;
     color: #333;
 }
-
 
 
 .maxwidth-250 {

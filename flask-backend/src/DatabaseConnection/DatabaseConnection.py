@@ -1,4 +1,6 @@
 import math
+import os
+import sys
 import time
 import warnings
 from io import StringIO
@@ -7,12 +9,16 @@ from typing import List
 
 import pandas as pd
 import sqlalchemy
-from sqlalchemy import MetaData, exc as sa_exc
+from sqlalchemy import MetaData, exc as sa_exc, Sequence
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from Logger import Logger
-from config import configDatabase
+# appends parent directory to the python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from src.utils.Logger import Logger
+from src.utils.configParser import configDatabase
+from src.utils.pathParser import getAbsPathFromProjectRoot
 
 
 class DatabaseConnection:
@@ -25,8 +31,9 @@ class DatabaseConnection:
         # read connection parameters
         params = configDatabase(filename, section)
 
-        self.engine = sqlalchemy.create_engine(f"postgresql://{params['user']}@localHost:5432/{params['dbname']}",
-                                               executemany_mode='batch')
+        self.engine: sqlalchemy.engine = sqlalchemy.create_engine(
+            f"postgresql://{params['user']}@localHost:5432/{params['dbname']}",
+            executemany_mode='batch')
         self.session = scoped_session(sessionmaker(bind=self.engine))
         self.meta_data = MetaData(bind=self.engine)
 
@@ -139,16 +146,17 @@ class DatabaseConnection:
             Logger.logError(
                 f"Could not find \"{meta_data_type}_id\" column in {dataset_name}")
             return False
-
+        USER_ID_SEQ = Sequence('user_id_seq')
         df_meta_data_table = df_csv[[meta_data_type + "_id"]].copy()
         df_meta_data_table["dataset_name"] = dataset_name
+        # df_meta_data_table["unique_" + meta_data_type+"_id"] = Column(Integer, USER_ID_SEQ, primary_key=True, server_default=USER_ID_SEQ.next_value())
 
         output = StringIO()
         df_meta_data_table.to_csv(
             output, sep='\t', header=False, encoding="utf8", index=False)
         output.seek(0)
-
-        cursor.copy_from(output, meta_data_type, sep='\t', null='')
+        columns = [meta_data_type + "_id", "dataset_name"]
+        cursor.copy_from(output, meta_data_type, sep='\t', null='', columns=columns)
 
         for attribute_name in attribute_names:
             if attribute_name == meta_data_type + "_id":
@@ -226,7 +234,8 @@ class DatabaseConnection:
 
 if __name__ == '__main__':
     db_con = DatabaseConnection()
-    db_con.connect(filename="config/database.ini")
+    db_con.connect(filename=getAbsPathFromProjectRoot("config-files/database.ini"))
     db_con.logVersion()
-    db_con.addDataset("H_M", "xSamx33", "../datasets/H_M/purchases.csv", "../datasets/H_M/articles.csv",
-                      "../datasets/H_M/customers.csv")
+    db_con.addDataset("H_M", "xSamx33", getAbsPathFromProjectRoot("../datasets/H_M/purchases.csv"),
+                      getAbsPathFromProjectRoot("../datasets/H_M/articles.csv"),
+                      getAbsPathFromProjectRoot("../datasets/H_M/customers.csv"))

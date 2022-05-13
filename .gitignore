@@ -1,32 +1,29 @@
-# config files
-src/config/*
-!src/config/__init__.py
-!src/config.py
-!src/config/logger.ini
+# Backend
+flask-backend/config-files/*
+!flask-backend/config-files/logger.ini
+flask-backend/logs
+flask-backend/uploaded-files
 
-# logs
-logs
-
-# react
+# Frontend
 react-frontend/node_modules
 react-frontend/build
+react-frontend/package-lock.json
+react-frontend/.eslintcache
+react-frontend/.DS_Store
 
-# datasets
+# Datasets
 datasets
-uploaded-files
 
 # Database rapport
-/sql/DatabaseSchemeTeam6.aux
-/sql/DatabaseSchemeTeam6.dvi
-/sql/DatabaseSchemeTeam6.log
-/sql/DatabaseSchemeTeam6.out
-/sql/DatabaseSchemeTeam6.synctex.gz
-/sql/DatabaseSchemeTeam6.toc
+/sql/rapport/DatabaseSchemeTeam6.aux
+/sql/rapport/DatabaseSchemeTeam6.dvi
+/sql/rapport/DatabaseSchemeTeam6.log
+/sql/rapport/DatabaseSchemeTeam6.out
+/sql/rapport/DatabaseSchemeTeam6.synctex.gz
+/sql/rapport/DatabaseSchemeTeam6.toc
 
 # Other
-datasets/*
 __pycache__
 .idea
 env
-react-frontend/package-lock.json
-/react-frontend/.eslintcache
+**/.DS_Store

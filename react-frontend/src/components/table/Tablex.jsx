@@ -8,7 +8,7 @@ import Paper from '@mui/material/Paper';
 import "./tablex.css"
 
 function createData(name, img, calories, fat, carbs, status) {
-    return { name, img, calories, fat, carbs, status };
+    return {name, img, calories, fat, carbs, status};
 }
 
 const rows = [
@@ -22,7 +22,7 @@ const rows = [
 const Tablex = () => {
     return (
         <TableContainer component={Paper} className="tablex">
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <Table sx={{minWidth: 650}} aria-label="simple table">
                 <TableHead>
                     <TableRow>
                         {/* hier colomen zetten van bv de user metadata info */}
@@ -41,7 +41,7 @@ const Tablex = () => {
                             <TableCell className='tableCell'>{row.name}</TableCell>
                             <TableCell className='tableCell'>
                                 <div className="cellWrapper">
-                                    <img src={row.img} alt="" className="image" />
+                                    <img src={row.img} alt="" className="image"/>
                                     {row.calories}
                                 </div>
                             </TableCell>
@@ -49,7 +49,7 @@ const Tablex = () => {
                             <TableCell className='tableCell'>{row.carbs}</TableCell>
                             <TableCell className='tableCell'>
                                 <span className={`status ${row.status}`}>{row.status}</span>
-                                </TableCell>
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

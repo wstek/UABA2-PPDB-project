@@ -1,8 +1,9 @@
-import pandas as pd
 from typing import Dict
 
-import DatabaseConnection
-from Logger import Logger
+import pandas as pd
+
+from src.DatabaseConnection import DatabaseConnection
+from src.utils.Logger import Logger
 
 
 class DatasetInsert:

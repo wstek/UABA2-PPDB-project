@@ -25,22 +25,16 @@ function LineChart({XFnY, title, xMin = 0, xMax = 10}) {
 
 
     return (
-        <div className="container-fluid ">
-
-            <div className="row text-center  align-content-center mb-3 justify-content-center">
-                <div className="container">
-                    {XFnY && XFnY.graphdata.length > 1 && <Chart
-                        chartType="LineChart"
-                        width="100%"
-                        height="400px"
-                        data={XFnY.graphdata}
-                        options={options}
-                    />
-
-                    }
-                </div>
-            </div>
-        </div>
+        <>
+            {XFnY && XFnY.graphdata.length > 1 && <Chart
+                chartType="LineChart"
+                width="100%"
+                height="400px"
+                data={XFnY.graphdata}
+                options={options}
+            />
+            }
+        </>
     )
 }
 
