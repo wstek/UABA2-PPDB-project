@@ -27,10 +27,12 @@ function App() {
     const [auth, setAuthed] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => handleLoggedIn(setAdmin, setAuthed, setIsLoading), [])
-
+    console.log(window.location.pathname)
     return (
         <Router>
+
             <div className="App">
+                {window.location.pathname === "/api/^(?:-?[1-9]\\d*$)|(?:^0)$/^(?:-?[1-9]\\d*$)|(?:^0)$" }
                 <Navbar admin={admin} auth={auth}/>
 
                 <div className="content">
@@ -107,7 +109,6 @@ function App() {
                         <Route path="*">
                             <NotFound/>
                         </Route>
-
                     </Switch>
                 </div>
                 <div className="clear"/>
