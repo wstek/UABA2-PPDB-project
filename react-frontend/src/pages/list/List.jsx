@@ -1,6 +1,5 @@
 import Datatable from "../../components/datatable/Datatable";
 import Sidebar from "../../components/sidebar/Sidebar";
-import { useEffect, useState, useSyncExternalStore } from "react";
 import "./list.css"
 
 const List = () => {
@@ -13,14 +12,14 @@ const List = () => {
 
     return (
         <div className="list">
-            <Sidebar />
+            <Sidebar/>
             {/* {!pending && */}
             <div className="listContainer">
-                <Datatable />
+                <Datatable/>
             </div>
             {/* } */}
         </div>
     );
 }
- 
+
 export default List;

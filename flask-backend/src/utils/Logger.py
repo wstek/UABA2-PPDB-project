@@ -1,16 +1,18 @@
 import datetime
 import logging
 import os
+import pathlib
 
-from config import configLogger
+from src.utils.configParser import configLogger
+from src.utils.pathParser import getAbsPathFromProjectRoot
 
-CONFIG_FILE = "./config/logger.ini"
+CONFIG_FILE = "config-files/logger.ini"
 
 
 class Logger:
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.ERROR)
 
-    params = configLogger(CONFIG_FILE)
+    params = configLogger(getAbsPathFromProjectRoot(CONFIG_FILE))
 
     directory = params["directory"]
     silence_log_console = params["silence_log_console"] == "True"
@@ -23,7 +25,7 @@ class Logger:
 
     @classmethod
     def __logFile(cls, message):
-        path = "../logs"
+        path = getAbsPathFromProjectRoot("logs")
 
         # create a new directory if it does not exist
         exists = os.path.exists(path)
@@ -31,7 +33,8 @@ class Logger:
             os.makedirs(path)
 
         currtime = datetime.datetime.now()
-        f = open("../logs/" + "log_" + currtime.strftime('%Y-%m-%d'), 'a')
+
+        f = open(pathlib.Path(str(path), "log_" + currtime.strftime('%Y-%m-%d')).resolve(), 'a')
         f.write(currtime.strftime("%H:%M:%S") + " " + message + '\n')
         f.close()
 

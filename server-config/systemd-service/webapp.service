@@ -1,5 +1,5 @@
 [Unit]
-Description=Gunicorn instance to serve Programming project databases
+Description=Gunicorn instance to serve the webapp backend
 After=network.target
 
 [Service]

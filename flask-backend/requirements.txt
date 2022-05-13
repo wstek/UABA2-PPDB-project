@@ -1,0 +1,17 @@
+Flask
+gunicorn
+Jinja2
+psycopg2-binary
+Werkzeug
+sqlalchemy
+flask-bcrypt
+flask-session
+flask-sqlalchemy
+flask-cors
+redis
+pandas
+numpy
+scipy
+flask_sse
+celery
+supervisor

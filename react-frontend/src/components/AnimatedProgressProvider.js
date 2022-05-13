@@ -1,15 +1,13 @@
 import React from "react";
-import { Animate } from "react-move";
+import {Animate} from "react-move";
 
 class AnimatedProgressProvider extends React.Component {
-    interval = undefined;
-
-    state = {
-        isAnimated: false
-    };
-
     static defaultProps = {
         valueStart: 0
+    };
+    interval = undefined;
+    state = {
+        isAnimated: false
     };
 
     componentDidMount() {
@@ -46,7 +44,7 @@ class AnimatedProgressProvider extends React.Component {
                     }
                 })}
             >
-                {({ value }) => this.props.children(value)}
+                {({value}) => this.props.children(value)}
             </Animate>
         );
     }

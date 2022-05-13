@@ -1,12 +1,10 @@
 import Overview from "../../components/Overview";
 import LineChart from "../../components/LineChart";
 import {ColoredLine} from '../../components/ColoredLine';
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useState} from "react";
 import ABTestPicker from "../../components/ABTestpicker";
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
 import DateSlider from "../../components/DateSlider";
-
-import SearchUser from "./SearchUser";
 import UserTable from "./UserTable";
 
 

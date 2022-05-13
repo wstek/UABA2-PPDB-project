@@ -1,5 +1,4 @@
-import React from "react";
-import {useEffect, useState} from "react";
+import React, {useState} from "react";
 
 export default function RangeSlider() {
     // window.onload = function () {
@@ -11,20 +10,20 @@ export default function RangeSlider() {
     let minGap = 1;
 
     const [start, setStart] = useState(sliderMinValue)
-    const [end,setEnd] = useState(sliderMaxValue)
+    const [end, setEnd] = useState(sliderMaxValue)
     console.log(start)
     console.log(end)
     // let displayValOne = document.getElementById("range1");
     // let displayValTwo = document.getElementById("range2");
     let sliderTrack = document.querySelector(".slider-track");
-    let percent1,percent2
+    let percent1, percent2
+
     function slideStart(event) {
 
         console.log("slideone")
         if (parseInt(end) - parseInt(start) < minGap) {
             setStart(parseInt(end) - minGap);
-        }
-        else {
+        } else {
             setStart(event.target.value)
         }
         // displayValOne.textContent = sliderOne.value;
@@ -34,8 +33,7 @@ export default function RangeSlider() {
     function slideEnd(event) {
         if (parseInt(end) - parseInt(start) < minGap) {
             setEnd(parseInt(start) + minGap);
-        }
-        else {
+        } else {
             setEnd(event.target.value)
         }
         // displayValTwo.textContent = sliderTwo.value;
@@ -61,8 +59,8 @@ export default function RangeSlider() {
             </div>
             <div className="container">
                 <div className="slider-track"></div>
-                <input type="range" min="0" max={sliderMaxValue} value={start} id="slider-1" onChange={slideStart} />
-                    <input type="range" min="0" max="100" value={end} id="slider-2" onChange={slideEnd}/>
+                <input type="range" min="0" max={sliderMaxValue} value={start} id="slider-1" onChange={slideStart}/>
+                <input type="range" min="0" max="100" value={end} id="slider-2" onChange={slideEnd}/>
             </div>
         </div>
     )

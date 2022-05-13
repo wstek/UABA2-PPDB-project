@@ -7,12 +7,13 @@ from typing import List
 
 import pandas as pd
 import sqlalchemy
-from sqlalchemy import MetaData, exc as sa_exc, Column, Integer, String, Sequence
+from sqlalchemy import MetaData, exc as sa_exc, Sequence
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from Logger import Logger
-from config import configDatabase
+from src.utils.Logger import Logger
+from src.utils.configParser import configDatabase
+from src.utils.pathParser import getAbsPathFromProjectRoot
 
 
 class DatabaseConnection:
@@ -25,8 +26,9 @@ class DatabaseConnection:
         # read connection parameters
         params = configDatabase(filename, section)
 
-        self.engine: sqlalchemy.engine = sqlalchemy.create_engine(f"postgresql://{params['user']}@localHost:5432/{params['dbname']}",
-                                               executemany_mode='batch')
+        self.engine: sqlalchemy.engine = sqlalchemy.create_engine(
+            f"postgresql://{params['user']}@localHost:5432/{params['dbname']}",
+            executemany_mode='batch')
         self.session = scoped_session(sessionmaker(bind=self.engine))
         self.meta_data = MetaData(bind=self.engine)
 
@@ -227,7 +229,7 @@ class DatabaseConnection:
 
 if __name__ == '__main__':
     db_con = DatabaseConnection()
-    db_con.connect(filename="config/database.ini")
+    db_con.connect(filename=getAbsPathFromProjectRoot("config-files/database.ini"))
     db_con.logVersion()
     db_con.addDataset("H_M", "xSamx33", "../datasets/H_M/purchases.csv", "../datasets/H_M/articles.csv",
                       "../datasets/H_M/customers.csv")

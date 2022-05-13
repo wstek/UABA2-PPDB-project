@@ -1,11 +1,11 @@
-import threading
-import pandas as pd
-from iknn import ItemKNNIterative
 import random
+import threading
+
 import numpy
+import pandas as pd
 from psycopg2.extensions import register_adapter, AsIs
-# from flask import session
-# from operator import index
+
+from src.ABTestSimulation.Algorithms.iknn import ItemKNNIterative
 
 
 def addapt_numpy_float64(numpy_float64):
@@ -18,6 +18,7 @@ def addapt_numpy_int64(numpy_int64):
 
 register_adapter(numpy.float64, addapt_numpy_float64)
 register_adapter(numpy.int64, addapt_numpy_int64)
+
 
 # TODO als er data is achter de start date van de simulatie mogen we deze data dan gebruiken (bv voor training, etc)
 
@@ -68,7 +69,8 @@ class ABTestSimulation(threading.Thread):
         self.database_connection.session.execute(
             "INSERT INTO recommendation(recommendation_id, unique_customer_id, statistics_id, unique_article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :unique_article_id)",
             {
-                "recommendation_id": recommendation_id, "customer_id": unique_customer_id, "statistics_id": statistics_id,"unique_article_id": unique_article_id
+                "recommendation_id": recommendation_id, "customer_id": unique_customer_id,
+                "statistics_id": statistics_id, "unique_article_id": unique_article_id
             })
 
     def insertRecommendations(self, recommendations, statistics_id, unique_customer_id):
@@ -91,7 +93,7 @@ class ABTestSimulation(threading.Thread):
         dt_current_date = pd.to_datetime(
             self.abtest["start"], format='%Y-%m-%d')
         dt_end = pd.to_datetime(self.abtest["end"], format='%Y-%m-%d')
-        dayz = (dt_end-dt_start).days
+        dayz = (dt_end - dt_start).days
 
         last_time_train = dt_current_date.strftime('%Y-%m-%d')
 
@@ -116,32 +118,37 @@ class ABTestSimulation(threading.Thread):
 
         for i in range(len(self.abtest["algorithms"])):
             idx = int(self.abtest["algorithms"][i]["id"]) - \
-                int(self.abtest["algorithms"][0]["id"])
+                  int(self.abtest["algorithms"][0]["id"])
             top_k_over_time_statistics[idx] = []
 
             if self.abtest["algorithms"][i]["name"] == "ItemKNN":
-                dynamic_info_algorithms[idx] = {"dt_start_LookBackWindow": pd.to_datetime(self.abtest["start"], format='%Y-%m-%d'),
-                                                "dt_start_RetrainInterval": pd.to_datetime(self.abtest["start"], format='%Y-%m-%d'), "KNN": ItemKNNIterative(k=int(
-                                                    self.abtest["algorithms"][i]["parameters"]["KNearest"]), normalize=(self.abtest["algorithms"][i]["parameters"]["Normalize"] == 'True'))}
+                dynamic_info_algorithms[idx] = {
+                    "dt_start_LookBackWindow": pd.to_datetime(self.abtest["start"], format='%Y-%m-%d'),
+                    "dt_start_RetrainInterval": pd.to_datetime(self.abtest["start"], format='%Y-%m-%d'),
+                    "KNN": ItemKNNIterative(k=int(
+                        self.abtest["algorithms"][i]["parameters"]["KNearest"]),
+                        normalize=(self.abtest["algorithms"][i]["parameters"]["Normalize"] == 'True'))}
 
             elif self.abtest["algorithms"][i]["name"] == "Recency":
                 dynamic_info_algorithms[idx] = {"dt_start_RetrainInterval": pd.to_datetime(
                     self.abtest["start"], format='%Y-%m-%d'), "prev_top_k": []}
 
             elif self.abtest["algorithms"][i]["name"] == "Popularity":
-                dynamic_info_algorithms[idx] = {"dt_start_LookBackWindow": pd.to_datetime(self.abtest["start"], format='%Y-%m-%d'),
-                                                "dt_start_RetrainInterval": pd.to_datetime(self.abtest["start"], format='%Y-%m-%d'), "prev_top_k": []}
+                dynamic_info_algorithms[idx] = {
+                    "dt_start_LookBackWindow": pd.to_datetime(self.abtest["start"], format='%Y-%m-%d'),
+                    "dt_start_RetrainInterval": pd.to_datetime(self.abtest["start"], format='%Y-%m-%d'),
+                    "prev_top_k": []}
 
         D = 7  # of 30
 
         D_prev_recommendations = []
 
         # SIMULATION LOOP MAIN
-        for n_day in range(0, int(dayz)+1, int(self.abtest["stepsize"])):
+        for n_day in range(0, int(dayz) + 1, int(self.abtest["stepsize"])):
             print(str(n_day) + "/" + str(int(dayz)))
             if n_day:
                 dt_current_date = dt_current_date + \
-                    pd.DateOffset(days=int(self.abtest["stepsize"]))
+                                  pd.DateOffset(days=int(self.abtest["stepsize"]))
 
             current_date = dt_current_date.strftime('%Y-%m-%d')
             # statistics per step per algorithm
@@ -174,7 +181,8 @@ class ABTestSimulation(threading.Thread):
                 user_histories[active_users[i]] = []
 
             for customer_id in data_per_user_over_time_statistics['customer_id']:
-                if len(data_per_user_over_time_statistics['customer_id'][customer_id]) < len(data_per_user_over_time_statistics['time']):
+                if len(data_per_user_over_time_statistics['customer_id'][customer_id]) < len(
+                        data_per_user_over_time_statistics['time']):
                     data_per_user_over_time_statistics['customer_id'][customer_id].append(
                         UserDataPerStep(current_date, active=False))
 
@@ -182,28 +190,29 @@ class ABTestSimulation(threading.Thread):
             active_users_over_time_statistics['n_users'].append(
                 len(active_users))
 
-            if len(D_prev_recommendations) == D+1:
+            if len(D_prev_recommendations) == D + 1:
                 D_prev_recommendations.pop(0)
             D_prev_recommendations.append({})
 
             for algo in range(len(self.abtest["algorithms"])):
                 # print(self.frontend_data)
                 self.database_connection.session.execute("INSERT INTO statistics(date_of, algorithm_id, abtest_id) VALUES(:datetime, :algorithm_id,\
-                :abtest_id)", {"datetime": current_date, "algorithm_id": self.abtest["algorithms"][algo]["id"], "abtest_id": self.abtest["abtest_id"]})
+                :abtest_id)", {"datetime": current_date, "algorithm_id": self.abtest["algorithms"][algo]["id"],
+                               "abtest_id": self.abtest["abtest_id"]})
                 statistics_id = self.database_connection.session.execute(
                     f'SELECT last_value FROM statistics_statistics_id_seq').fetchone()[0]
                 self.database_connection.session.commit()
 
                 idx = int(self.abtest["algorithms"][algo]["id"]) - \
-                    int(self.abtest["algorithms"][0]["id"])
+                      int(self.abtest["algorithms"][0]["id"])
                 k = int(self.abtest["topk"])
                 start_date = dt_start.strftime('%Y-%m-%d')
 
                 if self.abtest["algorithms"][algo]["name"] == "ItemKNN":
 
-                    diff = (dt_current_date-dynamic_info_algorithms[idx]["dt_start_LookBackWindow"]).days - \
-                        int(self.abtest["algorithms"][algo]
-                            ["parameters"]["LookBackWindow"])
+                    diff = (dt_current_date - dynamic_info_algorithms[idx]["dt_start_LookBackWindow"]).days - \
+                           int(self.abtest["algorithms"][algo]
+                               ["parameters"]["LookBackWindow"])
                     if diff > 0:
                         dynamic_info_algorithms[idx]["dt_start_LookBackWindow"] += pd.DateOffset(
                             days=diff)
@@ -216,7 +225,7 @@ class ABTestSimulation(threading.Thread):
                         dt_prev_day = dt_current_date - pd.DateOffset(days=1)
                         prev_day = dt_prev_day.strftime('%Y-%m-%d')
                         retrain = (
-                            dt_current_date-dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
+                                dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         interactions = self.database_connection.session.execute(f"SELECT unique_customer_id, unique_article_id from purchase natural join article natural join customer WHERE \
                             bought_on BETWEEN '{start_date}' AND '{prev_day}'").fetchall()
                         self.database_connection.session.commit()
@@ -231,7 +240,8 @@ class ABTestSimulation(threading.Thread):
                             dynamic_info_algorithms[idx]["KNN"].train(
                                 interactions, unique_item_ids=all_unique_item_ids)
                             dynamic_info_algorithms[idx]["dt_start_RetrainInterval"] = dt_current_date - pd.DateOffset(
-                                days=(retrain-int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])-1))
+                                days=(retrain - int(
+                                    self.abtest["algorithms"][algo]["parameters"]['RetrainInterval']) - 1))
                             # 2020-01-01 - 2020-01-05 = 4 -> 2 keer trainen?   momenten waarop getrain moet worden: 2020-01-01, 2020-01-03, 2020-01-05
                         for cc in range(len(interactions)):
                             if interactions[cc][0] in user_histories:
@@ -247,7 +257,7 @@ class ABTestSimulation(threading.Thread):
                         #         del user_histories[key]
 
                         index2customer_id = {index: customer_id for index,
-                                             customer_id in enumerate(user_histories)}
+                                                                    customer_id in enumerate(user_histories)}
 
                         # als training mag gebeuren maximaal window_size geleden, moeten we dit dan ook doen met de history van de users of moeten we hun history nemen van het begin
                         histories = list(user_histories.values())
@@ -261,7 +271,7 @@ class ABTestSimulation(threading.Thread):
                         for cc in range(len(recommendations)):
                             # print(cc)
                             recommendations[cc] += self.generateRandomTopK(
-                                all_unique_item_ids, k-len(recommendations[cc]))
+                                all_unique_item_ids, k - len(recommendations[cc]))
                             self.insertRecommendations(recommendations=recommendations[cc], statistics_id=statistics_id,
                                                        unique_customer_id=index2customer_id[cc])
                             user_purchased_items = user2purchasedItems[index2customer_id[cc]]
@@ -276,7 +286,7 @@ class ABTestSimulation(threading.Thread):
                                     break
                             out = False
                             D_prev_recommendations[-1][idx][index2customer_id[cc]
-                                                            ] = recommendations[cc]
+                            ] = recommendations[cc]
                             for purchased_item in range(len(user_purchased_items)):
                                 out = False
                                 for dayzx in range(len(D_prev_recommendations)):
@@ -284,20 +294,24 @@ class ABTestSimulation(threading.Thread):
                                         prev_recommendations = D_prev_recommendations[
                                             dayzx][idx][index2customer_id[cc]]
                                         for prev_recommended_item in range(len(prev_recommendations)):
-                                            if prev_recommendations[prev_recommended_item] == user_purchased_items[purchased_item]:
+                                            if prev_recommendations[prev_recommended_item] == user_purchased_items[
+                                                purchased_item]:
                                                 out = True
                                                 recommended_purchases += 1
                                                 break
                                     if out:
                                         break
 
-                        CTR = float(clicks)/len(active_users)
-                        ATTR_RATE = float(recommended_purchases)/len(purchases)
+                        CTR = float(clicks) / len(active_users)
+                        ATTR_RATE = float(recommended_purchases) / len(purchases)
 
                         self.database_connection.session.execute(
-                            'INSERT INTO dynamic_stepsize_var (statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)', {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
+                            'INSERT INTO dynamic_stepsize_var (statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
+                            {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
                         self.database_connection.session.execute(
-                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)', {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE", "parametervalue": ATTR_RATE})
+                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
+                            {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE",
+                             "parametervalue": ATTR_RATE})
                         self.database_connection.session.commit()
 
                         self.frontend_data.append(
@@ -329,19 +343,22 @@ class ABTestSimulation(threading.Thread):
                             for purchased_item in range(len(user_purchased_items)):
                                 for recommended_item in range(len(top_k_random)):
                                     if user_purchased_items[purchased_item] == top_k_random[recommended_item]:
-                                        if not(out):
+                                        if not (out):
                                             out = True
                                             clicks += 1
                                         recommended_purchases += 1
                                         break
 
-                        CTR = float(clicks)/len(active_users)
-                        ATTR_RATE = float(recommended_purchases)/len(purchases)
+                        CTR = float(clicks) / len(active_users)
+                        ATTR_RATE = float(recommended_purchases) / len(purchases)
 
                         self.database_connection.session.execute(
-                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)', {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
+                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
+                            {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
                         self.database_connection.session.execute(
-                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)', {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE", "parametervalue": ATTR_RATE})
+                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
+                            {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE",
+                             "parametervalue": ATTR_RATE})
                         self.database_connection.session.commit()
 
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(RANDOM_DATA(id=idx, topk=top_k_random, name="ItemKNN")) #DEEP COPY????????????
@@ -371,7 +388,7 @@ class ABTestSimulation(threading.Thread):
                         dt_prev_day = dt_current_date - pd.DateOffset(days=1)
                         prev_day = dt_prev_day.strftime('%Y-%m-%d')
                         retrain = (
-                            dt_current_date-dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
+                                dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme
                             top_k = self.database_connection.session.execute(f"SELECT a.unique_article_id, t.bought_on FROM(SELECT article_id,MIN(bought_on) AS bought_on \
@@ -382,7 +399,8 @@ class ABTestSimulation(threading.Thread):
                                 top_k_items.append(top_k[i][0])
                             # top_k_over_time_statistics[idx].append(top_k)
                             dynamic_info_algorithms[idx]["dt_start_RetrainInterval"] = dt_current_date - pd.DateOffset(
-                                days=(retrain-int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])-1))
+                                days=(retrain - int(
+                                    self.abtest["algorithms"][algo]["parameters"]['RetrainInterval']) - 1))
                             dynamic_info_algorithms[idx]["prev_top_k"] = top_k_items
                         else:
                             top_k_items = dynamic_info_algorithms[idx]["prev_top_k"]
@@ -397,8 +415,10 @@ class ABTestSimulation(threading.Thread):
                             self.insertCustomer(
                                 statistics_id=statistics_id, unique_customer_id=unique_customer_id)
                             for vv in range(k):
-                                self.insertRecommendation(recommendation_id=vv + 1, unique_customer_id=unique_customer_id,
-                                                          unique_article_id=top_k_items[vv], statistics_id=statistics_id)
+                                self.insertRecommendation(recommendation_id=vv + 1,
+                                                          unique_customer_id=unique_customer_id,
+                                                          unique_article_id=top_k_items[vv],
+                                                          statistics_id=statistics_id)
                             out = False
                             for purchased_item in range(len(user_purchased_items)):
                                 for recommended_item in range(len(top_k_items)):
@@ -415,20 +435,24 @@ class ABTestSimulation(threading.Thread):
                                     prev_recommendations = D_prev_recommendations[
                                         dayzx][idx]
                                     for prev_recommended_item in range(len(prev_recommendations)):
-                                        if prev_recommendations[prev_recommended_item] == user_purchased_items[purchased_item]:
+                                        if prev_recommendations[prev_recommended_item] == user_purchased_items[
+                                            purchased_item]:
                                             out = True
                                             recommended_purchases += 1
                                             break
                                     if out:
                                         break
 
-                        CTR = float(clicks)/len(active_users)
-                        ATTR_RATE = float(recommended_purchases)/len(purchases)
+                        CTR = float(clicks) / len(active_users)
+                        ATTR_RATE = float(recommended_purchases) / len(purchases)
 
                         self.database_connection.session.execute(
-                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)', {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
+                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
+                            {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
                         self.database_connection.session.execute(
-                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)', {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE", "parametervalue": ATTR_RATE})
+                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
+                            {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE",
+                             "parametervalue": ATTR_RATE})
                         self.database_connection.session.commit()
 
                         self.frontend_data.append(
@@ -449,8 +473,11 @@ class ABTestSimulation(threading.Thread):
                             self.insertCustomer(
                                 statistics_id=statistics_id, unique_customer_id=unique_customer_id)
                             for vv in range(k):
-                                self.database_connection.session.execute("INSERT INTO recommendation(recommendation_id, unique_customer_id, statistics_id, unique_article_id) VALUES(:recommendation_id, :unique_customer_id, :statistics_id, :unique_article_id)", {
-                                    "recommendation_id": vv+1, "unique_customer_id": unique_customer_id, "statistics_id": statistics_id, "unique_article_id": top_k_random[vv]})
+                                self.database_connection.session.execute(
+                                    "INSERT INTO recommendation(recommendation_id, unique_customer_id, statistics_id, unique_article_id) VALUES(:recommendation_id, :unique_customer_id, :statistics_id, :unique_article_id)",
+                                    {
+                                        "recommendation_id": vv + 1, "unique_customer_id": unique_customer_id,
+                                        "statistics_id": statistics_id, "unique_article_id": top_k_random[vv]})
                             out = False
                             for purchased_item in range(len(user_purchased_items)):
                                 for recommended_item in range(len(top_k_random)):
@@ -461,13 +488,16 @@ class ABTestSimulation(threading.Thread):
                                         recommended_purchases += 1
                                         break
 
-                        CTR = float(clicks)/len(active_users)
-                        ATTR_RATE = float(recommended_purchases)/len(purchases)
+                        CTR = float(clicks) / len(active_users)
+                        ATTR_RATE = float(recommended_purchases) / len(purchases)
 
                         self.database_connection.session.execute(
-                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)', {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
+                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
+                            {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
                         self.database_connection.session.execute(
-                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)', {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE", "parametervalue": ATTR_RATE})
+                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
+                            {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE",
+                             "parametervalue": ATTR_RATE})
                         self.database_connection.session.commit()
 
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(
@@ -486,9 +516,9 @@ class ABTestSimulation(threading.Thread):
                         dynamic_info_algorithms[idx]["prev_top_k"] = top_k_items
 
                 elif self.abtest["algorithms"][algo]["name"] == "Popularity":
-                    diff = (dt_current_date-dynamic_info_algorithms[idx]["dt_start_LookBackWindow"]).days - \
-                        int(self.abtest["algorithms"][algo]
-                            ["parameters"]["LookBackWindow"])
+                    diff = (dt_current_date - dynamic_info_algorithms[idx]["dt_start_LookBackWindow"]).days - \
+                           int(self.abtest["algorithms"][algo]
+                               ["parameters"]["LookBackWindow"])
                     if diff > 0:
                         dynamic_info_algorithms[idx]["dt_start_LookBackWindow"] += pd.DateOffset(
                             days=diff)
@@ -499,7 +529,7 @@ class ABTestSimulation(threading.Thread):
                         dt_prev_day = dt_current_date - pd.DateOffset(days=1)
                         prev_day = dt_prev_day.strftime('%Y-%m-%d')
                         retrain = (
-                            dt_current_date-dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
+                                dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme
                             top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.unique_article_id, count(*) AS popular_items FROM \
@@ -512,7 +542,8 @@ class ABTestSimulation(threading.Thread):
 
                             # top_k_over_time_statistics[idx].append(top_k)
                             dynamic_info_algorithms[idx]["dt_start_RetrainInterval"] = dt_current_date - pd.DateOffset(
-                                days=(retrain-int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])-1))
+                                days=(retrain - int(
+                                    self.abtest["algorithms"][algo]["parameters"]['RetrainInterval']) - 1))
                             dynamic_info_algorithms[idx]["prev_top_k"] = top_k_items
                         else:
                             top_k_items = dynamic_info_algorithms[idx]["prev_top_k"]
@@ -527,7 +558,8 @@ class ABTestSimulation(threading.Thread):
                                 unique_customer_id=active_users[i], statistics_id=statistics_id)
                             for vv in range(k):
                                 self.insertRecommendation(
-                                    recommendation_id=vv+1, unique_customer_id=active_users[i], statistics_id=statistics_id, unique_article_id=top_k_items[vv])
+                                    recommendation_id=vv + 1, unique_customer_id=active_users[i],
+                                    statistics_id=statistics_id, unique_article_id=top_k_items[vv])
                             out = False
                             user_purchased_items = user2purchasedItems[active_users[i]]
                             for purchased_item in range(len(user_purchased_items)):
@@ -544,20 +576,24 @@ class ABTestSimulation(threading.Thread):
                                     prev_recommendations = D_prev_recommendations[
                                         dayzx][idx]
                                     for prev_recommended_item in range(len(prev_recommendations)):
-                                        if prev_recommendations[prev_recommended_item] == user_purchased_items[purchased_item]:
+                                        if prev_recommendations[prev_recommended_item] == user_purchased_items[
+                                            purchased_item]:
                                             out = True
                                             recommended_purchases += 1
                                             break
                                     if out:
                                         break
 
-                        CTR = float(clicks)/len(active_users)
-                        ATTR_RATE = float(recommended_purchases)/len(purchases)
+                        CTR = float(clicks) / len(active_users)
+                        ATTR_RATE = float(recommended_purchases) / len(purchases)
 
                         self.database_connection.session.execute(
-                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)', {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
+                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
+                            {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
                         self.database_connection.session.execute(
-                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)', {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE", "parametervalue": ATTR_RATE})
+                            'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
+                            {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE",
+                             "parametervalue": ATTR_RATE})
                         self.database_connection.session.commit()
 
                         self.frontend_data.append(
@@ -577,26 +613,30 @@ class ABTestSimulation(threading.Thread):
                         for unique_customer_id, user_purchased_items in user2purchasedItems.items():
                             self.insertCustomer(unique_customer_id=unique_customer_id, statistics_id=statistics_id)
                             for vv in range(k):
-                                self.insertRecommendation(recommendation_id=vv + 1, unique_customer_id=unique_customer_id,
+                                self.insertRecommendation(recommendation_id=vv + 1,
+                                                          unique_customer_id=unique_customer_id,
                                                           statistics_id=statistics_id, unique_article_id=top_k_random[
-                                                              vv])
+                                        vv])
                             out = False
                             for purchased_item in range(len(user_purchased_items)):
                                 for recommended_item in range(len(top_k_random)):
                                     if user_purchased_items[purchased_item] == top_k_random[recommended_item]:
-                                        if not(out):
+                                        if not (out):
                                             out = True
                                             clicks += 1
                                         recommended_purchases += 1
                                         break
 
-                        CTR = float(clicks)/len(active_users)
-                        ATTR_RATE = float(recommended_purchases)/len(purchases)
+                        CTR = float(clicks) / len(active_users)
+                        ATTR_RATE = float(recommended_purchases) / len(purchases)
 
                         self.database_connection.session.execute(
-                            'INSERT INTO "dynamic_stepsize_var"(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)', {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
+                            'INSERT INTO "dynamic_stepsize_var"(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
+                            {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
                         self.database_connection.session.execute(
-                            'INSERT INTO "dynamic_stepsize_var"(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)', {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE", "parametervalue": ATTR_RATE})
+                            'INSERT INTO "dynamic_stepsize_var"(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
+                            {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE",
+                             "parametervalue": ATTR_RATE})
                         self.database_connection.session.commit()
 
                         # data_per_user_over_time_statistics['customer_id'][active_users[i]][-1].algorithm_data.append(
@@ -615,7 +655,7 @@ class ABTestSimulation(threading.Thread):
                         dynamic_info_algorithms[idx]["prev_top_k"] = top_k_items
 
                 self.prev_progress = self.current_progress
-                self.current_progress = round(n_day/float(dayz), 2)*100.0
+                self.current_progress = round(n_day / float(dayz), 2) * 100.0
                 with self.app.app_context():
                     self.sse.publish(
                         self.current_progress, type='simulation_progress')

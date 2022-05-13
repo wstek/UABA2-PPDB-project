@@ -147,7 +147,8 @@ function SignUp({setAdmin, setAuthed}) {
                         </div>
                     </div>
                     <div className="row mb-0 maxwidth-250 mx-auto">
-                        {!isPending && <button className="orange-hover button-purple" onClick={handleRegister}>Sign up</button>}
+                        {!isPending &&
+                            <button className="orange-hover button-purple" onClick={handleRegister}>Sign up</button>}
                         {isPending && <button disabled className="orange button-purple">Signing up...</button>}
                     </div>
                 </div>

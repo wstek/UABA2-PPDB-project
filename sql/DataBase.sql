@@ -1,5 +1,3 @@
-
-
 CREATE TABLE IF NOT EXISTS "datascientist"
 (
     "username"       varchar PRIMARY KEY,
@@ -47,8 +45,6 @@ CREATE TABLE IF NOT EXISTS "ab_test"
     "created_on"   date    NOT NULL default now(),
     "created_by"   varchar NOT NULL references "datascientist" (username) on update cascade on delete cascade
 );
-
-
 
 
 
@@ -170,7 +166,7 @@ CREATE TABLE IF NOT EXISTS "dynamic_stepsize_var"
     statistics_id   int references statistics (statistics_id),
     parameter_name  varchar,
     parameter_value varchar,
-    PRIMARY KEY (statistics_id,parameter_name)
+    PRIMARY KEY (statistics_id, parameter_name)
 );
 
 

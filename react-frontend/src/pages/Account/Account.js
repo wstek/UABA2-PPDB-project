@@ -2,9 +2,9 @@ import "../../index.css"
 import {Link, useHistory} from "react-router-dom"
 import React, {useState} from "react";
 
-function Account({ ...props }) {
+function Account({...props}) {
     const [user, setUser] = useState("user");
-    const [loaded,setLoaded] = useState(false)
+    const [loaded, setLoaded] = useState(false)
     const history = useHistory();
     const [isPending, setIsPending] = useState(false);
 
@@ -33,7 +33,7 @@ function Account({ ...props }) {
         fetch('/api/me', {
             method: 'GET',
             credentials: 'include',
-            headers: { "Content-Type": "application/json", 'Accept': 'application/json' }
+            headers: {"Content-Type": "application/json", 'Accept': 'application/json'}
         }).then(res => res.json())
             .then((data) => {
                 if (data.error) {
@@ -42,9 +42,9 @@ function Account({ ...props }) {
                 setUser(data);
                 setLoaded(true)
             }).catch((err) => {
-                setUser(null);
-                console.log(err);
-            })
+            setUser(null);
+            console.log(err);
+        })
     }
 
     return (
@@ -59,7 +59,8 @@ function Account({ ...props }) {
 
             <Link to="/account/changeinfo" className="Change_Info button-purple orange-hover">Change info</Link>
             <Link to="/sign_in" onClick={logout} className="button-purple red-hover Log_Out">Log out</Link>
-            {!isPending && <Link to="/sign_in" onClick={logout} className="button-purple Log_Out red-hover">Log out</Link>}
+            {!isPending &&
+                <Link to="/sign_in" onClick={logout} className="button-purple Log_Out red-hover">Log out</Link>}
             {isPending && <button disabled className="button-purple red-hover Log_Out">Logging out...</button>}
         </div>
 

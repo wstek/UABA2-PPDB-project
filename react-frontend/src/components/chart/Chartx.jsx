@@ -1,7 +1,6 @@
 import "./chartx.css"
-import { Chart } from "react-google-charts"
-import { fetchData } from "../../utils/fetchAndExecuteWithData"
-import { useState, useEffect } from "react"
+import {Chart} from "react-google-charts"
+import {useEffect, useState} from "react"
 
 const Chartx = ({title}) => {
     const [activeUsersOverTime, setActiveUsersOverTime] = useState(null);
@@ -15,25 +14,25 @@ const Chartx = ({title}) => {
             credentials: 'include',
             signal: abortCont.signal
         }).then(res => res.json())
-        .then(data => {
-            setOptions({
-                // title: title,
-                curveType: 'function',
-                legend: { position: 'bottom' },
-                hAxis: {
-                    viewWindow: {
-                        min: 0,
-                        max: data.graphdata.length
-                    },
+            .then(data => {
+                setOptions({
+                    // title: title,
+                    curveType: 'function',
+                    legend: {position: 'bottom'},
+                    hAxis: {
+                        viewWindow: {
+                            min: 0,
+                            max: data.graphdata.length
+                        },
+                    }
+                })
+                setActiveUsersOverTime(data)
+                setPending(false);
+            }).catch(err => {
+                if (err.name === 'AbortError') {
+                    console.log('fetch aborted')
                 }
-            })
-            setActiveUsersOverTime(data)
-            setPending(false);
-        }).catch(err => {
-            if (err.name === 'AbortError') {
-                console.log('fetch aborted')
             }
-        }
         )
     }, [])
 

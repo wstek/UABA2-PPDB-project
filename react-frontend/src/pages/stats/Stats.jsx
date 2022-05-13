@@ -4,7 +4,7 @@ import './stats.css'
 const Stats = () => {
     return (
         <div className="stats">
-            <Sidebar />
+            <Sidebar/>
             <div className="statsContainer">
                 Stats
             </div>
