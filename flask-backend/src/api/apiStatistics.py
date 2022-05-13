@@ -34,10 +34,9 @@ def get_personal_algorithms(abtest_id):
 
 
 @api_statistics.route("/api/users/<int:abtest_id>/<int:algorithm_id>", methods=['GET'])
-def get_users(abtest_id):
+def get_users(abtest_id, algorithm_id):
     users = database_connection.session.execute(
         f"SELECT distinct(unique_customer_id) FROM customer_specific_statistics natural join algorithm  natural join statistics natural join ab_test WHERE abtest_id= {abtest_id};").fetchall()
-    t2 = time.time()
     for u in range(len(users)):
         users[u] = users[u][0]
     return {"userlist": users}
