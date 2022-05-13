@@ -54,7 +54,7 @@ function Datatable({abtest_id,algorithm_id}) {
 
     function openTabs(){
         for (let i = 0; i < select.length; i++){
-            window.open("/api/" + abtest_id + "/" + select[i])
+            window.open("/api/" + abtest_id + "/" + algorithm_id + "/" + select[i])
         }
     }
 

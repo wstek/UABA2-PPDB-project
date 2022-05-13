@@ -158,11 +158,6 @@ function Statistics() {
                                    XFnY={attributionRate}/>
                     </div>
                 </div>
-                <div className="row text-center align-content-center justify-content-center">
-                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6">
-                        <UserTable abtest_id={selected_abtest}/>
-                    </div>
-                </div>
                 <ColoredLine/>
             </>}
         </div>
