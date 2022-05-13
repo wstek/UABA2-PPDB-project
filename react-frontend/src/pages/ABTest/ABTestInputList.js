@@ -47,10 +47,10 @@ const ABTestInputList = ({abs_algorithms}) => {
     const resetInput = () => {
         setId(0);
         setConAlgorithm([])
-        document.getElementById('stepsize').value = ''
-        document.getElementById('topk').value = ''
-        document.getElementById('start').value = ''
-        document.getElementById('end').value = ''
+        document.getElementById('stepsize').value = '1'
+        document.getElementById('topk').value = '10'
+        document.getElementById('start').value = '2020-01-01'
+        document.getElementById('end').value = '2020-01-10'
     }
 
     const renderFields = () => {
@@ -203,7 +203,7 @@ const ABTestInputList = ({abs_algorithms}) => {
             <div className="row text-center justify-content-center align-items-center mb-5">
                 <div>
                     <button id="addRow" type="submit" onClick={() => handleAddAlgorithm()}
-                            className="orange-hover button-purple btn-lg">Add Algorithm
+                            className="green-hover button-purple btn-lg">Add Algorithm
                     </button>
                 </div>
             </div>

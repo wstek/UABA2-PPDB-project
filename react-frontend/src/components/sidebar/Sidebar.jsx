@@ -3,6 +3,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import SsidChartIcon from '@mui/icons-material/SsidChart';
+import {Link} from "react-router-dom"
 
 const Sidebar = () => {
     return (
@@ -18,24 +19,38 @@ const Sidebar = () => {
             {/* <hr className="sidebar-hr" /> */}
             <div className="center">
                 <ul className="sidebar-ul">
+
                     <p className="title">MAIN</p>
-                    <li className="sidebar-li">
-                        <DashboardIcon className="icon"/>
-                        <span className="sidebar-span">Abtest</span>
-                    </li>
+
+                    <Link to="/dashboard" style={{textDecoration: "none"}}>
+                        <li className="sidebar-li">
+                            <DashboardIcon className="icon"/>
+                            <span className="sidebar-span">Abtest</span>
+                        </li>
+                    </Link>
+
                     <p className="title">LISTS</p>
-                    <li className="sidebar-li">
-                        <SsidChartIcon className="icon"/>
-                        <span className="sidebar-span">Stats</span>
-                    </li>
-                    <li className="sidebar-li">
-                        <PersonOutlineOutlinedIcon className="icon"/>
-                        <span className="sidebar-span">Users</span>
-                    </li>
-                    <li className="sidebar-li">
-                        <AutoAwesomeMotionIcon className="icon"/>
-                        <span className="sidebar-span"> Items</span>
-                    </li>
+
+                    <Link to="/stats" style={{textDecoration: "none"}}>
+                        <li className="sidebar-li">
+                            <SsidChartIcon className="icon"/>
+                            <span className="sidebar-span">Stats</span>
+                        </li>
+                    </Link>
+
+                    <Link to="/users" style={{textDecoration: "none"}}>
+                        <li className="sidebar-li">
+                            <PersonOutlineOutlinedIcon className="icon"/>
+                            <span className="sidebar-span">Users</span>
+                        </li>
+                    </Link>
+
+                    <Link to="/items" style={{textDecoration: "none"}}>
+                        <li className="sidebar-li">
+                            <AutoAwesomeMotionIcon className="icon"/>
+                            <span className="sidebar-span"> Items</span>
+                        </li>
+                    </Link>
                 </ul>
             </div>
             <div className="bottom">

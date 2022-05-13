@@ -135,23 +135,21 @@ function Statistics() {
                                 setEndIndex={setEndIndex}>
                     </DateSlider>
                 </div>
-                <div className="row text-center align-content-center justify-content-center">
+                <div className="row text-center align-content-center mt-5 justify-content-center">
                     <h1>Charts</h1>
                 </div>
                 <div className="row text-center align-content-center justify-content-center">
-                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 pl-">
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 ">
                         <LineChart chart_id={1} title="Active Users" xMin={StartIndex} xMax={EndIndex}
                                    XFnY={activeUsersOverTime}/>
                     </div>
                     <div className="col-12 col-lg-6 col-xl-6 col-xxl-6">
                         <LineChart chart_id={2} title={"Purchases"} xMin={StartIndex} xMax={EndIndex} XFnY={purchases}/>
                     </div>
-                    {/*<div className="col-12 col-lg-6 col-xl-6 col-xxl-6">*/}
-                    {/*    <SearchUser selected_abtest={selected_abtest}/>*/}
-                    {/*</div>*/}
+
                 </div>
                 <div className="row text-center align-content-center justify-content-center">
-                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 pl-">
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 ">
                         <LineChart chart_id={3} title="Click Through Rate" xMin={StartIndex} xMax={EndIndex}
                                    XFnY={clickThroughRate}/>
                     </div>
@@ -161,22 +159,10 @@ function Statistics() {
                     </div>
                 </div>
                 <div className="row text-center align-content-center justify-content-center">
-                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 pl-">
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6">
                         <UserTable abtest_id={selected_abtest}/>
                     </div>
                 </div>
-                {/*<div className="row text-center mt-5 align-content-center justify-content-center">*/}
-                {/*    <h4>Click Through Rate</h4>*/}
-                {/*    <LineChart chart_id={3} title={"CTR"} google={google} algorithms={algorithms} matrix={matrix}/>*/}
-                {/*</div>*/}
-                {/*<div className="row text-center mt-5 align-content-center justify-content-center">*/}
-                {/*    <h4>Attribution Rate</h4>*/}
-                {/*    <LineChart chart_id={4} title={"AR@D"} google={google} algorithms={algorithms} matrix={matrix}/>*/}
-                {/*</div>*/}
-                {/*<div className="row text-center mt-5 mb-5 align-content-center justify-content-center">*/}
-                {/*    <h4>Average Revenue Per User</h4>*/}
-                {/*    <LineChart chart_id={5} title={"ARPU@D"} google={google} algorithms={algorithms} matrix={matrix}/>*/}
-                {/*</div>*/}
                 <ColoredLine/>
             </>}
         </div>

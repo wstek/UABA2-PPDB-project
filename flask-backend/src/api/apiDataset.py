@@ -34,9 +34,7 @@ def upload_dataset():
 @api_dataset.route("/api/get_datasets")
 def get_datasets():
     datasets = database_connection.session.execute(
-        "SELECT * FROM dataset").fetchall()
-    database_connection.session.commit()
-
+        f"SELECT name FROM dataset").fetchall()
     for i in range(len(datasets)):
         datasets[i] = str(datasets[i].name)
 

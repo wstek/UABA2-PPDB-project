@@ -48,31 +48,39 @@ class ABTestSimulation(threading.Thread):
         self.prev_progress = 0
         self.current_progress = 0
 
-    def insertCustomer(self, customer_id, statistics_id, dataset_name):
+    # def __getstate__(self):
+    #     # print("aaaaaaaaaaaaaaaaaaaaaaa")
+    #     return (self.frontend_data, self.done, self.abtest)
+
+    # def __setstate__(self, state):
+    #     # print("ssssssssssssssssssssss")
+    #     self.frontend_data, self.done, self.abtest = state
+
+    def insertCustomer(self, unique_customer_id, statistics_id):
         self.database_connection.session.execute(
-            "INSERT INTO customer_specific_statistics(customer_id, statistics_id,dataset_name) "
-            "VALUES(:customer_id, :statistics_id, :dataset_name)",
+            "INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) "
+            "VALUES(:unique_customer_id, :statistics_id)",
             {
-                "customer_id": customer_id, "statistics_id": statistics_id,
-                "dataset_name": dataset_name
+                "unique_customer_id": unique_customer_id, "statistics_id": statistics_id
             }
         )
 
-    def insertRecommendation(self, recommendation_id, customer_id, statistics_id, dataset_name, article_id):
+    def insertRecommendation(self, recommendation_id, unique_customer_id, statistics_id, unique_article_id):
         self.database_connection.session.execute(
-            "INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
+            "INSERT INTO recommendation(recommendation_id, unique_customer_id, statistics_id, unique_article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :unique_article_id)",
             {
-                "recommendation_id": recommendation_id, "customer_id": customer_id, "statistics_id": statistics_id,
-                "dataset_name": dataset_name, "article_id": article_id})
+                "recommendation_id": recommendation_id, "customer_id": unique_customer_id,
+                "statistics_id": statistics_id, "unique_article_id": unique_article_id
+            })
 
-    def insertRecommendations(self, recommendations, statistics_id, customer_id):
-        self.insertCustomer(statistics_id=statistics_id, customer_id=customer_id,
-                            dataset_name=self.abtest["dataset_name"])
+    def insertRecommendations(self, recommendations, statistics_id, unique_customer_id):
+        self.insertCustomer(statistics_id=statistics_id, unique_customer_id=unique_customer_id
+                            )
 
         for vv in range(len(recommendations)):
-            self.insertRecommendation(recommendation_id=vv + 1, customer_id=customer_id,
-                                      statistics_id=statistics_id, dataset_name=self.abtest["dataset_name"],
-                                      article_id=recommendations[vv])
+            self.insertRecommendation(recommendation_id=vv + 1, unique_customer_id=unique_customer_id,
+                                      statistics_id=statistics_id,
+                                      unique_article_id=recommendations[vv])
         self.database_connection.session.commit()
 
     def generateRandomTopK(self, listx, items):
@@ -96,12 +104,12 @@ class ABTestSimulation(threading.Thread):
 
         # dynamic algorithms info that changes during simulation
         dynamic_info_algorithms = {}
-
+        dataset_name = self.abtest["dataset_name"]
         all_customer_ids = self.database_connection.session.execute(
-            "SELECT DISTINCT customer_id FROM customer").fetchall()
+            f"SELECT DISTINCT unique_customer_id FROM customer where dataset_name='{dataset_name}'").fetchall()
 
         all_unique_item_ids = self.database_connection.session.execute(
-            "SELECT DISTINCT article_id FROM article").fetchall()
+            f"SELECT DISTINCT unique_article_id FROM article where dataset_name='{dataset_name}'").fetchall()
         remove_tuples(all_unique_item_ids)
 
         for i in range(len(all_customer_ids)):
@@ -146,21 +154,20 @@ class ABTestSimulation(threading.Thread):
             # statistics per step per algorithm
             # customer_specific_statistics per active user (als n = active_users dan is er n customer_specific_statistics rows)
             # k recommendations per active user
-            active_users = self.database_connection.session.execute(f"SELECT DISTINCT SUBQUERY.customer_id FROM (SELECT * FROM \
-                    purchase WHERE bought_on = '{current_date}') AS SUBQUERY").fetchall()
+            active_users = self.database_connection.session.execute(f"SELECT DISTINCT SUBQUERY.unique_customer_id FROM (SELECT * FROM \
+                    purchase natural join customer WHERE bought_on = '{current_date}') AS SUBQUERY").fetchall()
             self.database_connection.session.commit()
 
             purchases = self.database_connection.session.execute(
-                f"SELECT customer_id, article_id FROM purchase WHERE bought_on = '{current_date}'").fetchall()
+                f"SELECT customer_id, article_id, unique_customer_id, unique_article_id  FROM purchase natural join customer natural join article WHERE bought_on = '{current_date}'").fetchall()
 
             user2purchasedItems = dict()
 
             for i in range(len(purchases)):
-                if purchases[i][0] not in user2purchasedItems:
-                    user2purchasedItems[purchases[i][0]] = []
+                if purchases[i][2] not in user2purchasedItems:
+                    user2purchasedItems[purchases[i][2]] = []
                 else:
-                    user2purchasedItems[purchases[i]
-                    [0]].append(purchases[i][1])
+                    user2purchasedItems[purchases[i][2]].append(purchases[i][3])
             remove_tuples(active_users)
 
             user_histories = dict()
@@ -219,7 +226,7 @@ class ABTestSimulation(threading.Thread):
                         prev_day = dt_prev_day.strftime('%Y-%m-%d')
                         retrain = (
                                 dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
-                        interactions = self.database_connection.session.execute(f"SELECT customer_id, article_id from purchase WHERE \
+                        interactions = self.database_connection.session.execute(f"SELECT unique_customer_id, unique_article_id from purchase natural join article natural join customer WHERE \
                             bought_on BETWEEN '{start_date}' AND '{prev_day}'").fetchall()
                         self.database_connection.session.commit()
 
@@ -227,7 +234,7 @@ class ABTestSimulation(threading.Thread):
                             interactions[i] = (
                                 interactions[i][0], interactions[i][1])
 
-                        if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
+                        if retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval']):
                             last_time_train = current_date
                             # retrain interval bereikt => train de KNN algoritme
                             dynamic_info_algorithms[idx]["KNN"].train(
@@ -266,7 +273,7 @@ class ABTestSimulation(threading.Thread):
                             recommendations[cc] += self.generateRandomTopK(
                                 all_unique_item_ids, k - len(recommendations[cc]))
                             self.insertRecommendations(recommendations=recommendations[cc], statistics_id=statistics_id,
-                                                       customer_id=index2customer_id[cc])
+                                                       unique_customer_id=index2customer_id[cc])
                             user_purchased_items = user2purchasedItems[index2customer_id[cc]]
                             out = False
                             for purchased_item in range(len(user_purchased_items)):
@@ -325,7 +332,7 @@ class ABTestSimulation(threading.Thread):
                         # random moet gedaan worden in loop om unieke topk voor elke use te maken maar is trager
                         for i in range(len(active_users)):
                             self.insertRecommendations(recommendations=top_k_random, statistics_id=statistics_id,
-                                                       customer_id=active_users[i])
+                                                       unique_customer_id=active_users[i])
 
                         # calculate CTR
                         clicks = 0
@@ -361,8 +368,8 @@ class ABTestSimulation(threading.Thread):
 
                         # train KNN algoritme to initialize it:
                         interactions = self.database_connection.session.execute(
-                            f"SELECT SUBQUERY.customer_id, SUBQUERY.article_id FROM (SELECT * FROM \
-                    purchase WHERE bought_on = '{start_date}') AS SUBQUERY").fetchall()  # BETWEEN zetten
+                            f"SELECT SUBQUERY.unique_customer_id, SUBQUERY.unique_article_id FROM (SELECT * FROM \
+                    purchase natural join article natural join customer WHERE bought_on = '{start_date}') AS SUBQUERY").fetchall()  # BETWEEN zetten
                         for i in range(len(interactions)):
                             interactions[i] = (
                                 interactions[i][0], interactions[i][1])
@@ -384,9 +391,8 @@ class ABTestSimulation(threading.Thread):
                                 dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme
-                            top_k = self.database_connection.session.execute(f"SELECT t.article_id, t.bought_on FROM(SELECT article_id,MIN(bought_on) AS bought_on \
-                                FROM purchase WHERE bought_on BETWEEN '{start_date}' AND '{prev_day}' GROUP BY article_id) x JOIN purchase t ON \
-                                    x.article_id = t.article_id AND x.bought_on = t.bought_on ORDER BY bought_on DESC LIMIT {k}").fetchall()
+                            top_k = self.database_connection.session.execute(f"SELECT a.unique_article_id, t.bought_on FROM(SELECT article_id,MIN(bought_on) AS bought_on \
+                                FROM purchase WHERE bought_on BETWEEN '{start_date}' AND '{prev_day}' GROUP BY article_id) x natural JOIN purchase t natural join article a ORDER BY bought_on DESC LIMIT {k}").fetchall()
 
                             top_k_items = []
                             for i in range(len(top_k)):
@@ -404,15 +410,15 @@ class ABTestSimulation(threading.Thread):
 
                         clicks = 0
                         recommended_purchases = 0
-                        for customer_id, user_purchased_items in user2purchasedItems.items():
+                        for unique_customer_id, user_purchased_items in user2purchasedItems.items():
 
                             self.insertCustomer(
-                                dataset_name=self.abtest["dataset_name"], statistics_id=statistics_id,
-                                customer_id=customer_id)
+                                statistics_id=statistics_id, unique_customer_id=unique_customer_id)
                             for vv in range(k):
-                                self.insertRecommendation(recommendation_id=vv + 1, customer_id=customer_id,
-                                                          dataset_name=self.abtest["dataset_name"],
-                                                          article_id=top_k_items[vv], statistics_id=statistics_id)
+                                self.insertRecommendation(recommendation_id=vv + 1,
+                                                          unique_customer_id=unique_customer_id,
+                                                          unique_article_id=top_k_items[vv],
+                                                          statistics_id=statistics_id)
                             out = False
                             for purchased_item in range(len(user_purchased_items)):
                                 for recommended_item in range(len(top_k_items)):
@@ -463,22 +469,20 @@ class ABTestSimulation(threading.Thread):
 
                         clicks = 0
                         recommended_purchases = 0
-                        for customer_id, user_purchased_items in user2purchasedItems.items():
+                        for unique_customer_id, user_purchased_items in user2purchasedItems.items():
                             self.insertCustomer(
-                                dataset_name=self.abtest["dataset_name"], statistics_id=statistics_id,
-                                customer_id=customer_id)
+                                statistics_id=statistics_id, unique_customer_id=unique_customer_id)
                             for vv in range(k):
                                 self.database_connection.session.execute(
-                                    "INSERT INTO recommendation(recommendation_id, customer_id, statistics_id, dataset_name, article_id) VALUES(:recommendation_id, :customer_id, :statistics_id, :dataset_name, :article_id)",
+                                    "INSERT INTO recommendation(recommendation_id, unique_customer_id, statistics_id, unique_article_id) VALUES(:recommendation_id, :unique_customer_id, :statistics_id, :unique_article_id)",
                                     {
-                                        "recommendation_id": vv + 1, "customer_id": customer_id,
-                                        "statistics_id": statistics_id, "dataset_name": self.abtest["dataset_name"],
-                                        "article_id": top_k_random[vv]})
+                                        "recommendation_id": vv + 1, "unique_customer_id": unique_customer_id,
+                                        "statistics_id": statistics_id, "unique_article_id": top_k_random[vv]})
                             out = False
                             for purchased_item in range(len(user_purchased_items)):
                                 for recommended_item in range(len(top_k_random)):
                                     if user_purchased_items[purchased_item] == top_k_random[recommended_item]:
-                                        if not (out):
+                                        if not out:
                                             out = True
                                             clicks += 1
                                         recommended_purchases += 1
@@ -503,9 +507,8 @@ class ABTestSimulation(threading.Thread):
                             f"current_day: {current_date}, algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k random: {top_k_random}")
 
                         # train Recency algoritme to initialize it:
-                        top_k = self.database_connection.session.execute(f"SELECT t.article_id, t.bought_on FROM(SELECT article_id,MIN(bought_on) AS bought_on \
-                                FROM purchase WHERE bought_on = '{start_date}' GROUP BY article_id) x JOIN purchase t ON \
-                                    x.article_id = t.article_id AND x.bought_on = t.bought_on ORDER BY bought_on DESC LIMIT {k}").fetchall()
+                        top_k = self.database_connection.session.execute(f"SELECT a.unique_article_id, t.bought_on FROM(SELECT article_id,MIN(bought_on) AS bought_on \
+                                FROM purchase WHERE bought_on = '{start_date}' GROUP BY article_id) x natural JOIN purchase t natural join article a ORDER BY bought_on DESC LIMIT {k}").fetchall()
                         top_k_items = []
                         for i in range(len(top_k)):
                             top_k_items.append(top_k[i][0])
@@ -529,9 +532,9 @@ class ABTestSimulation(threading.Thread):
                                 dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme
-                            top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.article_id, count(*) AS popular_items FROM \
-                                (SELECT * FROM purchase WHERE bought_on BETWEEN '{start_date}' AND '{prev_day}') AS SUBQUERY GROUP \
-                                    BY SUBQUERY.article_id ORDER BY popular_items DESC LIMIT {k}").fetchall()
+                            top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.unique_article_id, count(*) AS popular_items FROM \
+                                (SELECT * FROM purchase natural join article WHERE bought_on BETWEEN '{start_date}' AND '{prev_day}') AS SUBQUERY GROUP \
+                                    BY SUBQUERY.unique_article_id ORDER BY popular_items DESC LIMIT {k}").fetchall()
 
                             top_k_items = []
                             for i in range(len(top_k)):
@@ -552,12 +555,11 @@ class ABTestSimulation(threading.Thread):
                         recommended_purchases = 0
                         for i in range(len(active_users)):
                             self.insertCustomer(
-                                customer_id=active_users[i], statistics_id=statistics_id,
-                                dataset_name=self.abtest["dataset_name"])
+                                unique_customer_id=active_users[i], statistics_id=statistics_id)
                             for vv in range(k):
                                 self.insertRecommendation(
-                                    recommendation_id=vv + 1, customer_id=active_users[i], statistics_id=statistics_id,
-                                    article_id=top_k_items[vv], dataset_name=self.abtest["dataset_name"])
+                                    recommendation_id=vv + 1, unique_customer_id=active_users[i],
+                                    statistics_id=statistics_id, unique_article_id=top_k_items[vv])
                             out = False
                             user_purchased_items = user2purchasedItems[active_users[i]]
                             for purchased_item in range(len(user_purchased_items)):
@@ -608,14 +610,13 @@ class ABTestSimulation(threading.Thread):
                         clicks = 0
                         recommended_purchases = 0
 
-                        for customer_id, user_purchased_items in user2purchasedItems.items():
-                            self.insertCustomer(customer_id=customer_id, statistics_id=statistics_id,
-                                                dataset_name=self.abtest["dataset_name"])
+                        for unique_customer_id, user_purchased_items in user2purchasedItems.items():
+                            self.insertCustomer(unique_customer_id=unique_customer_id, statistics_id=statistics_id)
                             for vv in range(k):
-                                self.insertRecommendation(recommendation_id=vv + 1, customer_id=customer_id,
-                                                          statistics_id=statistics_id, article_id=top_k_random[
-                                        vv],
-                                                          dataset_name=self.abtest["dataset_name"])
+                                self.insertRecommendation(recommendation_id=vv + 1,
+                                                          unique_customer_id=unique_customer_id,
+                                                          statistics_id=statistics_id, unique_article_id=top_k_random[
+                                        vv])
                             out = False
                             for purchased_item in range(len(user_purchased_items)):
                                 for recommended_item in range(len(top_k_random)):
@@ -644,9 +645,9 @@ class ABTestSimulation(threading.Thread):
                             f"algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k random: {top_k_random}")
 
                         # train Popularity algorithm to initialize it:
-                        top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.article_id, count(*) AS popular_items FROM \
-                                (SELECT * FROM purchase WHERE bought_on = '{start_date}') AS SUBQUERY GROUP \
-                                    BY SUBQUERY.article_id ORDER BY popular_items DESC LIMIT {k}").fetchall()
+                        top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.unique_article_id, count(*) AS popular_items FROM \
+                                (SELECT * FROM purchase natural join article WHERE bought_on = '{start_date}') AS SUBQUERY GROUP \
+                                    BY SUBQUERY.unique_article_id ORDER BY popular_items DESC LIMIT {k}").fetchall()
 
                         top_k_items = []
                         for i in range(len(top_k)):

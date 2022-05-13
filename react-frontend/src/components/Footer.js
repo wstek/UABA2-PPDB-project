@@ -26,7 +26,7 @@ function Footer() {
                             <div className="col-2 align-left">
                                 <img src={ua_logo} className="vh-2" alt="pic" id="footer"/>
                             </div>
-                            <div className="col-8 ">
+                            <div className="col-8 footer-text">
                                 @Jorden Van Handenhoven, Mohammed Shakleya, Said Yandarbiev, Sam Roggeman, William
                                 Steklein
 

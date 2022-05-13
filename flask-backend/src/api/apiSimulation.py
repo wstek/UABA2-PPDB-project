@@ -46,15 +46,12 @@ def start_simulation():
                 {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "type": "string",
                  "value": value})
         database_connection.session.commit()
-
-    # todo backround-task
     # with lock:
     #     thread_per_user[session["user_id"]] = ABTestSimulation(database_connection, sse, app,
     #                                                            {"abtest_id": abtest_id, "start": start, "end": end,
     #                                                             "topk": topk,
     #                                                             "stepsize": stepsize,
-    #                                                             "dataset_name": dataset_name, "algorithms": algorithms
-    #                                                             })
+    #                                                             "dataset_name": dataset_name, "algorithms": algorithms})
     # thread_per_user[session["user_id"]].start()
     return "200"
 
