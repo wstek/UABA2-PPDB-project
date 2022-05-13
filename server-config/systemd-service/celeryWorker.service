@@ -7,7 +7,7 @@ User=app
 
 Group=www-data
 
-WorkingDirectory=/home/app/Programming-project-databases
+WorkingDirectory=/home/app/Programming-project-databases/flask-backend
 Environment="PATH=/home/app/Programming-project-databases/env/bin"
 ExecStart=/home/app/Programming-project-databases/env/bin/celery -A src.worker worker -l INFO
 Restart=on-failure
