@@ -83,7 +83,7 @@ export default function DatasetUpload() {
 
         // insert selected purchase data columns
         column_select_data["purchaseData"] = {
-            "time": datasetColumnNames2[purchaseTime.value],
+            "bought_on": datasetColumnNames2[purchaseTime.value],
             "price": datasetColumnNames2[purchasePrice.value],
             "article_id": datasetColumnNames2[purchaseArticleId.value],
             "customer_id": datasetColumnNames2[purchaseCustomerId.value],
@@ -124,7 +124,7 @@ export default function DatasetUpload() {
     function handleUpload(event) {
         event.preventDefault();
 
-        const url = '/api/upload_datasets';
+        const url = '/api/upload_dataset';
 
         let column_select_data = getColumnSelectData();
 

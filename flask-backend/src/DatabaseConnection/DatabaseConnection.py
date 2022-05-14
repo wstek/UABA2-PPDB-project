@@ -130,7 +130,7 @@ class DatabaseConnection:
             output, sep='\t', header=False, encoding="utf8", index=False)
         output.seek(0)
 
-        cursor.copy_from(output, table_name, sep='\t', null='')
+        cursor.copy_from(output, table_name, sep='\t', null='', columns=list(df))
 
     def __addMetaDataset(self, dataset_name: str, meta_data_filename: str, meta_data_type: str):
         self.meta_data.reflect()
