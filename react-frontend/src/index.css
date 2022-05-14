@@ -54,7 +54,14 @@ body {
     border: none;
     outline: none;
     border-radius: 10px;
+}
 
+.dateField {
+    background: rgb(119, 52, 231);
+    color: white;
+    font-weight: 900;
+    text-align: right;
+    border-radius: 50px;
 }
 
 
