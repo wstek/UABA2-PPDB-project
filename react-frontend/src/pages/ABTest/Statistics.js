@@ -108,8 +108,8 @@ function Statistics() {
     }
 
     return (
-        <div className="container-fluid my-auto">
-            <div className="row text-center align-items-center mb-3">
+        <div className="container-fluid">
+            <div className="row text-center align-items-center pt-4 mb-3">
                 <ABTestPicker personal_abtests={personal_abtests} setSelectedABTest={setSelectedABTest}
                               selected_abtest={selected_abtest}/>
             </div>
@@ -139,21 +139,21 @@ function Statistics() {
                     <h1>Charts</h1>
                 </div>
                 <div className="row text-center align-content-center justify-content-center">
-                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 ">
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height:"400px"}}>
                         <LineChart chart_id={1} title="Active Users" xMin={StartIndex} xMax={EndIndex}
                                    XFnY={activeUsersOverTime}/>
                     </div>
-                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6">
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height:"400px"}}>
                         <LineChart chart_id={2} title={"Purchases"} xMin={StartIndex} xMax={EndIndex} XFnY={purchases}/>
                     </div>
 
                 </div>
                 <div className="row text-center align-content-center justify-content-center">
-                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 ">
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 " style={{height:"400px"}}>
                         <LineChart chart_id={3} title="Click Through Rate" xMin={StartIndex} xMax={EndIndex}
                                    XFnY={clickThroughRate}/>
                     </div>
-                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6">
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height:"400px"}}>
                         <LineChart chart_id={2} title={"Attribution Rate"} xMin={StartIndex} xMax={EndIndex}
                                    XFnY={attributionRate}/>
                     </div>
