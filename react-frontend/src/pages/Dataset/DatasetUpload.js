@@ -267,7 +267,9 @@ export default function DatasetUpload() {
                 "GenerateCustomerMetadata",
                 setGenerateCustomerMetadata
             )}
-            {!generateCustomerMetadata && displayColumnSelect("metadata customer id")}
+            {!generateCustomerMetadata &&
+                displayColumnSelect("metadata customer id")
+            }
             <button style={{display: "block", margin: "10px auto"}} onClick={handleAddCustomerMetadataAttribute}>Add
                 customer attribute
             </button>

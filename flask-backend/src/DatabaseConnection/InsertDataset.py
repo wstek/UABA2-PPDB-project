@@ -5,17 +5,13 @@ import pandas as pd
 from src.DatabaseConnection import DatabaseConnection
 from src.utils.Logger import Logger
 
-# todo: check if the dataframes use shallow copies
+# todo: load only necessary columns in memory
 # todo: check dimensions of the selected columns
+# todo: exception handling
 
 
-def addDatasetColumnToDataframe(df_dataset_file, dataset_column_name, df_output, database_column_name):
-    try:
-        df_output[database_column_name] = df_dataset_file[dataset_column_name]
-    except Exception:
-        return False
-
-    return True
+def shallowCopyDfColumn(df_input, column_name_input, df_output, column_name_output):
+    df_output[column_name_output] = df_input[[column_name_input]].copy(deep=False)
 
 
 class InsertDataset:
@@ -71,7 +67,7 @@ class InsertDataset:
         else:
             self.__insertMetadata("customer")
 
-        # insert purchase data dataframe into purchase table
+        # insert purchase data dataframe into database
         self.database_connection.insertPdDataframeInTable(self.df_purchase_data, "purchase")
 
         self.database_connection.session.commit()
@@ -92,8 +88,8 @@ class InsertDataset:
         # insert purchase data into purchase data dataframe
         for database_column_name in purchase_select_data:
             selection = purchase_select_data[database_column_name]
-            addDatasetColumnToDataframe(self.df_dataset_files[selection[0]], selection[1], self.df_purchase_data,
-                                        database_column_name)
+            shallowCopyDfColumn(self.df_dataset_files[selection[0]], selection[1], self.df_purchase_data,
+                                database_column_name)
 
         self.df_purchase_data["dataset_name"] = self.dataset_name
 
@@ -102,41 +98,43 @@ class InsertDataset:
 
         # check if dataset_name already exists
         if self.database_connection.queryTable(datasets_table, {"name": self.dataset_name}).first():
-            Logger.logError(
-                f"Couldn't add dataset {self.dataset_name}, it already exists")
-            return False
+            Logger.logError(f"Couldn't add dataset {self.dataset_name}, it already exists")
 
         self.database_connection.insertRow(datasets_table, {
             "name": self.dataset_name,
             "uploaded_by": self.uploader_name
         })
 
-        return True
-
     def __generateMetadata(self, metadata_type: str):
+        metadata_id_name = metadata_type + "_id"
+
         # create meta table dataframe
         df_meta_table = pd.DataFrame()
 
-        df_meta_table[metadata_type + "_id"] = self.df_purchase_data[metadata_type + "_id"]
+        shallowCopyDfColumn(self.df_purchase_data, metadata_id_name, df_meta_table, metadata_id_name)
         df_meta_table.drop_duplicates(inplace=True)
 
         df_meta_table["dataset_name"] = self.dataset_name
 
+        # insert into database
         self.database_connection.insertPdDataframeInTable(df_meta_table, metadata_type)
 
     def __insertMetadata(self, metadata_type: str):
+        metadata_id_name = metadata_type + "_id"
+
         # get metadata column selection
         column_select_metadata = self.column_select_data[metadata_type + "Metadata"]
 
         # create meta table dataframe
         df_meta_table = pd.DataFrame()
 
-        meta_id_selection = column_select_metadata[metadata_type + "_id"]
-        addDatasetColumnToDataframe(self.df_dataset_files[meta_id_selection[0]], meta_id_selection[1],
-                                    df_meta_table, metadata_type + "_id")
+        meta_id_selection = column_select_metadata[metadata_id_name]
+        shallowCopyDfColumn(self.df_dataset_files[meta_id_selection[0]], meta_id_selection[1],
+                            df_meta_table, metadata_id_name)
 
         df_meta_table["dataset_name"] = self.dataset_name
 
+        # insert into database
         self.database_connection.insertPdDataframeInTable(df_meta_table, metadata_type)
 
         # todo:
