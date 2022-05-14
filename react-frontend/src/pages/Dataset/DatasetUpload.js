@@ -23,6 +23,7 @@ export default function DatasetUpload() {
     const [generateCustomerMetadata, setGenerateCustomerMetadata] = useState(false);
 
     const parseDatasets = (datasets) => {
+        // todo: rework this, so that it uses javascript filereader
         const newDatasetColumnNames = {};
         const newDatasetColumnNames2 = {};
         setParseProgress(true);
@@ -64,48 +65,53 @@ export default function DatasetUpload() {
         let column_select_data = {};
 
         // get dataset name
-        const datasetName = document.getElementById('datasetName');
+        const datasetName = document.getElementById('datasetName').value;
 
         // get selected columndata
-        const purchaseTime = document.getElementById('timeSelect');
-        const purchasePrice = document.getElementById('priceSelect');
-        const purchaseArticleId = document.getElementById('article idSelect');
-        const purchaseCustomerId = document.getElementById('customer idSelect');
+        const purchaseTime = document.getElementById('timeSelect').value;
+        const purchasePrice = document.getElementById('priceSelect').value;
+        const purchaseArticleId = document.getElementById('article idSelect').value;
+        const purchaseCustomerId = document.getElementById('customer idSelect').value;
 
         // todo check if all fields were selected
         if (!datasetName || !purchaseTime || !purchasePrice || !purchaseArticleId || !purchaseCustomerId) {
             alert("Please fill in all input fields.");
+            return {};
         }
 
         // insert dataset name
         // todo check if dataset name already exists in database
-        column_select_data["datasetName"] = datasetName.value;
+        column_select_data["datasetName"] = datasetName;
 
         // insert selected purchase data columns
         column_select_data["purchaseData"] = {
-            "bought_on": datasetColumnNames2[purchaseTime.value],
-            "price": datasetColumnNames2[purchasePrice.value],
-            "article_id": datasetColumnNames2[purchaseArticleId.value],
-            "customer_id": datasetColumnNames2[purchaseCustomerId.value],
+            "bought_on": datasetColumnNames2[purchaseTime],
+            "price": datasetColumnNames2[purchasePrice],
+            "article_id": datasetColumnNames2[purchaseArticleId],
+            "customer_id": datasetColumnNames2[purchaseCustomerId],
         }
 
         // get selected article metadata columns
         column_select_data["generate_article_metadata"] = generateArticleMetadata;
         if (!generateArticleMetadata) {
-            const metadataArticleId = document.getElementById('metadata article idSelect');
+            const metadataArticleId = document.getElementById('metadata article idSelect').value;
+
+            if (!metadataArticleId) return {};
 
             column_select_data["articleMetadata"] = {
-                "article_id": datasetColumnNames2[metadataArticleId.value]
+                "article_id": datasetColumnNames2[metadataArticleId]
             }
         }
 
         // get selected customer metadata columns
         column_select_data["generate_customer_metadata"] = generateCustomerMetadata;
         if (!generateCustomerMetadata) {
-            const metadataCustomerId = document.getElementById('metadata customer idSelect');
+            const metadataCustomerId = document.getElementById('metadata customer idSelect').value;
+
+            if (!metadataCustomerId) return {};
 
             column_select_data["customerMetadata"] = {
-                "customer_id": datasetColumnNames2[metadataCustomerId.value]
+                "customer_id": datasetColumnNames2[metadataCustomerId]
             }
         }
 
@@ -127,6 +133,12 @@ export default function DatasetUpload() {
         const url = '/api/upload_dataset';
 
         let column_select_data = getColumnSelectData();
+
+        if (Object.keys(column_select_data).length === 0) {
+            return;
+        }
+
+        // return;
 
         const formData = new FormData();
         for (let i = 0; i < files.length; i++) {
