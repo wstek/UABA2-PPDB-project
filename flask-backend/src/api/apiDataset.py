@@ -1,19 +1,27 @@
 import json
 import os
 
-from flask import Blueprint, request, abort, current_app
+from flask import Blueprint, request, abort, current_app, session
 from werkzeug.utils import secure_filename
 
 from src.extensions import database_connection
+
+from src.celeryTasks.tasks import insert_dataset
 
 api_dataset = Blueprint("api_dataset", __name__)
 
 
 @api_dataset.route("/api/upload_dataset", methods=["POST"])
 def upload_dataset():
+
     column_select_data = json.loads(request.form.get('data'))
+
+    filenames = {}
+
     for uploaded_file in request.files.getlist('files'):
+        # give file a secure name
         filename = secure_filename(uploaded_file.filename)
+
         if filename != '':
             # check file extension
             file_ext = os.path.splitext(filename)[1]
@@ -27,6 +35,8 @@ def upload_dataset():
             # upload the file
             uploaded_file.save(os.path.join(
                 current_app.config['UPLOAD_PATH'], filename))
+
+    insert_dataset.delay(session["user_id"], filenames, column_select_data)
 
     return "200"
 

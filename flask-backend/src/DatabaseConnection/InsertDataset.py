@@ -6,9 +6,8 @@ from src.DatabaseConnection import DatabaseConnection
 from src.utils.Logger import Logger
 
 
-class DatasetInsert:
-    def __init__(self, database_connection: DatabaseConnection, dataset_name: str, uploader_name: str,
-                 filenames: Dict[str, str],
+class InsertDataset:
+    def __init__(self, database_connection: DatabaseConnection, uploader_name: str, filenames: Dict[str, str],
                  column_select_data: dict):
         """
         Inserts a new dataset in the database

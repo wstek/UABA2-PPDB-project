@@ -1,0 +1,1 @@
+insert into admin(username) values ('mosh');
