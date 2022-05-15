@@ -16,11 +16,11 @@ def start_simulation():
     algorithms = request.json["algorithms"]
 
     database_connection.session.execute(
-        'INSERT INTO "ab_test"('
-        'start_date, "end_date", top_k, stepsize, dataset_name, created_by) '
-        'VALUES(:start, :end, :top_k, :stepsize, :dataset_name, :created_by)',
-        {"start": start, "end": end, "top_k": int(topk), "stepsize": int(stepsize), "dataset_name": dataset_name,
-         "created_by": session["user_id"]})
+        f'''
+            INSERT INTO "ab_test"(start_date, "end_date", top_k, stepsize, dataset_name, created_by)
+            VALUES('{start}', '{end}', {topk}, {int(stepsize)}, '{dataset_name}', '{session["user_id"]}');
+        '''
+    )
     database_connection.session.commit()
 
     abtest_id = database_connection.session.execute(

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import axios from "axios";
 import Papa from "papaparse";
 import {PurpleSpinner} from "../../components/PurpleSpinner"
+import uploadFiles from "./uploadFiles"
 
 // todo: limit selection to not selected columns and columns from the same csv file
 // todo: don't upload and process csv files that are not used
@@ -23,6 +23,7 @@ export default function DatasetUpload() {
     const [generateCustomerMetadata, setGenerateCustomerMetadata] = useState(false);
 
     const parseDatasets = (datasets) => {
+        // todo: rework this, so that it uses javascript filereader
         const newDatasetColumnNames = {};
         const newDatasetColumnNames2 = {};
         setParseProgress(true);
@@ -60,6 +61,66 @@ export default function DatasetUpload() {
         }).catch((err) => console.log('Something went wrong:', err))
     }
 
+    function getColumnSelectData() {
+        let column_select_data = {};
+
+        // get dataset name
+        const datasetName = document.getElementById('datasetName').value;
+
+        // get selected columndata
+        const purchaseTime = document.getElementById('timeSelect').value;
+        const purchasePrice = document.getElementById('priceSelect').value;
+        const purchaseArticleId = document.getElementById('article idSelect').value;
+        const purchaseCustomerId = document.getElementById('customer idSelect').value;
+
+        // todo check if all fields were selected
+        if (!datasetName || !purchaseTime || !purchasePrice || !purchaseArticleId || !purchaseCustomerId) {
+            alert("Please fill in all input fields.");
+            return {};
+        }
+
+        // insert dataset name
+        // todo check if dataset name already exists in database
+        column_select_data["datasetName"] = datasetName;
+
+        // insert selected purchase data columns
+        column_select_data["purchaseData"] = {
+            "bought_on": datasetColumnNames2[purchaseTime],
+            "price": datasetColumnNames2[purchasePrice],
+            "article_id": datasetColumnNames2[purchaseArticleId],
+            "customer_id": datasetColumnNames2[purchaseCustomerId],
+        }
+
+        // get selected article metadata columns
+        column_select_data["generate_article_metadata"] = generateArticleMetadata;
+        if (!generateArticleMetadata) {
+            const metadataArticleId = document.getElementById('metadata article idSelect').value;
+
+            if (!metadataArticleId) return {};
+
+            column_select_data["articleMetadata"] = {
+                "article_id": datasetColumnNames2[metadataArticleId]
+            }
+        }
+
+        // get selected customer metadata columns
+        column_select_data["generate_customer_metadata"] = generateCustomerMetadata;
+        if (!generateCustomerMetadata) {
+            const metadataCustomerId = document.getElementById('metadata customer idSelect').value;
+
+            if (!metadataCustomerId) return {};
+
+            column_select_data["customerMetadata"] = {
+                "customer_id": datasetColumnNames2[metadataCustomerId]
+            }
+        }
+
+        // debug
+        console.log(JSON.stringify(column_select_data));
+
+        return column_select_data;
+    }
+
     function handleFileselect(event) {
         let datasets = event.target.files;
         setFiles(datasets);
@@ -69,64 +130,16 @@ export default function DatasetUpload() {
     function handleUpload(event) {
         event.preventDefault();
 
-        let column_select_data = {};
+        let column_select_data = getColumnSelectData();
 
-        // get selected columndata
-        const purchaseTime = document.getElementById('timeSelect');
-        const purchasePrice = document.getElementById('priceSelect');
-        const purchaseArticleId = document.getElementById('article idSelect');
-        const purchaseCustomerId = document.getElementById('customer idSelect');
-
-        // todo check if all fields were selected
-        if (!purchaseTime || !purchasePrice || !purchaseArticleId || !purchaseCustomerId) {
-            console.log("Please fill in all input fields.");
+        if (Object.keys(column_select_data).length === 0) {
+            return;
         }
 
-        column_select_data["purchaseData"] = {
-            "time": datasetColumnNames2[purchaseTime.value],
-            "price": datasetColumnNames2[purchasePrice.value],
-            "article_id": datasetColumnNames2[purchaseArticleId.value],
-            "customer_id": datasetColumnNames2[purchaseCustomerId.value],
-        }
+        // debug
+        // return;
 
-        column_select_data["generate_article_metadata"] = generateArticleMetadata;
-        if (!generateArticleMetadata) {
-            const metadataArticleId = document.getElementById('metadata article idSelect');
-
-            column_select_data["articleMetadata"] = {
-                "article_id": datasetColumnNames2[metadataArticleId.value]
-            }
-        }
-
-        column_select_data["generate_customer_metadata"] = generateCustomerMetadata;
-        if (!generateCustomerMetadata) {
-            const metadataCustomerId = document.getElementById('metadata customer idSelect');
-
-            column_select_data["customerMetadata"] = {
-                "customer_id": datasetColumnNames2[metadataCustomerId.value]
-            }
-        }
-
-        console.log(JSON.stringify(column_select_data));
-
-        const url = '/api/upload_datasets';
-
-        const formData = new FormData();
-        for (let i = 0; i < files.length; i++) {
-            formData.append('files', files[i]);
-        }
-
-        formData.append('data', JSON.stringify(column_select_data))
-
-        const config = {
-            headers: {
-                'content-type': 'multipart/form-data',
-            },
-        };
-
-        axios.post(url, formData, config).then((response) => {
-            console.log(response.data);
-        });
+        uploadFiles(files)
     }
 
     function handleReset() {
@@ -134,6 +147,14 @@ export default function DatasetUpload() {
         setDatasetColumnNames([])
         setParseProgress(false)
         document.getElementById("DatasetUploadForm").reset();
+    }
+
+    const handleAddArticleMetadataAttribute = () => {
+        // todo
+    }
+
+    const handleAddCustomerMetadataAttribute = () => {
+        // todo
     }
 
     const displayColumnSelect = (name) => {
@@ -170,7 +191,6 @@ export default function DatasetUpload() {
                 <label>
                     <input id={id} type="checkbox" onChange={(e) => {
                         setCheckboxState(e.target.checked)
-                        // console.log(e.target.checked)
                     }}/>
                     {label}
                 </label>
@@ -178,32 +198,34 @@ export default function DatasetUpload() {
         )
     }
 
-    const handleAddArticleMetadataAttribute = () => {
-
-    }
-
-    const handleAddCustomerMetadataAttribute = () => {
-
-    }
-
     const displayArticleMetadataSelections = () => {
-
+        // todo
     }
 
     const displayCustomerMetadataSelections = () => {
-
+        // todo
     }
 
     return (
         <div className="App" style={{textAlign: "center"}}>
             <h1>Dataset Upload</h1>
+
+            {/*file select*/}
             <input type="file" name="csv_file" form={'DatasetUploadForm'} multiple onChange={handleFileselect}
-                   accept=".csv"
-                   style={{display: "block", margin: "10px auto"}}/>
+                   accept=".csv" style={{display: "block", margin: "10px auto"}}/>
+
+            {/*reset button*/}
+            <button style={{display: "block", margin: "10px auto"}} onClick={handleReset}>Reset</button>
+
+            {/*dataset name textbox*/}
+            <input type="text" id="datasetName" name="datasetName" defaultValue={"dataset name"}/>
+
+            {/*upload to the server*/}
             <form id="DatasetUploadForm" onSubmit={handleUpload}>
                 <button type="submit" style={{display: "block", margin: "10px auto"}}>Upload</button>
             </form>
-            <button style={{display: "block", margin: "10px auto"}} onClick={handleReset}>Reset</button>
+
+            {/*parse progress*/}
             {parseProgress && PurpleSpinner()}
 
             {/*purchase data*/}
@@ -220,11 +242,15 @@ export default function DatasetUpload() {
                 "GenerateArticleMetadata",
                 setGenerateArticleMetadata
             )}
-            {!generateArticleMetadata && displayColumnSelect("metadata article id")}
-            <button style={{display: "block", margin: "10px auto"}} onClick={handleAddArticleMetadataAttribute}>Add
-                article attribute
-            </button>
-            {displayArticleMetadataSelections}
+            {!generateArticleMetadata &&
+                displayColumnSelect("metadata article id")
+            }
+            {!generateArticleMetadata &&
+                <button style={{display: "block", margin: "10px auto"}} onClick={handleAddArticleMetadataAttribute}>Add
+                    article attribute
+                </button>
+            }
+            {/*{displayArticleMetadataSelections}*/}
 
             {/*customer metadata*/}
             <h2>Customer metadata columns</h2>
@@ -233,11 +259,15 @@ export default function DatasetUpload() {
                 "GenerateCustomerMetadata",
                 setGenerateCustomerMetadata
             )}
-            {!generateCustomerMetadata && displayColumnSelect("metadata customer id")}
-            <button style={{display: "block", margin: "10px auto"}} onClick={handleAddCustomerMetadataAttribute}>Add
-                customer attribute
-            </button>
-            {displayCustomerMetadataSelections}
+            {!generateCustomerMetadata &&
+                displayColumnSelect("metadata customer id")
+            }
+            {!generateCustomerMetadata &&
+                <button style={{display: "block", margin: "10px auto"}} onClick={handleAddCustomerMetadataAttribute}>Add
+                    customer attribute
+                </button>
+            }
+            {/*{displayCustomerMetadataSelections}*/}
         </div>
     );
 }

@@ -25,10 +25,6 @@ const ABTestInputList = ({abs_algorithms}) => {
         setConAlgorithm(con_algorithms.filter((item) => item.id !== algorithm_id));
     }
 
-    // const handleRemoveAlgorithm = (id) => {
-    //     const newAlgorithms = con_algorithms.filter(alg => alg.id !== id);
-    //     setConAlgorithm(newAlgorithms)
-    // }
     useEffect(() => {
         resetInput()
         fetch('/api/get_datasets', {

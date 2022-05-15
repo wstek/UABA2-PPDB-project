@@ -14,4 +14,3 @@ numpy
 scipy
 flask_sse
 celery
-supervisor

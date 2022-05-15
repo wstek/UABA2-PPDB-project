@@ -130,7 +130,7 @@ class DatabaseConnection:
             output, sep='\t', header=False, encoding="utf8", index=False)
         output.seek(0)
 
-        cursor.copy_from(output, table_name, sep='\t', null='')
+        cursor.copy_from(output, table_name, sep='\t', null='', columns=list(df))
 
     def __addMetaDataset(self, dataset_name: str, meta_data_filename: str, meta_data_type: str):
         self.meta_data.reflect()
@@ -230,6 +230,75 @@ class DatabaseConnection:
                          columns=list(df_purchase_data_table))
 
         return True
+
+    def getABTests(self, username):
+        query = f'''
+            select abtest_id 
+            from ab_test 
+            where created_by = '{username}';
+            '''
+        return self.execute(query)
+
+    def execute(self, query, fetchall = True):
+        if fetchall:
+            return self.session.execute(query).fetchall()
+        return self.session.execute(query).fetchone()
+
+    def getAlgorithms(self, abtest_id):
+        query = f''' 
+            select algorithm_id
+            from algorithm 
+            where abtest_id = {abtest_id};
+            '''
+        return self.execute(query)
+
+    def getABTestInfo(self,abtest_id):
+        query = f'''
+            select start_date, end_date, stepsize,top_k,dataset_name,created_on 
+            from ab_test 
+            where abtest_id = {abtest_id};
+            '''
+        return self.execute(query, fetchall=False)
+
+    def getAlgorithmsInformation(self, abtest_id):
+        query = f'''
+            select algorithm_id, algorithm_name, parameter_name, value
+            from algorithm natural join parameter 
+            where abtest_id = {abtest_id};
+            '''
+        return self.execute(query)
+
+    def getActiveUsersOverTime(self, start, end, dataset_name):
+        query = f'''
+            SELECT bought_on,COUNT(DISTINCT(unique_customer_id))
+            FROM purchase natural join customer
+            WHERE '{start}' <= bought_on and bought_on <= '{end}' and dataset_name = '{dataset_name}' 
+            group by bought_on;
+        '''
+        return self.execute(query)
+
+    def getPurchasesOverTime(self, start, end, dataset_name):
+        query = f'''
+            SELECT bought_on,COUNT(unique_article_id)
+            FROM purchase natural join article
+            WHERE '{start}' <= bought_on and bought_on <= '{end}' and dataset_name = '{dataset_name}' 
+            group by bought_on;
+        '''
+        return self.execute(query)
+
+    def getCRTOverTime(self, abtest_id):
+        return self.getDynamicStepsizeVar(abtest_id, parameter_name="CTR")
+
+    def getAttributionRateOverTime(self, abtest_id):
+        return self.getDynamicStepsizeVar(abtest_id, parameter_name="ATTR_RATE")
+
+    def getDynamicStepsizeVar(self, abtest_id, parameter_name):
+        query = f'''
+            SELECT date_of, algorithm_id,parameter_value
+            FROM statistics NATURAL JOIN dynamic_stepsize_var NATURAL JOIN  algorithm
+            WHERE abtest_id = {abtest_id} AND parameter_name = '{parameter_name}' ORDER BY date_of;
+        '''
+        return self.execute(query)
 
 
 if __name__ == '__main__':

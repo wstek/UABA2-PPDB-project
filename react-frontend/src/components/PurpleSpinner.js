@@ -1,5 +1,9 @@
 import {Spinner} from "react-bootstrap";
 
 export function PurpleSpinner() {
-    return <Spinner animation="border" className="purple-color" variant="danger"/>;
+    return (
+        <div className={"my-auto mx-auto"}>
+            <Spinner animation="border" className="purple-color" variant="danger"/>
+        </div>
+    )
 }

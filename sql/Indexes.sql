@@ -10,6 +10,8 @@ create index idx_dataset_uploader on dataset(uploaded_by);
 
 drop index if exists idx_customer_dataset_id;
 create index idx_customer_dataset_id on customer(customer_id, dataset_name);
+drop index if exists idx_customer_dataset_name;
+create index idx_customer_dataset_name on customer( dataset_name);
 
 drop index if exists idx_customer_unique_id;
 create index idx_customer_unique_id on customer(unique_customer_id);
@@ -31,6 +33,8 @@ create index idx_customer_unique_id on article(unique_article_id);
 
 drop index if exists idx_purchase_bought_on;
 create index idx_purchase_bought_on on purchase(bought_on);
+drop index if exists idx_purchase_dataset_name;
+create index idx_purchase_dataset_name on purchase(dataset_name);
 
 drop index if exists idx_algorithm;
 create index idx_algorithm on algorithm("algorithm_id", "abtest_id");
@@ -55,3 +59,9 @@ create index idx_statistics_on_id on statistics(statistics_id);
 
 drop index if exists idx_customer_specific_on_stat_id;
 create index idx_customer_specific_on_stat_id on customer_specific_statistics(statistics_id);
+
+drop index if exists idx_abtest_on_id;
+create index idx_abtest_on_id on ab_test(abtest_id);
+
+drop index if exists idx_algorithm_on_abtest_id;
+create index idx_algorithm_on_abtest_id on algorithm(abtest_id);

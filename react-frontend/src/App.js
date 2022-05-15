@@ -22,14 +22,12 @@ import Stats from './pages/stats/Stats';
 import TaskTest from "./pages/TaskTest";
 
 function App() {
-    const integer = new RegExp("^[0-9]+")
     const [admin, setAdmin] = useState(false);
     const [auth, setAuthed] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+
     useEffect(() => handleLoggedIn(setAdmin, setAuthed, setIsLoading), [])
-    const a = "/api/" + integer + "/" + integer
-    console.log(window.location.pathname)
-    console.log(a)
+
     return (
         <Router>
 
