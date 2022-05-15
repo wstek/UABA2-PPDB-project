@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import axios from "axios";
 import Papa from "papaparse";
 import {PurpleSpinner} from "../../components/PurpleSpinner"
+import uploadFiles from "./uploadFiles"
 
 // todo: limit selection to not selected columns and columns from the same csv file
 // todo: don't upload and process csv files that are not used
@@ -130,32 +130,16 @@ export default function DatasetUpload() {
     function handleUpload(event) {
         event.preventDefault();
 
-        const url = '/api/upload_dataset';
-
         let column_select_data = getColumnSelectData();
 
         if (Object.keys(column_select_data).length === 0) {
             return;
         }
 
+        // debug
         // return;
 
-        const formData = new FormData();
-        for (let i = 0; i < files.length; i++) {
-            formData.append('files', files[i]);
-        }
-
-        formData.append('data', JSON.stringify(column_select_data))
-
-        const config = {
-            headers: {
-                'content-type': 'multipart/form-data',
-            },
-        };
-
-        axios.post(url, formData, config).then((response) => {
-            console.log(response.data);
-        });
+        uploadFiles(files)
     }
 
     function handleReset() {
@@ -226,19 +210,23 @@ export default function DatasetUpload() {
         <div className="App" style={{textAlign: "center"}}>
             <h1>Dataset Upload</h1>
 
+            {/*file select*/}
             <input type="file" name="csv_file" form={'DatasetUploadForm'} multiple onChange={handleFileselect}
-                   accept=".csv"
-                   style={{display: "block", margin: "10px auto"}}/>
-            <button style={{display: "block", margin: "10px auto"}} onClick={handleReset}>Reset</button>
-            {parseProgress && PurpleSpinner()}
+                   accept=".csv" style={{display: "block", margin: "10px auto"}}/>
 
-            {/*dataset name*/}
-            <input type="text" id="datasetName" name="datasetName"/>
+            {/*reset button*/}
+            <button style={{display: "block", margin: "10px auto"}} onClick={handleReset}>Reset</button>
+
+            {/*dataset name textbox*/}
+            <input type="text" id="datasetName" name="datasetName" defaultValue={"dataset name"}/>
 
             {/*upload to the server*/}
             <form id="DatasetUploadForm" onSubmit={handleUpload}>
                 <button type="submit" style={{display: "block", margin: "10px auto"}}>Upload</button>
             </form>
+
+            {/*parse progress*/}
+            {parseProgress && PurpleSpinner()}
 
             {/*purchase data*/}
             <h2>Purchase data columns</h2>
@@ -254,10 +242,14 @@ export default function DatasetUpload() {
                 "GenerateArticleMetadata",
                 setGenerateArticleMetadata
             )}
-            {!generateArticleMetadata && displayColumnSelect("metadata article id")}
-            <button style={{display: "block", margin: "10px auto"}} onClick={handleAddArticleMetadataAttribute}>Add
-                article attribute
-            </button>
+            {!generateArticleMetadata &&
+                displayColumnSelect("metadata article id")
+            }
+            {!generateArticleMetadata &&
+                <button style={{display: "block", margin: "10px auto"}} onClick={handleAddArticleMetadataAttribute}>Add
+                    article attribute
+                </button>
+            }
             {/*{displayArticleMetadataSelections}*/}
 
             {/*customer metadata*/}
@@ -270,9 +262,11 @@ export default function DatasetUpload() {
             {!generateCustomerMetadata &&
                 displayColumnSelect("metadata customer id")
             }
-            <button style={{display: "block", margin: "10px auto"}} onClick={handleAddCustomerMetadataAttribute}>Add
-                customer attribute
-            </button>
+            {!generateCustomerMetadata &&
+                <button style={{display: "block", margin: "10px auto"}} onClick={handleAddCustomerMetadataAttribute}>Add
+                    customer attribute
+                </button>
+            }
             {/*{displayCustomerMetadataSelections}*/}
         </div>
     );

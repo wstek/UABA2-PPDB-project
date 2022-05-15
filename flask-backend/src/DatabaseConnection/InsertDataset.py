@@ -5,6 +5,7 @@ import pandas as pd
 from src.DatabaseConnection import DatabaseConnection
 from src.utils.Logger import Logger
 
+
 # todo: load only necessary columns in memory
 # todo: check dimensions of the selected columns
 # todo: exception handling
@@ -129,8 +130,8 @@ class InsertDataset:
         df_meta_table = pd.DataFrame()
 
         meta_id_selection = column_select_metadata[metadata_id_name]
-        shallowCopyDfColumn(self.df_dataset_files[meta_id_selection[0]], meta_id_selection[1],
-                            df_meta_table, metadata_id_name)
+        shallowCopyDfColumn(self.df_dataset_files[meta_id_selection[0]], meta_id_selection[1], df_meta_table,
+                            metadata_id_name)
 
         df_meta_table["dataset_name"] = self.dataset_name
 
