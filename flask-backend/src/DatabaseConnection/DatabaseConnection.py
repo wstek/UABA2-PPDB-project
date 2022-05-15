@@ -268,6 +268,14 @@ class DatabaseConnection:
             '''
         return self.execute(query)
 
+    def getActiveUsers(self, start, end, dataset_name):
+        query = f'''
+            SELECT distinct (unique_customer_id)
+            FROM purchase natural join customer
+            WHERE '{start}' <= bought_on and bought_on <= '{end}' and dataset_name = '{dataset_name}'; 
+        '''
+        return self.execute(query)
+
     def getActiveUsersOverTime(self, start, end, dataset_name):
         query = f'''
             SELECT bought_on,COUNT(DISTINCT(unique_customer_id))
