@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import Papa from "papaparse";
 import {PurpleSpinner} from "../../components/PurpleSpinner"
-import uploadFiles from "./uploadFiles"
+import axios from "axios";
 
 // todo: limit selection to not selected columns and columns from the same csv file
 // todo: don't upload and process csv files that are not used
@@ -127,8 +127,11 @@ export default function DatasetUpload() {
         parseDatasets(datasets);
     }
 
+
     function handleUpload(event) {
         event.preventDefault();
+
+        const url = '/api/upload_dataset';
 
         let column_select_data = getColumnSelectData();
 
@@ -136,10 +139,24 @@ export default function DatasetUpload() {
             return;
         }
 
-        // debug
         // return;
 
-        uploadFiles(files)
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+
+        formData.append('data', JSON.stringify(column_select_data))
+
+        const config = {
+            headers: {
+                'content-type': 'multipart/form-data',
+            },
+        };
+
+        axios.post(url, formData, config).then((response) => {
+            console.log(response.data);
+        });
     }
 
     function handleReset() {

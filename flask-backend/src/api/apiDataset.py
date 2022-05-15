@@ -40,7 +40,7 @@ def upload_dataset():
         new_filepath = os.path.join(Config.UPLOAD_PATH, new_filename)
 
         # upload the file
-        # uploaded_file.save(new_filepath)
+        uploaded_file.save(new_filepath)
 
         # insert into filenames object
         filenames[original_filename] = new_filepath
