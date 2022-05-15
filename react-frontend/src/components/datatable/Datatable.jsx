@@ -1,16 +1,17 @@
 import "./datatable.css"
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
-import { Link } from "react-router-dom";
+import {DataGrid} from '@mui/x-data-grid';
 import React, {useEffect, useState} from "react";
-import ABTestPicker from "../ABTestpicker";
 
 
-function Datatable({abtest_id,algorithm_id}) {
+function Datatable({abtest_id, algorithm_id}) {
 
     const [loaded, setLoaded] = useState(false);
     const [select, setSelection] = React.useState([]);
     const [allRows, setAllRows] = useState(null);
-        useEffect(() => {
+    const [selectedCustomer, setSelectedCustomer] = useState(false)
+    const [topk, setTopk] = useState(null)
+
+    useEffect(() => {
         fetch('/api/users/' + abtest_id + "/" + algorithm_id, {
             method: 'GET',
             credentials: 'include',
@@ -52,29 +53,64 @@ function Datatable({abtest_id,algorithm_id}) {
     // ]
 
 
-    function openTabs(){
-        for (let i = 0; i < select.length; i++){
-            window.open("/api/" + abtest_id + "/" + algorithm_id + "/" + select[i])
+    function openTabs() {
+        fetch('/api/' + abtest_id + '/' + algorithm_id + '/' + select[0], {
+            method: 'GET',
+            credentials: 'include',
+            headers: {"Content-Type": "application/json", 'Accept': 'application/json'}
+        }).then(res => res.json())
+            .then((data) => {
+                if (data.error) {
+                    throw Error(data.error);
+                }
+                setSelectedCustomer(true)
+                setTopk(data)
+
+            }).catch((err) => {
+            console.log(err);
+        })
+    }
+
+    function showTopk(){
+        let string = ""
+        for(let key in topk){
+            string += key + ": "
+            for(let value = 0; value < topk[key].length; value++){
+                string += topk[key][value]
+                string += ","
+            }
+            string += '\n'
         }
+        return string
     }
 
     return (
-        <div className="datatable">
-            <div className="datatableTitle">
-                All users
+        <div className="page">
+            <label>All active Users</label>
+            <div className="row text-left align-content-left justify-content-left">
+                <div className="datatable" style={{height: 400, width: '50%'}}>
+                    <div className="datatableTitle">
+                        <DataGrid style={{height: 400, width: '50%'}} className="col-12 col-lg-6 col-xl-6 col-xxl-6 "
+                                  rows={allRows}
+                            // columns={columns.concat(actionColumn)}
+                                  columns={columns}
+                                  pageSize={5}
+                                  checkboxSelection
+                                  onSelectionModelChange={(newSelection) => {
+                                      setSelection(newSelection);
+                                  }}
+                        />
+                    </div>
+                </div>
+                {selectedCustomer &&
+                <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 " >
+                    <label>Topk </label>
+                    <div style={{ flex: 1, padding: 20, backgroundColor: "grey", height: 400, width: '100%' }}>
+                        {showTopk()}
+                    </div>
+                </div>}
             </div>
-            <DataGrid
-                rows={allRows}
-                // columns={columns.concat(actionColumn)}
-                columns={columns}
-                pageSize={10}
-                rowsPerPageOptions={[10]}
-                checkboxSelection
-                onSelectionModelChange={(newSelection) => {
-                    setSelection(newSelection);
-                }}
-            />
-            <button onClick={openTabs}>Submit</button>
+             <button className="position-relative " onClick={openTabs}>Submit</button>
         </div>
     );
 }

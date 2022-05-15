@@ -32,8 +32,6 @@ function App() {
         <Router>
 
             <div className="App">
-
-                {/*{window.location.pathname === "/api/" + integer + "/" + integer  && <Navbar admin={admin} auth={auth}></Navbar>}*/}
                 <Navbar admin={admin} auth={auth}/>
 
                 <div className="content">

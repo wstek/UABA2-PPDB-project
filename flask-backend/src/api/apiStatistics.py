@@ -51,6 +51,26 @@ def get_user_attributes(customer_id, selected_abtest):
     response = dict()
     for r in attr:
         response[r.attribute_name] = r.attribute_value
+
+    return response\
+
+@api_statistics.route("/api/<int:abtest_id>/<int:algorithm_id>/<int:customer_id>")
+def get_user_topk(abtest_id, algorithm_id, customer_id):
+    attr = database_connection.session.execute(
+        f"select date_of, unique_customer_id, article_id  from  recommendation natural join  "
+        f"statistics natural join algorithm natural join article "
+        f"where unique_customer_id = '{customer_id}'and abtest_id = '{abtest_id}' and algorithm_id = '{algorithm_id}';").fetchall()
+    date = None
+    d = None
+    response = dict()
+    for article in attr:
+        if not date or d != article[0]:
+            date = article[0]
+            d = article[0]
+            date = date.strftime("%d-%b-%Y (%H:%M:%S.%f)")
+            response[date] = []
+
+        response[date].append(article[2])
     return response
 
 
