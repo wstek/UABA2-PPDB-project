@@ -1,4 +1,4 @@
-import Datatable from "../../components/datatable/Datatable";
+import ItemDatatable from "../../components/datatable/ItemDatatable";
 import Sidebar from "../../components/sidebar/Sidebar";
 import {useEffect, useState, useSyncExternalStore} from "react";
 import "./list.css"
@@ -7,7 +7,7 @@ import ABTestPicker from "../../components/ABTestpicker";
 import React from "react";
 import AlgorithmPicker from "../../components/Algorithmpicker";
 
-const UserList = () => {
+const ItemList = () => {
     const [personal_abtests, setPersonalABTests] = useState(null);
     const [personal_algorithms, setPersonalAlgorithms] = useState(null);
     const [selected_abtest, setSelectedABTest] = useState(null);
@@ -56,7 +56,7 @@ const UserList = () => {
                 </div>}
                 {selected_abtest && selected_algorithm &&
                 <div className="listContainer">
-                    <Datatable abtest_id={selected_abtest} algorithm_id={selected_algorithm}/>
+                    <ItemDatatable abtest_id={selected_abtest} algorithm_id={selected_algorithm}/>
                 </div>}
                 {/* } */}
             </div>
@@ -64,4 +64,4 @@ const UserList = () => {
     );
 }
 
-export default UserList;
+export default ItemList;

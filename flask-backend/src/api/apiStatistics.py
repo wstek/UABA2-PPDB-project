@@ -33,6 +33,18 @@ def get_personal_algorithms(abtest_id):
 
     return {"personal_algorithms": personal_algorithms}
 
+@api_statistics.route("/api/items/<int:abtest_id>/<int:algorithm_id>", methods=['GET'])
+def get_items(abtest_id, algorithm_id):
+    active_items = database_connection.execute(
+        f"select article_id from article natural join ab_test natural join purchase "
+        f"where bought_on <= end_date and abtest_id = {abtest_id} "
+    )
+    if not active_items:
+        return {"error": "Page does not exist"}, 404
+    for items in range(len(active_items)):
+        active_items[items] = active_items[items][0]
+
+    return {"itemlist": active_items}
 
 @api_statistics.route("/api/users/<int:abtest_id>/<int:algorithm_id>", methods=['GET'])
 def get_users(abtest_id, algorithm_id):
@@ -55,7 +67,27 @@ def get_user_attributes(customer_id, selected_abtest):
     for r in attr:
         response[r.attribute_name] = r.attribute_value
 
-    return response\
+    return response
+
+@api_statistics.route("/api/purchases/<int:abtest_id>/<int:customer_id>")
+def get_user_history(abtest_id, customer_id):
+    attr = database_connection.session.execute(
+        f"select bought_on, unique_article_id  from ab_test natural join purchase natural join customer natural join article "
+        f"where abtest_id = '{abtest_id}' and unique_customer_id = '{customer_id}' and end_date >= bought_on"
+    ).fetchall()
+
+    date = None
+    d = None
+    response = dict()
+    for article in attr:
+        if not date or d != article[0]:
+            date = article[0]
+            d = article[0]
+            date = date.strftime("%d-%b-%Y")
+            response[date] = []
+
+        response[date].append(article[1])
+    return response
 
 @api_statistics.route("/api/<int:abtest_id>/<int:algorithm_id>/<int:customer_id>")
 def get_user_topk(abtest_id, algorithm_id, customer_id):
@@ -70,7 +102,7 @@ def get_user_topk(abtest_id, algorithm_id, customer_id):
         if not date or d != article[0]:
             date = article[0]
             d = article[0]
-            date = date.strftime("%d-%b-%Y (%H:%M:%S.%f)")
+            date = date.strftime("%d-%b-%Y")
             response[date] = []
 
         response[date].append(article[2])

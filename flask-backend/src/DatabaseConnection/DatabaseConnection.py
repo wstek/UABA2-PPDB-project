@@ -252,7 +252,7 @@ class DatabaseConnection:
             '''
         return self.execute(query)
 
-    def getABTestInfo(self,abtest_id):
+    def getABTestInfo(self,abtest_id,):
         query = f'''
             select start_date, end_date, stepsize,top_k,dataset_name,created_on 
             from ab_test 

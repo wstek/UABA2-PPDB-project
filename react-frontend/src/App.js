@@ -16,10 +16,11 @@ import {handleLoggedIn} from './utils/handleLoggedIn'
 import Simulation from "./pages/Account/Simulation";
 import ChangeInfo from "./pages/Account/ChangeInfo";
 import Home from "./pages/Home";
-import List from "./pages/list/List"
+import UserList from "./pages/list/List"
 import Single from './pages/single/Single';
 import Stats from './pages/stats/Stats';
 import TaskTest from "./pages/TaskTest";
+import ItemList from "./pages/list/ItemList";
 
 function App() {
     const [admin, setAdmin] = useState(false);
@@ -85,11 +86,11 @@ function App() {
                                         path="/account/changeinfo"/>
 
                         <Route exact path="/users">
-                            <List/>
+                            <UserList/>
                         </Route>
 
                         <Route exact path="/items">
-                            <List/>
+                            <ItemList/>
                         </Route>
 
                         <Route exact path="/stats">
