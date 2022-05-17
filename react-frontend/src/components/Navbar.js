@@ -83,7 +83,7 @@ function DashboardButton() {
 function ViewDataSetButton() {
     return (
         <li className="nav-item">
-            <Link to="/dataset" className="flexible orange-hover button-purple">Dashboard
+            <Link to="/dataset" className="flexible orange-hover button-purple">Datasets
             </Link>
         </li>
     )
