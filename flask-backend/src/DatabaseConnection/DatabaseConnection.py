@@ -6,19 +6,32 @@ import warnings
 from io import StringIO
 from pathlib import Path
 from typing import List
+from psycopg2.extensions import register_adapter, AsIs
 
 import pandas as pd
 import sqlalchemy
+import numpy
 from sqlalchemy import MetaData, exc as sa_exc, Sequence
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import scoped_session, sessionmaker
+from src.utils.Logger import Logger
+from src.utils.configParser import configDatabase
+from src.utils.pathParser import getAbsPathFromProjectRoot
 
 # appends parent directory to the python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.utils.Logger import Logger
-from src.utils.configParser import configDatabase
-from src.utils.pathParser import getAbsPathFromProjectRoot
+
+def addapt_numpy_float64(numpy_float64):
+    return AsIs(numpy_float64)
+
+
+def addapt_numpy_int64(numpy_int64):
+    return AsIs(numpy_int64)
+
+
+register_adapter(numpy.float64, addapt_numpy_float64)
+register_adapter(numpy.int64, addapt_numpy_int64)
 
 
 class DatabaseConnection:
@@ -239,10 +252,39 @@ class DatabaseConnection:
             '''
         return self.execute(query)
 
-    def execute(self, query, fetchall = True):
+    def getUserCount(self, dataset_name):
+        query = f'''
+            select count(*) 
+            from customer 
+            where dataset_name = '{dataset_name}';
+            '''
+        return self.execute(query, fetchall=False)
+
+    def getItemCount(self, dataset_name):
+        query = f'''
+            select count(*) 
+            from article 
+            where dataset_name = '{dataset_name}';
+            '''
+        return self.execute(query, fetchall=False)
+
+    def getPurchaseCount(self, dataset_name):
+        query = f'''
+            select count(*) 
+            from purchase 
+            where dataset_name = '{dataset_name}';
+            '''
+        return self.execute(query, fetchall=False)
+
+    def execute(self, query, fetchall=True):
+
         if fetchall:
-            return self.session.execute(query).fetchall()
-        return self.session.execute(query).fetchone()
+            result = self.session.execute(query).fetchall()
+        else:
+            result = self.session.execute(query).fetchone()
+
+        self.session.commit()
+        return result
 
     def getAlgorithms(self, abtest_id):
         query = f''' 
@@ -252,7 +294,7 @@ class DatabaseConnection:
             '''
         return self.execute(query)
 
-    def getABTestInfo(self,abtest_id,):
+    def getABTestInfo(self, abtest_id):
         query = f'''
             select start_date, end_date, stepsize,top_k,dataset_name,created_on 
             from ab_test 
@@ -294,6 +336,14 @@ class DatabaseConnection:
         '''
         return self.execute(query)
 
+    def getPriceExtrema(self, dataset_name):
+        query = f'''
+            SELECT min(price), max(price)
+            FROM purchase
+            WHERE dataset_name = '{dataset_name}' 
+        '''
+        return self.execute(query, fetchall=False)
+
     def getCRTOverTime(self, abtest_id):
         return self.getDynamicStepsizeVar(abtest_id, parameter_name="CTR")
 
@@ -308,11 +358,19 @@ class DatabaseConnection:
         '''
         return self.execute(query)
 
+    def getPriceCount(self, price_interval_min, price_interval_max, dataset_name):
+        query = f'''
+            SELECT count(*)
+            FROM purchase
+            WHERE dataset_name = '{dataset_name}' and {price_interval_min} <= price and price < {price_interval_max}  
+        '''
+        return self.execute(query, fetchall=False)
+
 
 if __name__ == '__main__':
     db_con = DatabaseConnection()
     db_con.connect(filename=getAbsPathFromProjectRoot("config-files/database.ini"))
     db_con.logVersion()
-    db_con.addDataset("H_M", "xSamx33", getAbsPathFromProjectRoot("../datasets/H_M/purchases.csv"),
+    db_con.addDataset("H_M", "mosh", getAbsPathFromProjectRoot("../datasets/H_M/purchases.csv"),
                       getAbsPathFromProjectRoot("../datasets/H_M/articles.csv"),
                       getAbsPathFromProjectRoot("../datasets/H_M/customers.csv"))
