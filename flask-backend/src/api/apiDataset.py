@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 from flask import Blueprint, request, abort, current_app, session
 from werkzeug.utils import secure_filename
@@ -49,6 +50,37 @@ def upload_dataset():
     task = insert_dataset.delay(user_id, filenames, column_select_data)
 
     return {"task_id": task.id}, 202
+
+
+@api_dataset.route("/api/get_datasets_information/<dataset_name>")
+def get_dataset_information(dataset_name):
+    information = dict()
+
+    # User Count
+    query_result = database_connection.getUserCount(dataset_name)
+    information["user_count"] = query_result.count
+
+    # Interaction Count
+    query_result = database_connection.getPurchaseCount(dataset_name)
+    information["purchase_count"] = query_result.count
+
+    # Item count
+    query_result = database_connection.getItemCount(dataset_name)
+    information["item_count"] = query_result.count
+
+    query_result = database_connection.getPriceExtrema(dataset_name)
+    price_min, price_max = query_result.min, query_result.max
+    intervals = 25
+    price_diff = (price_max - price_min) / intervals
+    information["prices"] = dict()
+    price_interval_min = price_min
+    while price_interval_min < price_max:
+        price_interval_max = price_interval_min + price_diff
+        query_result = database_connection.getPriceCount(price_interval_min, price_interval_max, dataset_name)
+        information["prices"][price_interval_min + price_diff / 2] = query_result.count
+        price_interval_min = price_interval_max
+
+    return information
 
 
 @api_dataset.route("/api/get_datasets")
