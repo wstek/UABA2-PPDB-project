@@ -1,5 +1,5 @@
 import {Chart} from "react-google-charts";
-import {PurpleSpinner} from "./PurpleSpinner"
+import {PurpleSpinner} from "../PurpleSpinner"
 import {useEffect, useState} from "react";
 
 function LineChart({XFnY, title, xMin = 0, xMax = 10}) {
