@@ -3,7 +3,7 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import {useEffect, useState, useSyncExternalStore} from "react";
 import "./list.css"
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
-import ABTestPicker from "../../components/ABTestpicker";
+import InputSelector from "../../components/InputSelector";
 import React from "react";
 import AlgorithmPicker from "../../components/Algorithmpicker";
 
@@ -46,7 +46,7 @@ const ItemList = () => {
             <div className="container-fluid my-auto">
                 {!selected_abtest &&
                 <div className="row text-center align-items-center mb-3">
-                    <ABTestPicker personal_abtests={personal_abtests} setSelectedABTest={setSelectedABTest}
+                    <InputSelector header={"Select AB-Test"} personal_abtests={personal_abtests} setSelectedABTest={setSelectedABTest}
                                   selected_abtest={selected_abtest}/>
                 </div>}
                 {selected_abtest && !selected_algorithm &&
