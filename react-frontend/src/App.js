@@ -20,6 +20,9 @@ import UserList from "./pages/list/List"
 import Single from './pages/single/Single';
 import Stats from './pages/stats/Stats';
 import TaskTest from "./pages/TaskTest";
+import DatasetPage, {DatasetStatistics} from "./pages/Dataset";
+
+
 import ItemList from "./pages/list/ItemList";
 
 function App() {
@@ -70,16 +73,19 @@ function App() {
                             <SignUp setAdmin={setAdmin} setAuthed={setAuthed}/>
                         </Route>
 
-                        <Route exact path="/contact">
-                            <Contact/>
+                        <Route exact path="/dataset">
+                            <DatasetPage/>
+                        </Route>
+                        <Route exact path="/dataset/:dataset_name">
+                            <DatasetStatistics/>
                         </Route>
 
                         <ProtectedRoute component={Dashboard} isLoading={isLoading} auth={auth} setAuthed={setAuthed}
                                         setAdmin={setAdmin} exact path="/dashboard"/>
                         <ProtectedRoute component={Simulation} isLoading={isLoading} auth={auth} setAuthed={setAuthed}
                                         setAdmin={setAdmin} exact path="/simulation"/>
-                        <ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth} exact
-                                        path="/statistics"/>
+                        <ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth}
+                                        path="/ABTest/statistics"/>
                         <ProtectedRoute component={DatasetUpload} isLoading={isLoading} auth={auth} exact
                                         path="/dataset/upload"/>
                         <ProtectedRoute component={ChangeInfo} isLoading={isLoading} auth={auth} exact
