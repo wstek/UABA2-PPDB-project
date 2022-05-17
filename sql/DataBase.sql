@@ -163,14 +163,8 @@ CREATE TABLE IF NOT EXISTS "recommendation"
 
 CREATE TABLE IF NOT EXISTS "dynamic_stepsize_var"
 (
-    statistics_id   int references statistics (statistics_id),
+    statistics_id   int references statistics (statistics_id) on update cascade on delete cascade,
     parameter_name  varchar,
     parameter_value varchar,
     PRIMARY KEY (statistics_id, parameter_name)
 );
-
-
-insert into "datascientist" (username, first_name, last_name, birthdate, password, email_address)
-values ('xSamx33', 'Sam', 'Roggeman', '2001-06-14', '123456789', 'sam.roggeman@gmail.com');
-insert into "admin" (username)
-values ('xSamx33')
