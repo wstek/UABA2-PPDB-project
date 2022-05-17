@@ -37,8 +37,10 @@ def get_personal_algorithms(abtest_id):
 @api_statistics.route("/api/items/<int:abtest_id>/<int:algorithm_id>", methods=['GET'])
 def get_items(abtest_id, algorithm_id):
     active_items = database_connection.execute(
-        f"select article_id from article natural join ab_test natural join purchase "
-        f"where bought_on <= end_date and abtest_id = {abtest_id} "
+        f"select distinct unique_article_id from article natural join ab_test natural join purchase natural join recommendation "
+        f"natural join statistics "
+        f"where bought_on >= start_date and bought_on <= end_date and abtest_id = {abtest_id} and date_of >= start_date "
+        f"and date_of <= end_date"
     )
     if not active_items:
         return {"error": "Page does not exist"}, 404
@@ -47,6 +49,122 @@ def get_items(abtest_id, algorithm_id):
 
     return {"itemlist": active_items}
 
+
+@api_statistics.route("/api/items/purchases/<int:abtest_id>/<int:article_id>", methods=['GET'])
+def get_item_purchases_over_time(abtest_id, article_id):
+
+    amount_of_purchases = database_connection.execute(
+        f"select distinct bought_on from article natural join ab_test natural join purchase "
+        f"where bought_on >= start_date and bought_on <= end_date and abtest_id = {abtest_id}  "
+    )
+
+    response = dict()
+    for i in amount_of_purchases:
+        j = i[0]
+        j = j.strftime("%d-%b-%Y")
+        response[j] = []
+
+    amount_of_purchases = database_connection.execute(
+        f"select bought_on, customer_id from article natural join ab_test natural join purchase "
+        f"where bought_on >= start_date and bought_on <= end_date and abtest_id = {abtest_id} and  unique_article_id = {article_id} "
+    )
+
+    if not amount_of_purchases:
+        return {"error": "Page does not exist"}, 404
+
+    date = None
+    d = None
+    for article in amount_of_purchases:
+        if not date or d != article[0]:
+            date = article[0]
+            d = article[0]
+            date = date.strftime("%d-%b-%Y")
+            response[date] = []
+
+        response[date].append(article[1])
+    return response
+
+@api_statistics.route("/api/items/recommendations/<int:abtest_id>/<int:article_id>", methods=['GET'])
+def get_item_recommendations_over_time(abtest_id, article_id):
+
+    amount_of_recommendations = database_connection.execute(
+        f"select distinct date_of  from recommendation natural join statistics natural join ab_test "
+        f"where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id}"
+    )
+
+    response = dict()
+    for key in amount_of_recommendations:
+        date = key[0]
+        date = date.strftime("%d-%b-%Y")
+        response[date] = []
+
+    amount_of_recommendations = database_connection.execute(
+        f"select date_of, unique_customer_id  from recommendation natural join statistics natural join ab_test "
+        f"where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id} and  unique_article_id = {article_id} "
+    )
+
+    if not amount_of_recommendations:
+        return {"error": "Page does not exist"}, 404
+
+    date = None
+    d = None
+    for article in amount_of_recommendations:
+        if not date or d != article[0]:
+            date = article[0]
+            d = article[0]
+            date = date.strftime("%d-%b-%Y")
+            response[date] = []
+
+        response[date].append(article[1])
+    return response
+
+@api_statistics.route("/api/items/recommendations/purchases/<int:abtest_id>/<int:article_id>", methods=['GET'])
+def get_item_recommendations_and_purchases_over_time(abtest_id, article_id):
+
+    amount_of_recommendations = database_connection.execute(
+        f"select distinct date_of  from recommendation natural join statistics natural join ab_test "
+        f"where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id}"
+    )
+
+    response = dict()
+    for key in amount_of_recommendations:
+        date = key[0]
+        date = date.strftime("%d-%b-%Y")
+        response[date] = []
+
+    amount_of_recommendations = database_connection.execute(
+        f"select date_of, unique_customer_id  from recommendation natural join statistics natural join ab_test natural join purchase "
+        f"where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id} and  unique_article_id = {article_id} "
+    )
+
+    if not amount_of_recommendations:
+        return {"error": "Page does not exist"}, 404
+
+    date = None
+    d = None
+    for article in amount_of_recommendations:
+        if not date or d != article[0]:
+            date = article[0]
+            d = article[0]
+            date = date.strftime("%d-%b-%Y")
+            response[date] = []
+
+        response[date].append(article[1])
+    return response
+
+@api_statistics.route("/api/items/metadata/<int:abtest_id>/<int:article_id>", methods=['GET'])
+def get_item_attribute(abtest_id, article_id):
+    active_items = database_connection.execute(
+        f"select attribute_name, attribute_value from article natural join ab_test natural join article_attribute "
+        f"where unique_article_id = {article_id} and abtest_id = {abtest_id} "
+    )
+    if not active_items:
+        return {"error": "Page does not exist"}, 404
+    response = dict()
+    for items in range(len(active_items)):
+        response[active_items[items][0]] = active_items[items][1]
+
+    return response
 
 @api_statistics.route("/api/users/<int:abtest_id>/<int:algorithm_id>", methods=['GET'])
 def get_users(abtest_id, algorithm_id):
