@@ -45,7 +45,7 @@ function Home() {
                     <br/>
                     <div>
                         <Link to="/abtest/setup" className="orange-hover button-purple ">Start</Link>
-                        <Link to="/Statistics" className="button-purple orange-hover">Statistics</Link>
+                        <Link to="/ABTest/Statistics" className="button-purple orange-hover">Statistics</Link>
 
                     </div>
 
