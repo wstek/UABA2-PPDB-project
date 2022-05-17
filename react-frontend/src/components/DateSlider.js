@@ -9,13 +9,10 @@ export default function DateSlider({dates, setStartIndex, setEndIndex}) {
     const sliderChanged = (event) => {
         let start_date = new Date(event.min * 1000 * 3600 * 24 + Date.parse(dates[0]))
         let end_date = new Date(event.max * 1000 * 3600 * 24 + Date.parse(dates[0]))
-        console.log(sliderChanged)
         setCurrentStartDate(start_date.toISOString().split('T')[0])
         setCurrentEndDate(end_date.toISOString().split('T')[0])
         setEndIndex(event.max)
         setStartIndex(event.min)
-        // console.log(start_date.toISOString().split('T')[0])
-        // console.log("slider changed")
     }
 
     if (dates) {
