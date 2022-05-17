@@ -33,6 +33,7 @@ def get_personal_algorithms(abtest_id):
 
     return {"personal_algorithms": personal_algorithms}
 
+
 @api_statistics.route("/api/items/<int:abtest_id>/<int:algorithm_id>", methods=['GET'])
 def get_items(abtest_id, algorithm_id):
     active_items = database_connection.execute(
@@ -46,14 +47,18 @@ def get_items(abtest_id, algorithm_id):
 
     return {"itemlist": active_items}
 
+
 @api_statistics.route("/api/users/<int:abtest_id>/<int:algorithm_id>", methods=['GET'])
 def get_users(abtest_id, algorithm_id):
     abtest_information = database_connection.getABTestInfo(abtest_id)
     if not abtest_information:
         return {"error": "Page does not exist"}, 404
 
-    users_rows = database_connection.getActiveUsers(start=abtest_information.start_date, end=abtest_information.end_date, dataset_name=abtest_information.dataset_name)
-    #         f"-- SELECT distinct(unique_customer_id) FROM customer_specific_statistics natural join algorithm  natural join statistics natural join ab_test WHERE abtest_id= {abtest_id};").fetchall()
+    users_rows = database_connection.getActiveUsers(
+        start=abtest_information.start_date,
+        end=abtest_information.end_date,
+        dataset_name=abtest_information.dataset_name
+    )
     users = [row.unique_customer_id for row in users_rows]
 
     return {"userlist": users}
@@ -68,6 +73,7 @@ def get_user_attributes(customer_id, selected_abtest):
         response[r.attribute_name] = r.attribute_value
 
     return response
+
 
 @api_statistics.route("/api/purchases/<int:abtest_id>/<int:customer_id>")
 def get_user_history(abtest_id, customer_id):
@@ -88,6 +94,7 @@ def get_user_history(abtest_id, customer_id):
 
         response[date].append(article[1])
     return response
+
 
 @api_statistics.route("/api/<int:abtest_id>/<int:algorithm_id>/<int:customer_id>")
 def get_user_topk(abtest_id, algorithm_id, customer_id):
