@@ -121,16 +121,6 @@ class DatabaseConnection:
             '''
         return self.session_execute_and_fetch(query, fetchall=False)
 
-    def execute(self, query, fetchall=True):
-
-        if fetchall:
-            result = self.session.execute(query).fetchall()
-        else:
-            result = self.session.execute(query).fetchone()
-
-        self.session.commit()
-        return result
-
     def getAlgorithms(self, abtest_id):
         query = f''' 
             select algorithm_id
@@ -209,7 +199,7 @@ class DatabaseConnection:
             FROM purchase
             WHERE dataset_name = '{dataset_name}' and {price_interval_min} <= price and price < {price_interval_max}  
         '''
-        return self.execute(query, fetchall=False)
+        return self.session_execute_and_fetch(query, fetchall=False)
 
 
 if __name__ == '__main__':
