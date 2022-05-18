@@ -1,15 +1,25 @@
-CREATE TABLE IF NOT EXISTS "datascientist"
+CREATE SCHEMA public;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO public;
+
+create domain algorithmname varchar check (VALUE IN ('ItemKNN', 'Popularity', 'Recency'));
+
+CREATE EXTENSION if not exists citext;
+CREATE DOMAIN email AS citext
+    CHECK ( value ~
+            '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
+CREATE DOMAIN nat_int bigint check ( value >= 0 );
+
+create table datascientist
 (
-    "username"       varchar PRIMARY KEY,
-    datascientist_id serial unique not null,
-
-    "first_name"     varchar       NOT NULL,
-    "last_name"      varchar       NOT NULL,
-
-    "created_on"     timestamp     NOT NULL default now(),
-    "birthdate"      date          NOT NULL,
-    "password"       varchar       NOT NULL,
-    "email_address"  email UNIQUE  NOT NULL
+    "username"         varchar primary key,
+    "datascientist_id" serial unique,
+    "first_name"       varchar            not null,
+    "last_name"        varchar            not null,
+    "created_on"       date default now() not null,
+    "birthdate"        date               not null,
+    "password"         varchar            not null,
+    "email_address"    email unique       not null
 );
 
 CREATE TABLE IF NOT EXISTS "admin"
@@ -22,7 +32,6 @@ CREATE TABLE IF NOT EXISTS "dataset"
     "name"        varchar primary key,
     "uploaded_by" varchar NOT NULL references admin (username) on update cascade on delete cascade
 );
-
 
 CREATE TABLE IF NOT EXISTS "customer"
 (
@@ -46,8 +55,6 @@ CREATE TABLE IF NOT EXISTS "ab_test"
     "created_by"   varchar NOT NULL references "datascientist" (username) on update cascade on delete cascade
 );
 
-
-
 CREATE TABLE IF NOT EXISTS "article"
 (
 
@@ -58,8 +65,6 @@ CREATE TABLE IF NOT EXISTS "article"
     primary key (unique_article_id)
 
 );
-
-
 
 CREATE TABLE IF NOT EXISTS "article_attribute"
 (
@@ -73,8 +78,6 @@ CREATE TABLE IF NOT EXISTS "article_attribute"
     primary key ("attribute_name", "article_id", dataset_name)
 );
 
-
-
 CREATE TABLE IF NOT EXISTS "customer_attribute"
 (
     "type"            varchar not null,
@@ -87,19 +90,18 @@ CREATE TABLE IF NOT EXISTS "customer_attribute"
 
     primary key ("attribute_name", "customer_id", dataset_name)
 );
+
 CREATE TABLE IF NOT EXISTS "purchase"
 (
     "dataset_name" varchar          not null,
     "customer_id"  nat_int          NOT NULL,
-    article_id     nat_int          NOT NULL,
+    "article_id"   nat_int          NOT NULL,
     "bought_on"    date             not null,
     "price"        double precision NOT NULL,
     foreign key (article_id, dataset_name) references article (article_id, dataset_name) on update cascade on delete cascade,
     foreign key (customer_id, dataset_name) references customer (customer_id, dataset_name) on update cascade on delete cascade,
     PRIMARY KEY ("dataset_name", "customer_id", "article_id", "bought_on")
 );
-
-
 
 CREATE TABLE IF NOT EXISTS "algorithm"
 (
@@ -110,7 +112,6 @@ CREATE TABLE IF NOT EXISTS "algorithm"
     "algorithm_name" algorithmname NOT NULL,
     PRIMARY KEY ("algorithm_id", "abtest_id")
 );
-
 
 CREATE TABLE IF NOT EXISTS "parameter"
 (
@@ -124,7 +125,6 @@ CREATE TABLE IF NOT EXISTS "parameter"
     PRIMARY KEY ("parameter_name", "algorithm_id", "abtest_id")
 );
 
-
 CREATE TABLE IF NOT EXISTS "statistics"
 (
     "statistics_id" serial PRIMARY KEY,
@@ -136,7 +136,6 @@ CREATE TABLE IF NOT EXISTS "statistics"
 
     foreign key (algorithm_id, abtest_id) references algorithm (algorithm_id, abtest_id) on update cascade on delete cascade
 );
-
 
 CREATE TABLE IF NOT EXISTS "customer_specific_statistics"
 (
@@ -160,11 +159,10 @@ CREATE TABLE IF NOT EXISTS "recommendation"
     PRIMARY KEY ("recommendation_id", "unique_customer_id", "statistics_id")
 );
 
-
 CREATE TABLE IF NOT EXISTS "dynamic_stepsize_var"
 (
-    statistics_id   int references statistics (statistics_id) on update cascade on delete cascade,
-    parameter_name  varchar,
-    parameter_value varchar,
+    "statistics_id"   int references statistics (statistics_id) on update cascade on delete cascade,
+    "parameter_name"  varchar,
+    "parameter_value" varchar,
     PRIMARY KEY (statistics_id, parameter_name)
 );

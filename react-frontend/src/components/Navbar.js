@@ -55,7 +55,7 @@ function SignUpButton() {
 function UploadDataSetButton() {
     return (
         <li className="nav-item">
-            <Link to="/dataset/upload" className="flexible orange-hover button-purple">Upload Dataset
+            <Link to="/dataset-upload" className="flexible orange-hover button-purple">Upload Dataset
             </Link>
         </li>
     )

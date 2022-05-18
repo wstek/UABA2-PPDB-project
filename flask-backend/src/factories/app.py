@@ -13,6 +13,13 @@ from src.extensions import flask_bcrypt
 from src.extensions import flask_session
 from src.utils.pathParser import getAbsPathFromProjectRoot
 
+from src.api.apiABTest import api_abtest
+from src.api.apiAccount import api_account
+from src.api.apiDataset import api_dataset
+from src.api.apiSimulation import api_simulation
+from src.api.apiStatistics import api_statistics
+from src.api.apiTask import api_task
+
 
 def create_app() -> Flask:
     flask_app = Flask(__name__)
@@ -36,13 +43,6 @@ def create_app() -> Flask:
     flask_app.register_blueprint(sse, url_prefix='/api/stream')
 
     # api blueprints
-    from src.api.apiABTest import api_abtest
-    from src.api.apiAccount import api_account
-    from src.api.apiDataset import api_dataset
-    from src.api.apiSimulation import api_simulation
-    from src.api.apiStatistics import api_statistics
-    from src.api.apiTask import api_task
-
     flask_app.register_blueprint(api_account)
     flask_app.register_blueprint(api_dataset)
     flask_app.register_blueprint(api_abtest)

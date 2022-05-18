@@ -44,9 +44,11 @@ def upload_dataset():
         uploaded_file.save(new_filepath)
 
         # insert into filenames object
-        filenames[original_filename] = new_filepath
+        filenames[original_filename] = [new_filepath, column_select_data["delimiter"]]
 
     # start the dataset insert background process
+    print(json.dumps(filenames))
+    print(json.dumps(column_select_data))
     task = insert_dataset.delay(user_id, filenames, column_select_data)
 
     return {"task_id": task.id}, 202

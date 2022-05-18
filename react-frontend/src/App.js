@@ -73,8 +73,6 @@ function App() {
                             <SignUp setAdmin={setAdmin} setAuthed={setAuthed}/>
                         </Route>
 
-                        <ProtectedRoute component={DatasetUpload} isLoading={isLoading} auth={auth} exact
-                                        path="/dataset/upload"/>
                         <Route exact path="/dataset">
                             <DatasetPage/>
                         </Route>
@@ -90,6 +88,9 @@ function App() {
                                         exact path={"/ABTest/statistics"}/>
                         <ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth}
                                         exact path={"/ABTest/:abtest_id/statistics"}/>
+
+                        <ProtectedRoute component={DatasetUpload} isLoading={isLoading} auth={auth} exact
+                                        path="/dataset-upload"/>
                         <ProtectedRoute component={ChangeInfo} isLoading={isLoading} auth={auth} exact
                                         path="/account/changeinfo"/>
 
