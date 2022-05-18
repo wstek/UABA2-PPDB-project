@@ -249,10 +249,11 @@ def get_abtest_algorithm_information(abtest_id):
 
 def get_abtest_information(abtest_id):
     abtest_information = database_connection.getABTestInfo(abtest_id)
-    returnvalue = {'dates': [], 'start_date': abtest_information.start_date,
-                   'end_date': abtest_information.end_date, 'top-k': abtest_information.top_k,
-                   'dataset-name': abtest_information.dataset_name, 'created-on': abtest_information.created_on,
-                   'stepsize': abtest_information.stepsize}
+    print(str(abtest_information.start_date))
+    returnvalue = {'dates': [], 'start_date': str(abtest_information.start_date),
+                   'end_date': str(abtest_information.end_date), 'top-k': abtest_information.top_k,
+                   'dataset-name': abtest_information.dataset_name, 'created-on': str(abtest_information.created_on),
+                   'stepsize': abtest_information.stepsize, 'abtest-id': abtest_information.abtest_id}
     for n in range(int((abtest_information.end_date - abtest_information.start_date).days)):
         date = (abtest_information.start_date + timedelta(abtest_information.stepsize * n))
         returnvalue['dates'].append(date)
@@ -328,7 +329,11 @@ def get_CRT_over_time(abtest_id):
 @api_statistics.route("/api/abtest/statistics/<int:abtest_id>/<stat>")
 def get_stat(abtest_id, stat):
     username = session.get("user_id")
-    if not username:
+
+    abtest_info = database_connection.getABTestInfo(abtest_id)
+    if not abtest_info:
+        return {"error": "PageNotFound"}, 404
+    if not username or abtest_info.created_by != username:
         return {"error": "unauthorized"}, 401
 
     if stat == "ABTest_information":

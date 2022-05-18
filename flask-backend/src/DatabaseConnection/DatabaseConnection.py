@@ -296,7 +296,7 @@ class DatabaseConnection:
 
     def getABTestInfo(self, abtest_id):
         query = f'''
-            select start_date, end_date, stepsize,top_k,dataset_name,created_on 
+            select abtest_id,top_k, start_date, end_date, stepsize,dataset_name,created_on,created_by
             from ab_test 
             where abtest_id = {abtest_id};
             '''
