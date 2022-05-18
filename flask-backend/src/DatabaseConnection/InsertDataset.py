@@ -1,18 +1,35 @@
+import json
+import math
+import os
+import sys
+import time
 from typing import Dict
 
 import pandas as pd
+from celery.exceptions import SoftTimeLimitExceeded
 
-from src.DatabaseConnection import DatabaseConnection
+# appends parent directory to the python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from src.DatabaseConnection.DatabaseConnection import DatabaseConnection
 from src.utils.Logger import Logger
+from src.utils.pathParser import getAbsPathFromProjectRoot
 
 
-# todo: load only necessary columns in memory
-# todo: check dimensions of the selected columns
+# todo: handle csv with empty id values
 # todo: exception handling
+# todo: check if multithreading interferes with database connection session
 
 
-def shallowCopyDfColumn(df_input, column_name_input, df_output, column_name_output):
+def shallowCopyDfColumn(df_input, column_name_input, df_output, column_name_output, delete_empty=False):
+    # print(df_input, column_name_input, df_output, column_name_output)
     df_output[column_name_output] = df_input[[column_name_input]].copy(deep=False)
+
+    if not delete_empty and df_output.isnull().values.any():
+        raise ValueError("merging columns with different sizes")
+
+    if delete_empty:
+        df_output.dropna(inplace=True)
 
 
 class InsertDataset:
@@ -35,27 +52,24 @@ class InsertDataset:
 
         self.df_dataset_files = {}  # key: original dataset name, value: pandas dataframe
 
-    def clear(self):
-        pass
-
     def startInsert(self):
-        self.database_connection.reflectMetaData()
-
-        # todo: check if dataset files exists (pathParser function)
-
         self.__insertDatasetName()
-
-        # todo: execution time measurement
-
-        # parse dataset files into pandas dataframes
-        for original_dataset_name in self.filenames:
-            # todo: custom seperator
-            dataset_filename = self.filenames[original_dataset_name]
-            self.df_dataset_files[original_dataset_name] = pd.read_csv(dataset_filename, sep=',')
 
         Logger.log(f"Inserting dataset {self.dataset_name}")
 
+        # execution time measurement
+        start_time = time.time()
+        stopwatch = start_time
+
+        self.__parse_csv_files()
+
+        Logger.log(f"Parsed {len(self.filenames)} files in {math.floor(time.time() - stopwatch)} seconds")
+        stopwatch = time.time()
+
         self.__createPurchasedataDf()
+
+        Logger.log(f"Created purchases dataframe in {math.floor(time.time() - stopwatch)} seconds")
+        stopwatch = time.time()
 
         # insert or generate metadata dataframes and insert into database
         if self.column_select_data["generate_article_metadata"]:
@@ -63,24 +77,66 @@ class InsertDataset:
         else:
             self.__insertMetadata("article")
 
+        Logger.log(
+            f"Created article dataframe and inserted in database in {math.floor(time.time() - stopwatch)} seconds")
+        stopwatch = time.time()
+
         if self.column_select_data["generate_customer_metadata"]:
             self.__generateMetadata("customer")
         else:
             self.__insertMetadata("customer")
 
+        Logger.log(
+            f"Created customer dataframe and inserted in database in {math.floor(time.time() - stopwatch)} seconds")
+        stopwatch = time.time()
+
         # insert purchase data dataframe into database
-        self.database_connection.insertPdDataframeInTable(self.df_purchase_data, "purchase")
+        self.df_purchase_data.drop_duplicates(subset=["dataset_name", "customer_id", "article_id", "bought_on"],
+                                              inplace=True)
+        self.database_connection.insert_pd_dataframe(self.df_purchase_data, "purchase")
+
+        Logger.log(f"Inserted purchases dataframe in database in {math.floor(time.time() - stopwatch)} seconds")
+        stopwatch = time.time()
 
         self.database_connection.session.commit()
-        pass
+
+        Logger.log(f"Commited changes to database in {math.floor(time.time() - stopwatch)} seconds")
+
+        Logger.log(f"Added dataset \"{self.dataset_name}\" in {math.floor(time.time() - start_time)} seconds")
 
     def cleanup(self):
         # todo: cleanup uploaded files
         pass
 
     def abort(self):
-        # todo: delete already inserted data from database
-        pass
+        self.database_connection.session.rollback()
+
+    def __parse_csv_files(self):
+        dataset_file_dtypes = {}
+
+        # get dtype for certain columns
+        bought_on_selection = self.column_select_data["purchaseData"]["bought_on"]
+        dataset_file_dtypes[bought_on_selection[0]] = [bought_on_selection[1], "date"]
+
+        price_selection = self.column_select_data["purchaseData"]["price"]
+        # dataset_file_dtypes[price_selection[0]]
+
+
+        # parse dataset files into pandas dataframes
+        for original_dataset_name in self.filenames:
+            dataset_filename = self.filenames[original_dataset_name][0]
+            delimiter = self.filenames[original_dataset_name][1]
+
+            self.df_dataset_files[original_dataset_name] = pd.read_csv(dataset_filename, sep=delimiter)
+            self.df_dataset_files[original_dataset_name].drop_duplicates(inplace=True)
+
+    def __insertDatasetName(self):
+        query = f"""
+        INSERT INTO dataset (name, uploaded_by) 
+        VALUES ('{self.dataset_name}', '{self.uploader_name}')
+        """
+
+        self.database_connection.session_execute(query)
 
     def __createPurchasedataDf(self):
         # get purchase data column selection
@@ -90,21 +146,15 @@ class InsertDataset:
         for database_column_name in purchase_select_data:
             selection = purchase_select_data[database_column_name]
             shallowCopyDfColumn(self.df_dataset_files[selection[0]], selection[1], self.df_purchase_data,
-                                database_column_name)
+                                database_column_name, delete_empty=True)
 
         self.df_purchase_data["dataset_name"] = self.dataset_name
 
-    def __insertDatasetName(self):
-        datasets_table = self.database_connection.meta_data.tables["dataset"]
-
-        # check if dataset_name already exists
-        if self.database_connection.queryTable(datasets_table, {"name": self.dataset_name}).first():
-            Logger.logError(f"Couldn't add dataset {self.dataset_name}, it already exists")
-
-        self.database_connection.insertRow(datasets_table, {
-            "name": self.dataset_name,
-            "uploaded_by": self.uploader_name
-        })
+        # Logger.log("AAAAAAHHHHHHH")
+        self.df_purchase_data["bought_on"] = pd.to_datetime(self.df_purchase_data["bought_on"]).dt.date
+        self.df_purchase_data.drop_duplicates(subset=["dataset_name", "customer_id", "article_id", "bought_on"],
+                                              inplace=True)
+        print(self.df_purchase_data.head(10))
 
     def __generateMetadata(self, metadata_type: str):
         metadata_id_name = metadata_type + "_id"
@@ -113,12 +163,13 @@ class InsertDataset:
         df_meta_table = pd.DataFrame()
 
         shallowCopyDfColumn(self.df_purchase_data, metadata_id_name, df_meta_table, metadata_id_name)
+
         df_meta_table.drop_duplicates(inplace=True)
 
         df_meta_table["dataset_name"] = self.dataset_name
 
         # insert into database
-        self.database_connection.insertPdDataframeInTable(df_meta_table, metadata_type)
+        self.database_connection.insert_pd_dataframe(df_meta_table, metadata_type)
 
     def __insertMetadata(self, metadata_type: str):
         metadata_id_name = metadata_type + "_id"
@@ -136,9 +187,58 @@ class InsertDataset:
         df_meta_table["dataset_name"] = self.dataset_name
 
         # insert into database
-        self.database_connection.insertPdDataframeInTable(df_meta_table, metadata_type)
+        self.database_connection.insert_pd_dataframe(df_meta_table, metadata_type)
 
-        # todo:
         # create new dataframe for each attribute type
+        for column_selection in column_select_metadata:
+            if column_selection == metadata_type + "_id":
+                continue
 
-        # inset attribute dataframe into meta_attribute table
+            meta_attribute_selection = column_select_metadata[column_selection]
+
+            df_meta_attribute_table = df_meta_table.copy(deep=False)
+
+            df_meta_attribute_table["attribute_name"] = column_selection
+
+            shallowCopyDfColumn(self.df_dataset_files[meta_attribute_selection[0]], meta_attribute_selection[1],
+                                df_meta_attribute_table, "attribute_value", delete_empty=True)
+
+            df_meta_attribute_table["type"] = meta_attribute_selection[2]
+
+            self.database_connection.insert_pd_dataframe(df_meta_attribute_table, metadata_type + "_attribute")
+
+
+if __name__ == "__main__":
+    # filenames = '{"product_metadata.csv": ["/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_product_metadata.csv", ","], "purchases.csv": ["/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_purchases2.csv", ","], "user_metadata.csv": ["/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_user_metadata.csv", ","]}'
+    # column_select_data = '{"datasetName": "dummy", "purchaseData": {"bought_on": ["purchases.csv", "time_of_purchase"], "price": ["purchases.csv", " price_of_product"], "article_id": ["purchases.csv", " product_id"], "customer_id": ["purchases.csv", " user_id"]}, "generate_article_metadata": false, "articleMetadata": {"article_id": ["product_metadata.csv", "product_id"], ' \
+    #                      '"color": ["product_metadata.csv", "color", "string"]}, "generate_customer_metadata": false, "customerMetadata": {"customer_id": ["user_metadata.csv", "user_id"]}}'
+
+    # filenames = '{"articles.csv": "/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_articles.csv", "customers.csv": "/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_customers.csv", "purchases.csv": "/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_purchases.csv"}'
+    # column_select_data = '{"datasetName": "H&M", "purchaseData": {"bought_on": ["purchases.csv", "t_dat"], "price": ["purchases.csv", "price"], "article_id": ["purchases.csv", "article_id"], "customer_id": ["purchases.csv", "customer_id"]}, "generate_article_metadata": false, "articleMetadata": {"article_id": ["articles.csv", "article_id"]}, "generate_customer_metadata": false, "customerMetadata": {"customer_id": ["customers.csv", "customer_id"]}}'
+
+    filenames = '{"2020-Jan.csv": ["/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_2020-Jan.csv", ","]}'
+    column_select_data = '{"datasetName": "bro_wtf", "purchaseData": {"bought_on": ["2020-Jan.csv", "event_time"], "price": ["2020-Jan.csv", "price"], "article_id": ["2020-Jan.csv", "product_id"], "customer_id": ["2020-Jan.csv", "user_id"]}, "generate_article_metadata": true, "generate_customer_metadata": true, "delimiter": ","}'
+
+    db_con = DatabaseConnection()
+    db_con.connect(filename=getAbsPathFromProjectRoot("config-files/database.ini"))
+    db_con.log_version()
+
+    insert_dataset_obj = InsertDataset(db_con, "mosh", json.loads(filenames), json.loads(column_select_data))
+
+    # try:
+    #     insert_dataset_obj.startInsert()
+    # except SoftTimeLimitExceeded:
+    #     insert_dataset_obj.abort()
+    # except ValueError as e:
+    #     Logger.logError(str(e))
+    # except Exception as e:
+    #     insert_dataset_obj.abort()
+    #
+    #     # debug
+    #     Logger.logError(str(e))
+    #     raise Exception
+    # finally:
+    #     insert_dataset_obj.cleanup()
+
+    from dateutil.parser import parse as dateparse
+    print(dateparse(""))

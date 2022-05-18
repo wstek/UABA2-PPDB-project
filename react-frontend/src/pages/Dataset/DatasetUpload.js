@@ -146,6 +146,7 @@ export default function DatasetUpload() {
             formData.append('files', files[i]);
         }
 
+        column_select_data["delimiter"] = ","
         formData.append('data', JSON.stringify(column_select_data))
 
         const config = {

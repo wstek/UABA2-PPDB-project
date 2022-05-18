@@ -1,4 +1,3 @@
-
 drop index if exists idx_recommendation;
 create index idx_recommendation on recommendation("unique_customer_id","recommendation_id");
 

@@ -86,8 +86,9 @@ function App() {
                                         setAdmin={setAdmin} exact path="/simulation"/>
                         <ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth}
                                         path="/ABTest/statistics"/>
+
                         <ProtectedRoute component={DatasetUpload} isLoading={isLoading} auth={auth} exact
-                                        path="/dataset/upload"/>
+                                        path="/dataset-upload"/>
                         <ProtectedRoute component={ChangeInfo} isLoading={isLoading} auth={auth} exact
                                         path="/account/changeinfo"/>
 

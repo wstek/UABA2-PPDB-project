@@ -1,7 +1,7 @@
 import "./datatable.css"
 import {DataGrid} from '@mui/x-data-grid';
 import React, {useEffect, useState} from "react";
-import LineChart from "../LineChart";
+import LineChart from "../chart/LineChart";
 import {object} from "prop-types";
 
 
