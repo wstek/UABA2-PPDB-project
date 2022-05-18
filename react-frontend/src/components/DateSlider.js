@@ -1,5 +1,6 @@
 import MultiRangeSlider from "./multiRangeSlider/MultiRangeSlider";
 import {useState} from "react";
+import datetimeToDate from "../utils/datetimeToDate"
 
 
 export default function DateSlider({dates, setStartIndex, setEndIndex}) {
@@ -9,15 +10,16 @@ export default function DateSlider({dates, setStartIndex, setEndIndex}) {
     const sliderChanged = (event) => {
         let start_date = new Date(event.min * 1000 * 3600 * 24 + Date.parse(dates[0]))
         let end_date = new Date(event.max * 1000 * 3600 * 24 + Date.parse(dates[0]))
-        setCurrentStartDate(start_date.toISOString().split('T')[0])
-        setCurrentEndDate(end_date.toISOString().split('T')[0])
+        setCurrentStartDate(datetimeToDate(start_date))
+        setCurrentEndDate(datetimeToDate(end_date))
         setEndIndex(event.max)
         setStartIndex(event.min)
     }
 
     if (dates) {
         return (
-            <>
+        <div className="row text-center align-content-center justify-content-center pt-5">
+
                 <div className={"col-12 align-items-md-center col-lg-3 col-xl-3 col-xxl-3 text-lg-end my-auto"}>
                     <input type="date" value={currentStartDate} id="start" className={"dateField"}
                            readOnly={true}/>
@@ -30,7 +32,7 @@ export default function DateSlider({dates, setStartIndex, setEndIndex}) {
                     <input type="date" value={currentEndDate} id="end" className={"dateField"}
                            readOnly={true}/>
                 </div>
-            </>
+        </div>
         )
     }
 

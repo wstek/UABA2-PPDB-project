@@ -38,7 +38,7 @@ function App() {
             <div className="App">
                 <Navbar admin={admin} auth={auth}/>
 
-                <div className="content">
+                <div className="content mt-4">
                     <Switch>
                         <Route exact path="/tasktest">
                             <TaskTest/>
@@ -85,7 +85,9 @@ function App() {
                         <ProtectedRoute component={Simulation} isLoading={isLoading} auth={auth} setAuthed={setAuthed}
                                         setAdmin={setAdmin} exact path="/simulation"/>
                         <ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth}
-                                        path="/ABTest/statistics"/>
+                                        exact path={"/ABTest/statistics"}/>
+                        <ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth}
+                                        exact path={"/ABTest/:abtest_id/statistics"}/>
 
                         <ProtectedRoute component={DatasetUpload} isLoading={isLoading} auth={auth} exact
                                         path="/dataset-upload"/>

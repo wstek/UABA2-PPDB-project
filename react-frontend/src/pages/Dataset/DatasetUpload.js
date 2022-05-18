@@ -7,6 +7,7 @@ import axios from "axios";
 // todo: don't upload and process csv files that are not used
 
 export default function DatasetUpload() {
+    console.log("hi")
     // dataset files
     const [files, setFiles] = useState([]);
 
@@ -28,20 +29,12 @@ export default function DatasetUpload() {
         const newDatasetColumnNames2 = {};
         setParseProgress(true);
 
-        Promise.all([...datasets].map((dataset) =>
-            new Promise((resolve, reject) =>
-                Papa.parse(dataset, {
-                    // multithreaded
-                    worker: true,
-                    // includes header in the data
-                    header: true,
-                    skipEmptyLines: true,
-                    // reads only the 5 first rows from the data stream
-                    preview: 5,
-                    complete: resolve,
-                })
-            )),
-        ).then((results) => {
+        Promise.all([...datasets].map((dataset) => new Promise((resolve, reject) => Papa.parse(dataset, {
+            // multithreaded
+            worker: true, // includes header in the data
+            header: true, skipEmptyLines: true, // reads only the 5 first rows from the data stream
+            preview: 5, complete: resolve,
+        }))),).then((results) => {
             results.forEach((result, index) => {
                 const column_names = result.meta['fields'];
                 const dataset_name = datasets[index].name;
@@ -176,44 +169,36 @@ export default function DatasetUpload() {
     }
 
     const displayColumnSelect = (name) => {
-        return (
-            <div>
-                <label>
-                    {name}
-                    <br></br>
-                    <select id={name + "Select"} defaultValue={'DEFAULT'} form={'DatasetUploadForm'}
-                            style={{width: "150px"}}>
-                        <option value="DEFAULT" disabled hidden>Select a column</option>
-                        {Object.keys(datasetColumnNames).map((datasetName, datasetNameIndex) => {
-                            return (
-                                <optgroup label={datasetName} key={datasetNameIndex}>
-                                    {datasetColumnNames[datasetName].map((columnName, columnNameIndex) => {
-                                        return (
-                                            <option value={datasetName + columnName} key={columnNameIndex}>
-                                                {columnName}
-                                            </option>
-                                        )
-                                    })}
-                                </optgroup>
-                            )
-                        })}
-                    </select>
-                </label>
-            </div>
-        )
+        return (<div>
+            <label>
+                {name}
+                <br></br>
+                <select id={name + "Select"} className={"bg-purple"} defaultValue={'DEFAULT'} form={'DatasetUploadForm'}
+                        style={{width: "150px"}}>
+                    <option value="DEFAULT" className={"bg-purple"} disabled hidden>Select a column</option>
+                    {Object.keys(datasetColumnNames).map((datasetName, datasetNameIndex) => {
+                        return (<optgroup label={datasetName} key={datasetNameIndex}>
+                            {datasetColumnNames[datasetName].map((columnName, columnNameIndex) => {
+                                return (<option value={datasetName + columnName} key={columnNameIndex}>
+                                    {columnName}
+                                </option>)
+                            })}
+                        </optgroup>)
+                    })}
+                </select>
+            </label>
+        </div>)
     }
 
     const displayGenerateMetadataCheckbox = (label, id, setCheckboxState) => {
-        return (
-            <div>
-                <label>
-                    <input id={id} type="checkbox" onChange={(e) => {
-                        setCheckboxState(e.target.checked)
-                    }}/>
-                    {label}
-                </label>
-            </div>
-        )
+        return (<div>
+            <label>
+                <input id={id} type="checkbox" onChange={(e) => {
+                    setCheckboxState(e.target.checked)
+                }}/>
+                {label}
+            </label>
+        </div>)
     }
 
     const displayArticleMetadataSelections = () => {
@@ -224,70 +209,79 @@ export default function DatasetUpload() {
         // todo
     }
 
-    return (
-        <div className="App" style={{textAlign: "center"}}>
+    return (<>
+        <div className="row text-center justify-content-center align-items-center align-content-center">
+
             <h1>Dataset Upload</h1>
-
-            {/*file select*/}
-            <input type="file" name="csv_file" form={'DatasetUploadForm'} multiple onChange={handleFileselect}
-                   accept=".csv" style={{display: "block", margin: "10px auto"}}/>
-
-            {/*reset button*/}
-            <button style={{display: "block", margin: "10px auto"}} onClick={handleReset}>Reset</button>
-
-            {/*dataset name textbox*/}
-            <input type="text" id="datasetName" name="datasetName" defaultValue={"dataset name"}/>
-
-            {/*upload to the server*/}
-            <form id="DatasetUploadForm" onSubmit={handleUpload}>
-                <button type="submit" style={{display: "block", margin: "10px auto"}}>Upload</button>
-            </form>
-
-            {/*parse progress*/}
-            {parseProgress && PurpleSpinner()}
-
-            {/*purchase data*/}
-            <h2>Purchase data columns</h2>
-            {displayColumnSelect("time")}
-            {displayColumnSelect("price")}
-            {displayColumnSelect("article id")}
-            {displayColumnSelect("customer id")}
-
-            {/*article metadata*/}
-            <h2>Article metadata columns</h2>
-            {displayGenerateMetadataCheckbox(
-                "Generate Metadata?",
-                "GenerateArticleMetadata",
-                setGenerateArticleMetadata
-            )}
-            {!generateArticleMetadata &&
-                displayColumnSelect("metadata article id")
-            }
-            {!generateArticleMetadata &&
-                <button style={{display: "block", margin: "10px auto"}} onClick={handleAddArticleMetadataAttribute}>Add
-                    article attribute
-                </button>
-            }
-            {/*{displayArticleMetadataSelections}*/}
-
-            {/*customer metadata*/}
-            <h2>Customer metadata columns</h2>
-            {displayGenerateMetadataCheckbox(
-                "Generate Metadata?",
-                "GenerateCustomerMetadata",
-                setGenerateCustomerMetadata
-            )}
-            {!generateCustomerMetadata &&
-                displayColumnSelect("metadata customer id")
-            }
-            {!generateCustomerMetadata &&
-                <button style={{display: "block", margin: "10px auto"}} onClick={handleAddCustomerMetadataAttribute}>Add
-                    customer attribute
-                </button>
-            }
-            {/*{displayCustomerMetadataSelections}*/}
         </div>
-    );
+        <div className="row text-center justify-content-center align-items-center align-content-center">
+            {/*file select*/}
+            <div className={"col-auto"}>
+                <input type="file" name="csv_file" className={"bg-purple"} form={'DatasetUploadForm'} multiple
+                       onChange={handleFileselect}
+                       accept=".csv"/>
+            </div>
+        </div>
+        <div className="row text-center justify-content-center align-items-center align-content-center mt-3">
+            <div className={"col-auto"}>
+                {/*reset button*/}
+                <button className={"button-purple red-hover"} onClick={handleReset}>Reset</button>
+            </div>
+            {/*dataset name textbox*/}
+            <div className={"col-auto"}>
+                <input type="text" id="datasetName" name="datasetName" className={"bg-purple"}
+                       placeholder={"Dataset Name"}/>
+            </div>
+            <div className={"col-auto"}>
+
+                {/*upload to the server*/}
+                <form id="DatasetUploadForm" onSubmit={handleUpload}>
+                    <button type="submit" className={"button-purple green-hover"}>Upload</button>
+                </form>
+            </div>
+        </div>
+
+        {/*parse progress*/}
+        {parseProgress && (
+            <div className="row text-center justify-content-center align-items-center align-content-center">
+                <PurpleSpinner/>
+            </div>)}
+
+        <div className="row text-center align-content-center mt-4">
+            <div className={"col-4"}>
+
+                {/*purchase data*/}
+                <h2>Purchase data columns</h2>
+                {displayColumnSelect("Time")}
+                {displayColumnSelect("Price")}
+                {displayColumnSelect("Article ID")}
+                {displayColumnSelect("Customer ID")}
+            </div>
+            <div className={"col-4"}>
+                {/*article metadata*/}
+                <h2>Article metadata columns</h2>
+                {displayGenerateMetadataCheckbox("Generate Metadata?", "GenerateArticleMetadata", setGenerateArticleMetadata)}
+                {generateArticleMetadata && displayColumnSelect("metadata article id")}
+                {generateArticleMetadata && <button className={"button-purple green-hover mt-3"}
+                                                    onClick={handleAddArticleMetadataAttribute}>Add
+                    article attribute
+                </button>}
+                {/*{displayArticleMetadataSelections}*/}
+            </div>
+
+            <div className={"col-4"}>
+                {/*customer metadata*/}
+                <h2>Customer metadata columns</h2>
+                {displayGenerateMetadataCheckbox("Generate Metadata?", "GenerateCustomerMetadata", setGenerateCustomerMetadata)}
+                {generateCustomerMetadata && displayColumnSelect("metadata customer id")}
+                {generateCustomerMetadata && <button className={"button-purple green-hover mt-3"}
+                                                     onClick={handleAddCustomerMetadataAttribute}>Add
+                    customer attribute
+                </button>}
+                {/*{displayCustomerMetadataSelections}*/}
+            </div>
+        </div>
+    </>);
 }
 
 

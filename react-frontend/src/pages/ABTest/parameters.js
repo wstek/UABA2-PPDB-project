@@ -5,7 +5,7 @@ const RealNumberField = (id, label, placeholder) => {
         <div key={id} className="row text-center justify-content-center align-items-center mb-1">
             <div className="col-7 text-center">
                 <label htmlFor={id}>{label}</label>
-                <input type="number" className="form-control" id={id} min={1} placeholder={placeholder}/>
+                <input type="number" className="form-control" id={id} min={1} placeholder={placeholder} required/>
             </div>
         </div>
     );
@@ -16,7 +16,7 @@ const BoolField = (id, label) => {
         <div key={id} className="row text-center justify-content-center align-items-center mb-1">
             <div className="col-7 text-center">
                 <label htmlFor={id}>{label}</label>
-                <input type="checkbox" className="form-check-input" key={id} id={id}/>
+                <input type="checkbox" className="form-check-input" key={id} id={id} required/>
             </div>
         </div>
     );
