@@ -10,10 +10,10 @@ export default function InputSelector({inputs, header = null, onChange}) {
     function personalABTests() {
         let temp_personal_idtests_id_components = []
         if (inputs) {
-            // let ids = inputs.personal_abtestids
+            let ids = inputs.personal_abtestids
             let id
-            for (let ab_test_id in inputs) {
-                id = inputs[ab_test_id]
+            for (let ab_test_id in ids) {
+                id = ids[ab_test_id]
                 temp_personal_idtests_id_components.push(
                     <option value={id} key={id}>{id}</option>
                 )

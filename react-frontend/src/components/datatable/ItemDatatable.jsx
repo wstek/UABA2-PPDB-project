@@ -14,6 +14,7 @@ function ItemDatatable({abtest_id, algorithm_id}) {
     const [selectedAttributes, setSelectedAttributes] = useState(false)
     const [amountOfPurchases, setAmountOfPurchases] = useState(null)
     const [amountOfRecommendations, setAmountOfRecommendations] = useState(null)
+    const [amountOfSuccesfullRecommendations, setAmountOfSuccesfullRecommendations] = useState(null)
     const [selectedGraphs, setSelectedGraphs] = useState(false)
 
 
@@ -120,7 +121,7 @@ function ItemDatatable({abtest_id, algorithm_id}) {
                 let last_value = 0
                 let day = 0
                 let map = {graphdata: []}
-                map["graphdata"].push(["Date", "AmountOfPurchases"])
+                map["graphdata"].push(["Date", "AmountOfRecommendations"])
                 for (let key in data) {
                     day += 1
                     let new_value = data[key].length
@@ -153,7 +154,7 @@ function ItemDatatable({abtest_id, algorithm_id}) {
                 let last_value = 0
                 let day = 0
                 let map = {graphdata: []}
-                map["graphdata"].push(["Date", "AmountOfPurchases"])
+                map["graphdata"].push(["Date", "AmountOfSuccesfullRecommendations"])
                 for (let key in data) {
                     day += 1
                     let new_value = data[key].length
@@ -227,9 +228,9 @@ function ItemDatatable({abtest_id, algorithm_id}) {
                     </div>
                     <div className="row text-center align-content-center justify-content-center">
                         {/*<div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>*/}
-                        {/*    <LineChart chart_id={1} title="Amount Of Purchases" xMin={0}*/}
-                        {/*               xMax={amountOfPurchases.size}*/}
-                        {/*               XFnY={amountOfPurchases}/>*/}
+                        {/*    <LineChart chart_id={2} title="Amount Of Succesfull reccomendations" xMin={0}*/}
+                        {/*               xMax={AmountOfSuccesfullRecommendations.size}*/}
+                        {/*               XFnY={AmountOfSuccesfullRecommendations}/>*/}
                         {/*</div>*/}
                     </div>
                 </div>

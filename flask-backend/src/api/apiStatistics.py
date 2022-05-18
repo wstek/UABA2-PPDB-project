@@ -133,8 +133,11 @@ def get_item_recommendations_and_purchases_over_time(abtest_id, article_id):
         response[date] = []
 
     amount_of_recommendations = database_connection.execute(
-        f"select date_of, unique_customer_id  from recommendation natural join statistics natural join ab_test natural join purchase "
-        f"where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id} and  unique_article_id = {article_id} "
+    f'''
+        select date_of, unique_customer_id  from recommendation natural join statistics natural join ab_test natural join purchase 
+        where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id} and  unique_article_id = {article_id}
+    '''
+
     )
 
     if not amount_of_recommendations:
