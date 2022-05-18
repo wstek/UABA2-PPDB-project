@@ -191,13 +191,13 @@ export default function DatasetUpload() {
 
     const displayGenerateMetadataCheckbox = (label, id, setCheckboxState) => {
         return (<div>
-                <label>
-                    <input id={id} type="checkbox" onChange={(e) => {
-                        setCheckboxState(e.target.checked)
-                    }}/>
-                    {label}
-                </label>
-            </div>)
+            <label>
+                <input id={id} type="checkbox" onChange={(e) => {
+                    setCheckboxState(e.target.checked)
+                }}/>
+                {label}
+            </label>
+        </div>)
     }
 
     const displayArticleMetadataSelections = () => {
@@ -262,7 +262,7 @@ export default function DatasetUpload() {
                 {displayGenerateMetadataCheckbox("Generate Metadata?", "GenerateArticleMetadata", setGenerateArticleMetadata)}
                 {generateArticleMetadata && displayColumnSelect("metadata article id")}
                 {generateArticleMetadata && <button className={"button-purple green-hover mt-3"}
-                                                     onClick={handleAddArticleMetadataAttribute}>Add
+                                                    onClick={handleAddArticleMetadataAttribute}>Add
                     article attribute
                 </button>}
                 {/*{displayArticleMetadataSelections}*/}
@@ -274,7 +274,7 @@ export default function DatasetUpload() {
                 {displayGenerateMetadataCheckbox("Generate Metadata?", "GenerateCustomerMetadata", setGenerateCustomerMetadata)}
                 {generateCustomerMetadata && displayColumnSelect("metadata customer id")}
                 {generateCustomerMetadata && <button className={"button-purple green-hover mt-3"}
-                                                      onClick={handleAddCustomerMetadataAttribute}>Add
+                                                     onClick={handleAddCustomerMetadataAttribute}>Add
                     customer attribute
                 </button>}
                 {/*{displayCustomerMetadataSelections}*/}
