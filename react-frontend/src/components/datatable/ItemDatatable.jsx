@@ -142,7 +142,7 @@ function ItemDatatable({abtest_id, algorithm_id}) {
     }
 
     function showAmountOfRecommendationsAndPurchasesTab() {
-        fetch('/api/items/recommendations/purchases/' + abtest_id + '/' + select[0], {
+        fetch('/api/items/recommendations/purchases/' + abtest_id + '/' + select[0] + '/' + algorithm_id, {
             method: 'GET',
             credentials: 'include',
             headers: {"Content-Type": "application/json", 'Accept': 'application/json'}
@@ -164,8 +164,7 @@ function ItemDatatable({abtest_id, algorithm_id}) {
                     map["graphdata"].push([key, new_value])
                 }
 
-                setAmountOfRecommendations(map)
-                setSelectedGraphs(true)
+                setAmountOfSuccesfullRecommendations(map)
                 setSelectedAttributes(false)
 
 
@@ -177,7 +176,7 @@ function ItemDatatable({abtest_id, algorithm_id}) {
     function fetchGraphs() {
         if (select[0]) {
             showAmountOfPurchasesTab()
-            // showAmountOfRecommendationsAndPurchasesTab()
+            showAmountOfRecommendationsAndPurchasesTab()
             showAmountOfRecommendationsTab()
 
         }
@@ -227,11 +226,11 @@ function ItemDatatable({abtest_id, algorithm_id}) {
                         </div>
                     </div>
                     <div className="row text-center align-content-center justify-content-center">
-                        {/*<div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>*/}
-                        {/*    <LineChart chart_id={2} title="Amount Of Succesfull reccomendations" xMin={0}*/}
-                        {/*               xMax={AmountOfSuccesfullRecommendations.size}*/}
-                        {/*               XFnY={AmountOfSuccesfullRecommendations}/>*/}
-                        {/*</div>*/}
+                        <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
+                            <LineChart chart_id={2} title="Amount Of Succesfull reccomendations" xMin={0}
+                                       xMax={amountOfSuccesfullRecommendations.size}
+                                       XFnY={amountOfSuccesfullRecommendations}/>
+                        </div>
                     </div>
                 </div>
             }
