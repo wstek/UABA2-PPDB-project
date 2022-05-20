@@ -3,7 +3,7 @@ import Table from 'react-bootstrap/Table'
 
 
 
-function ReactTable({columns, data}) {
+function BootstrapTable({columns, data}) {
     return (
         <div className={"col-auto mx-auto my-auto"}>
             <Table responsive className={"border-dark avoid-break-inside border-2 border"}>
@@ -27,4 +27,4 @@ function ReactTable({columns, data}) {
     )
 }
 
-export default ReactTable
+export default BootstrapTable

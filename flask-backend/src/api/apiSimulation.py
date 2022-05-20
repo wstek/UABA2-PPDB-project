@@ -40,8 +40,8 @@ def start_simulation():
         algorithms[i]["id"] = algorithm_id
         for param, value in algorithms[i]["parameters"].items():
             database_connection.session.execute(
-                "INSERT INTO parameter(parameter_name, algorithm_id, abtest_id, type, value) VALUES(:parametername, "
-                ":algorithm_id, :abtest_id, :type, :value)",
+                "INSERT INTO parameter(parameter_name, algorithm_id, type, value) VALUES(:parametername, "
+                ":algorithm_id, :type, :value)",
                 {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "type": "string",
                  "value": value})
         database_connection.session.commit()

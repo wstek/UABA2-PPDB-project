@@ -1,7 +1,7 @@
 // import {useEffect} from "react";
 import React, {useMemo} from 'react'
 import {PurpleSpinner} from "./PurpleSpinner"
-import ReactTable from "../components/ReactTable";
+import BootstrapTable from "./table/BootstrapTable";
 
 
 function computeColumns(input_algorithms){
@@ -38,7 +38,7 @@ function AlgorithmsOverview({input_algorithms}) {
     if (Object.getOwnPropertyNames(input_algorithms).length === 0) return <h2>No Algorithms Provided</h2>
 
     return (
-            <ReactTable columns={columns} data={data}/>
+            <BootstrapTable columns={columns} data={data}/>
     )
 }
 

@@ -13,12 +13,13 @@ export function DatasetStatistics() {
         setDatasetInformation(null)
         let url = '/api/get_datasets_information/' + dataset_name
         fetchData(url, (data) => {
+            console.log(data)
             setDatasetInformation(data)
         })
     }
     useEffect(fetchDatasetInformation, [],)
 
-    if (! dataset_information) return <PurpleSpinner></PurpleSpinner>
+    if (! dataset_information) return <PurpleSpinner />
     // console.log(dataset_information)
     return (<>
             <div className="row text-center align-items-center pt-4 mb-3">

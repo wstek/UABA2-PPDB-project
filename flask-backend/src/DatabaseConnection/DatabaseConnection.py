@@ -55,6 +55,7 @@ class DatabaseConnection:
 
     def session_execute(self, query: str):
         self.session.execute(query)
+        self.session.commit()
 
     def engine_execute_and_fetch(self, query: str, fetchall=True):
         result = self.engine.execute(text(query))
@@ -64,11 +65,13 @@ class DatabaseConnection:
         return result.fetchone()
 
     def session_execute_and_fetch(self, query: str, fetchall=True):
-        result = self.session.execute(text(query))
-
         if fetchall:
-            return result.fetchall()
-        return result.fetchone()
+            result = self.session.execute(query).fetchall()
+        else:
+            result = self.session.execute(query).fetchone()
+
+        self.session.commit()
+        return result
 
     def session_query_table(self, table, query_data: dict):
         return self.session.query(table).filter_by(**query_data)
@@ -120,6 +123,41 @@ class DatabaseConnection:
             where dataset_name = '{dataset_name}';
             '''
         return self.session_execute_and_fetch(query, fetchall=False)
+
+    def getTimesRecommended(self, abtest_id):
+        query = f''' 
+            select date_of, unique_customer_id
+            from recommendation natural join customer_specific_statistics 
+                natural join statistics natural join ab_test natural join purchase
+            where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id} and  unique_article_id = 100;
+            '''
+        return self.session_execute_and_fetch(query)
+
+    def getTopkRecommended(self, abtest_id, start_date,end_date):
+        query = f''' 
+            -- take top k out
+            select ranked_table.*
+            from (
+            -- rank on this count
+                     select counted_table.*,
+                            row_number() over (partition by algorithm_id order by count desc ) rank
+                     from (
+            --       Find the count of recommendations per algorithm for one article
+                              select algorithm_id, unique_article_id, count(*) count
+                              from ab_test
+                                       natural join algorithm
+                                       natural join statistics
+                                       natural join customer_specific_statistics
+                                       natural join recommendation
+                              where abtest_id = {abtest_id}
+                                and date_of between '{start_date}' and '{end_date}'
+                              group by algorithm_id, unique_article_id
+                              ) counted_table
+                     ) ranked_table
+            where ranked_table.rank <= 10
+            order by rank, algorithm_id;
+            '''
+        return self.session_execute_and_fetch(query)
 
     def getAlgorithms(self, abtest_id):
         query = f''' 
@@ -188,7 +226,7 @@ class DatabaseConnection:
     def getDynamicStepsizeVar(self, abtest_id, parameter_name):
         query = f'''
             SELECT date_of, algorithm_id,parameter_value
-            FROM statistics NATURAL JOIN dynamic_stepsize_var NATURAL JOIN  algorithm
+            FROM statistics NATURAL JOIN dynamic_stepsize_var NATURAL JOIN  algorithm NATURAL JOIN ab_test
             WHERE abtest_id = {abtest_id} AND parameter_name = '{parameter_name}' ORDER BY date_of;
         '''
         return self.session_execute_and_fetch(query)
@@ -200,6 +238,35 @@ class DatabaseConnection:
             WHERE dataset_name = '{dataset_name}' and {price_interval_min} <= price and price < {price_interval_max}  
         '''
         return self.session_execute_and_fetch(query, fetchall=False)
+
+    def makeAdmin(self, username):
+        query = f'''
+                    Select * 
+                    from datascientist
+                    where username = '{username}' 
+                '''
+        if self.session_execute_and_fetch(query):
+            query = f'''
+            insert into admin (username)
+            values ('{username}')
+            '''
+            self.session_execute(query)
+
+    def getPriceDistribution(self, dataset_name, intervals):
+        priceExtrema = self.getPriceExtrema(dataset_name)
+        diff = (priceExtrema.max - priceExtrema.min) / intervals
+        zeroes = ""
+        while diff < 10:
+            diff *= 10
+            zeroes += '0'
+        query = f'''
+                select width_bucket(price, 0, 0.5, {intervals}) as buckets,
+                         count(price), to_char(avg(price)::float8,'FM999999999.{zeroes}') as average
+                    from purchase where dataset_name='{dataset_name}'
+                group by buckets
+                order by buckets;
+            '''
+        return self.engine_execute_and_fetch(query)
 
 
 if __name__ == '__main__':

@@ -91,7 +91,7 @@ function ViewDataSetButton() {
 
 function Navbar({admin, auth}) {
     return (
-        <nav className="navbar navbar-expand-sm navbar-light bg-purple justify-content-center sticky-top">
+        <nav className="navbar navbar-expand-md navbar-light bg-purple justify-content-center sticky-lg-top">
             <div className="container-fluid">
                 <CollapseButton/>
                 <div className="navbar-collapse collapse w-100" id="collapsenavbar">

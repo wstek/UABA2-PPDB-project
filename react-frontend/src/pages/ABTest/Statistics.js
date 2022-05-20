@@ -9,8 +9,9 @@ import {Route, Switch, useHistory, useParams} from "react-router-dom";
 import * as PropTypes from "prop-types";
 import NotFound from "../NotFound";
 import React from 'react';
-import ReactTable from "../../components/ReactTable";
+import BootstrapTable from "../../components/table/BootstrapTable";
 import {PurpleSpinner} from "../../components/PurpleSpinner";
+import {TopKPerAlgorithmTable} from "../../components/table/ReactTable";
 
 const reducer = (state, action) => {
     return {...state, [action.field]: action.value};
@@ -46,7 +47,7 @@ function ABTestOverview({abtest_information}) {
     }], [])
 
     if (!abtest_information) return <PurpleSpinner/>
-    return (<ReactTable columns={columns} data={[abtest_information]}/>)
+    return (<BootstrapTable columns={columns} data={[abtest_information]}/>)
 }
 
 ABTestOverview.propTypes = {input_algorithms: PropTypes.any};
@@ -198,6 +199,7 @@ function StatisticsInformation() {
                            XFnY={state.attribution_rate_over_time}/>
             </div>
         </div>
+        <TopKPerAlgorithmTable abtest_id={abtest_id}/>
         <ColoredLine color={"purple"}/>
     </>;
 }
@@ -208,7 +210,7 @@ function Statistics() {
 
     function fetchCurrentUserABTestIDs() {
         let url = '/api/abtest/statistics/'
-        fetchData(url, setPersonalAbTests)
+        fetchData(url, (data) => setPersonalAbTests(data.personal_abtestids))
     }
 
     useEffect(fetchCurrentUserABTestIDs, [])
@@ -218,7 +220,8 @@ function Statistics() {
 
     return (<div className="container-fluid">
         <div className="row text-center align-items-center pt-4 mb-3">
-            <InputSelector inputs={personal_abtests && personal_abtests.personal_abtestids}
+            <InputSelector inputs={personal_abtests}
+                           onClick={fetchCurrentUserABTestIDs}
                            onChange={(selected_abtest_id) => {
                                history.push('/ABTest/' + selected_abtest_id + '/Statistics/');
                            }}
@@ -230,5 +233,4 @@ function Statistics() {
         </Switch>
     </div>);
 }
-
 export default Statistics;

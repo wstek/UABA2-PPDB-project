@@ -53,6 +53,16 @@ def register_user():
     return {"username": username, "email": email}
 
 
+@api_account.route("/api/make_admin")
+def make_admin():
+    try:
+        username = session.get("user_id")
+        database_connection.makeAdmin(username)
+        return 'Success'
+    except:
+        return 'Faillure'
+
+
 @api_account.route("/api/login", methods=["POST"])
 def login_user1():
     username = request.json["username"]

@@ -183,12 +183,12 @@ class ABTestSimulation(threading.Thread):
             if len(D_prev_recommendations) == D + 1:
                 D_prev_recommendations.pop(0)
             D_prev_recommendations.append({})
-
             for algo in range(len(self.abtest["algorithms"])):
                 # print(self.frontend_data)
-                self.database_connection.session.execute("INSERT INTO statistics(date_of, algorithm_id, abtest_id) VALUES(:datetime, :algorithm_id,\
-                :abtest_id)", {"datetime": current_date, "algorithm_id": self.abtest["algorithms"][algo]["id"],
-                               "abtest_id": self.abtest["abtest_id"]})
+                self.database_connection.session.execute(
+                    "INSERT INTO statistics(date_of, algorithm_id)"
+                    "VALUES(:datetime, :algorithm_id)",
+                    {"datetime": current_date, "algorithm_id": self.abtest["algorithms"][algo]["id"]})
                 statistics_id = self.database_connection.session.execute(
                     f'SELECT last_value FROM statistics_statistics_id_seq').fetchone()[0]
                 self.database_connection.session.commit()

@@ -278,7 +278,6 @@ def get_abtest_algorithm_information(abtest_id):
 
 def get_abtest_information(abtest_id):
     abtest_information = database_connection.getABTestInfo(abtest_id)
-    print(str(abtest_information.start_date))
     returnvalue = {'dates': [], 'start_date': str(abtest_information.start_date),
                    'end_date': str(abtest_information.end_date), 'top-k': abtest_information.top_k,
                    'dataset-name': abtest_information.dataset_name, 'created-on': str(abtest_information.created_on),
@@ -355,6 +354,17 @@ def get_CRT_over_time(abtest_id):
     return attr_rows_to_XFnY(attr_rate_rows)
 
 
+@api_statistics.route("/api/abtest/statistics/get_top_k_per_algorithm/<int:abtest_id>/<start_date>/<end_date>")
+def getTopKPerAlgoithm(abtest_id, start_date, end_date):
+    query_result = database_connection.getTopkRecommended(abtest_id,start_date, end_date)
+    return_array = [{} for rank in range(10)]
+    for row in query_result:
+        return_array[row.rank-1][row.algorithm_id] = {'count': row.count, 'article':row.unique_article_id}
+
+    # for algorithm_id in algorithm_ids:
+    return {'returnvalue': return_array}
+
+
 @api_statistics.route("/api/abtest/statistics/<int:abtest_id>/<stat>")
 def get_stat(abtest_id, stat):
     username = session.get("user_id")
@@ -382,3 +392,4 @@ def get_stat(abtest_id, stat):
 
     elif stat == "CTR_over_time":
         return get_CRT_over_time(abtest_id)
+
