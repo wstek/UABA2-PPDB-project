@@ -46,7 +46,7 @@ const UserList = () => {
             <div className="container-fluid my-auto">
                 {!selected_abtest &&
                 <div className="row text-center align-items-center mb-3">
-                    <InputSelector inputs={personal_abtests} setSelectedInput={setSelectedABTest}
+                    <InputSelector inputs={personal_abtests} header="Select AB_test" onChange={setSelectedABTest}
                                    selected_input={selected_abtest}/>
                 </div>}
                 {selected_abtest && !selected_algorithm &&

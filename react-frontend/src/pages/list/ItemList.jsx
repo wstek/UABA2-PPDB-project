@@ -46,8 +46,8 @@ const ItemList = () => {
             <div className="container-fluid my-auto">
                 {!selected_abtest &&
                 <div className="row text-center align-items-center mb-3">
-                    <InputSelector header={"Select AB-Test"} personal_abtests={personal_abtests} setSelectedABTest={setSelectedABTest}
-                                  selected_abtest={selected_abtest}/>
+                    <InputSelector header={"Select AB-Test"} inputs={personal_abtests}  onChange={setSelectedABTest}
+                                   selected_input={selected_abtest}/>
                 </div>}
                 {selected_abtest && !selected_algorithm &&
                 <div className="row text-center align-items-center mb-3">
