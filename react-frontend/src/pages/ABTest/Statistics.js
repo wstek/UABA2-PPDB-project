@@ -11,7 +11,7 @@ import NotFound from "../NotFound";
 import React from 'react';
 import BootstrapTable from "../../components/table/BootstrapTable";
 import {PurpleSpinner} from "../../components/PurpleSpinner";
-import {TopKPerAlgorithmTable} from "../../components/table/ReactTable";
+import {TopKPerAlgorithmTable, TopKPurchasedTable} from "../../components/table/ReactTable";
 
 const reducer = (state, action) => {
     return {...state, [action.field]: action.value};
@@ -152,7 +152,6 @@ function StatisticsInformation() {
     }
 
     if (state.not_found) return <NotFound linkTo={<></>} message={"This ABTest does not exist"}/>
-
     return <>
         <div className="row text-center align-items-end">
             <div>
@@ -163,43 +162,56 @@ function StatisticsInformation() {
             </div>
         </div>
         <div className="row text-center align-content-center justify-content-center">
-            <h1>ABTest Parameters</h1>
-            <ABTestOverview abtest_information={state.abtest_data}/>
+            <div className={"col-auto my-auto"}>
+                <h1>ABTest Parameters</h1>
+                <ABTestOverview abtest_information={state.abtest_data}/>
+            </div>
+            <div className={"col-auto"}>
+                <h1>Used algorithms information</h1>
+                <AlgorithmsOverview input_algorithms={state.input_algorithms}/>
+            </div>
         </div>
-        <div className="row text-center align-content-center justify-content-center">
-            <h1>Used algorithms information</h1>
-            <AlgorithmsOverview input_algorithms={state.input_algorithms}/>
-        </div>
-            <DateSlider dates={state.abtest_data && state.abtest_data.dates} setStartIndex={setSelectedStart}
-                        setEndIndex={setSelectedEnd}>
-            </DateSlider>
+        <DateSlider dates={state.abtest_data && state.abtest_data.dates} style={{minHeight: "200px"}}
+                    setStartIndex={setSelectedStart}
+                    setEndIndex={setSelectedEnd}>
+        </DateSlider>
         <div className="row text-center align-content-center mt-5 justify-content-center">
             <h1>Charts</h1>
         </div>
         <div className="row text-center align-content-center justify-content-center">
-            <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
+            <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
                 <LineChart chart_id={1} title="Active Users" xMin={state.selected_start_date}
                            xMax={state.selected_end_date}
                            XFnY={state.active_user_over_time}/>
             </div>
-            <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
+            <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
                 <LineChart chart_id={2} title={"Purchases"} xMin={state.selected_start_date}
                            xMax={state.selected_end_date} XFnY={state.purchases_over_time}/>
             </div>
         </div>
         <div className="row text-center align-content-center justify-content-center">
-            <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 " style={{height: "400px"}}>
+            <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
                 <LineChart chart_id={3} title="Click Through Rate" xMin={state.selected_start_date}
                            xMax={state.selected_end_date}
                            XFnY={state.click_through_rate_over_time}/>
             </div>
-            <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
+            <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
                 <LineChart chart_id={2} title={"Attribution Rate"} xMin={state.selected_start_date}
                            xMax={state.selected_end_date}
                            XFnY={state.attribution_rate_over_time}/>
             </div>
         </div>
-        <TopKPerAlgorithmTable abtest_id={abtest_id}/>
+        <div className="row text-center align-content-center justify-content-center mx-auto">
+            <div className="col-auto " style={{minHeight: "400px"}}>
+                <TopKPerAlgorithmTable abtest_id={abtest_id}
+                                       start_date={state.abtest_data && state.abtest_data.dates[state.selected_start_date]}
+                                       end_date={state.abtest_data && state.abtest_data.dates[state.selected_end_date]}/>
+            </div>
+            <div className="col-auto my-auto" style={{minHeight: "400px"}}>
+
+                <TopKPurchasedTable abtest_id={abtest_id}/>
+            </div>
+        </div>
         <ColoredLine color={"purple"}/>
     </>;
 }
@@ -233,4 +245,5 @@ function Statistics() {
         </Switch>
     </div>);
 }
+
 export default Statistics;

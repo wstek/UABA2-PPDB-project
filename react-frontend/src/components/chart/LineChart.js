@@ -13,7 +13,7 @@ function LineChart({XFnY, title, xMin = 0, xMax = 10}) {
                 hAxis: {
                     viewWindow: {
                         min: xMin,
-                        max: xMax + 1
+                        max: xMax
                     },
                 }
             }

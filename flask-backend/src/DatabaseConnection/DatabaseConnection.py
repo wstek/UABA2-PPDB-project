@@ -133,7 +133,7 @@ class DatabaseConnection:
             '''
         return self.session_execute_and_fetch(query)
 
-    def getTopkRecommended(self, abtest_id, start_date,end_date):
+    def getTopkRecommended(self, abtest_id, start_date, end_date, top_k):
         query = f''' 
             -- take top k out
             select ranked_table.*
@@ -154,7 +154,7 @@ class DatabaseConnection:
                               group by algorithm_id, unique_article_id
                               ) counted_table
                      ) ranked_table
-            where ranked_table.rank <= 10
+            where ranked_table.rank <= {top_k}
             order by rank, algorithm_id;
             '''
         return self.session_execute_and_fetch(query)
@@ -251,6 +251,22 @@ class DatabaseConnection:
             values ('{username}')
             '''
             self.session_execute(query)
+
+
+    def getTopKPurchased(self, abtest_id,start_date, end_date, top_k):
+        query = f'''
+            select unique_article_id, count(*)
+            from ab_test
+                     natural join dataset
+                     natural join purchase
+                     natural join article
+            where abtest_id = {abtest_id}
+              and bought_on between '{start_date}' and '{end_date}'
+            group by unique_article_id
+            order by count(*) desc
+            limit {top_k};
+        '''
+        return self.session_execute_and_fetch(query)
 
     def getPriceDistribution(self, dataset_name, intervals):
         priceExtrema = self.getPriceExtrema(dataset_name)

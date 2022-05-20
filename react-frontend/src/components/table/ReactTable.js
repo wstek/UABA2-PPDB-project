@@ -67,18 +67,45 @@ function ReactTable({columns, data}) {
                 )
 }
 
-export function TopKPerAlgorithmTable({abtest_id, start_date, end_date}) {
-    const [top_k_per_algorithm, setTopKPerAlgorithm] = useState()
-    const fetchTopKPerAlgorithm = () => {
+export function TopKPurchasedTable({abtest_id, start_date, end_date}) {
+    const [top_k_purchased, setTopKPurchased] = useState()
+     const fetchTopKPerAlgorithm = () => {
         const abortCont = new AbortController();
-        let api = '/api/abtest/statistics/get_top_k_per_algorithm/' + abtest_id + '/2020-01-01/2020-01-10'
-        if (abtest_id) fetchData(api, (data) => setTopKPerAlgorithm(data.returnvalue), abortCont)
+        let api = '/api/abtest/statistics/get_top_k_purchased/' + abtest_id + '/2020-01-01/2020-01-10'
+        if (abtest_id) fetchData(api, (data) => setTopKPurchased(data.returnvalue), abortCont)
 
         return () => abortCont.abort();
     }
     useEffect(fetchTopKPerAlgorithm, [abtest_id],)
+    const makeColomns = (top_k_purchased) => {
+        let columns
+        if (top_k_purchased) {
+            columns = [
+                {Header: 'Article', accessor: 'article'}, {Header: 'Times Purchased', accessor: 'count'}
+            ]
+        }
+        return columns
+    }
+    const columns = React.useMemo(() => makeColomns(top_k_purchased), [top_k_purchased])
+    if (!top_k_purchased) return <PurpleSpinner/>
+    return (
+
+        <Styles>
+        <ReactTable columns={columns} data={top_k_purchased}/>
+     </Styles>
+    )
+}
+export function TopKPerAlgorithmTable({abtest_id, start_date, end_date}) {
+    const [top_k_per_algorithm, setTopKPerAlgorithm] = useState()
+    const fetchTopKPerAlgorithm = () => {
+        const abortCont = new AbortController();
+        let api = `/api/abtest/statistics/get_top_k_per_algorithm/${abtest_id}/${start_date}/${end_date}`
+        if (abtest_id) fetchData(api, (data) => setTopKPerAlgorithm(data.returnvalue), abortCont)
+
+        return () => abortCont.abort();
+    }
+    useEffect(fetchTopKPerAlgorithm, [start_date,end_date,abtest_id],)
     const makeColomns = (top_k_per_algorithm) => {
-        // console.log(top_k_per_algorithm)
         let columns
         if (top_k_per_algorithm) {
             columns = [{
@@ -90,7 +117,6 @@ export function TopKPerAlgorithmTable({abtest_id, start_date, end_date}) {
 
         }]
             for (let algorithm_id in top_k_per_algorithm[0]) {
-
                 columns[0].columns.push({
                     Header: algorithm_id.toString(), columns: [{
                         Header: 'Article ID', accessor: algorithm_id.toString() + '.article'

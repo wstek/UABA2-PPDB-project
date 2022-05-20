@@ -282,9 +282,9 @@ def get_abtest_information(abtest_id):
                    'end_date': str(abtest_information.end_date), 'top-k': abtest_information.top_k,
                    'dataset-name': abtest_information.dataset_name, 'created-on': str(abtest_information.created_on),
                    'stepsize': abtest_information.stepsize, 'abtest-id': abtest_information.abtest_id}
-    for n in range(int((abtest_information.end_date - abtest_information.start_date).days)):
+    for n in range(int((abtest_information.end_date - abtest_information.start_date).days) + 1):
         date = (abtest_information.start_date + timedelta(abtest_information.stepsize * n))
-        returnvalue['dates'].append(date)
+        returnvalue['dates'].append(str(date))
     return returnvalue
 
 
@@ -356,12 +356,19 @@ def get_CRT_over_time(abtest_id):
 
 @api_statistics.route("/api/abtest/statistics/get_top_k_per_algorithm/<int:abtest_id>/<start_date>/<end_date>")
 def getTopKPerAlgoithm(abtest_id, start_date, end_date):
-    query_result = database_connection.getTopkRecommended(abtest_id,start_date, end_date)
-    return_array = [{} for rank in range(10)]
+    top_k = database_connection.getABTestInfo(abtest_id).top_k
+    query_result = database_connection.getTopkRecommended(abtest_id,start_date, end_date, top_k)
+    return_array = [{} for rank in range(top_k)]
     for row in query_result:
         return_array[row.rank-1][row.algorithm_id] = {'count': row.count, 'article':row.unique_article_id}
-
     # for algorithm_id in algorithm_ids:
+    return {'returnvalue': return_array}
+
+@api_statistics.route("/api/abtest/statistics/get_top_k_purchased/<int:abtest_id>/<start_date>/<end_date>")
+def getTopKPurchased(abtest_id, start_date, end_date):
+    top_k = database_connection.getABTestInfo(abtest_id).top_k
+    query_result = database_connection.getTopKPurchased(abtest_id,start_date, end_date, top_k)
+    return_array = [{'count': row.count, 'article':row.unique_article_id} for row in query_result]
     return {'returnvalue': return_array}
 
 

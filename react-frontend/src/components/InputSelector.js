@@ -1,16 +1,17 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {PurpleSpinner} from "./PurpleSpinner"
 
 export default function InputSelector({inputs, header = null, onChange, onClick = () => {} }) {
     const [personal_idtests_id_components, setPersonalABTestsElements] = useState([])
-    let value
-    if (!value) value = 0
+    const [value,setValue] = useState(0);
 
 
     function personalABTests() {
-            console.log(inputs)
         let temp_personal_idtests_id_components = []
         if (inputs) {
+            if ( inputs.includes(value)){
+                setValue(0)
+            }
             let id
             for (let ab_test_id in inputs) {
                 id = inputs[ab_test_id]
@@ -25,6 +26,7 @@ export default function InputSelector({inputs, header = null, onChange, onClick 
     useEffect(personalABTests, [inputs],);
 
     function handleChange(e) {
+        setValue(e.target.value)
         onChange(e.target.value)
     }
 
