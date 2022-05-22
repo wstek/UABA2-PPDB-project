@@ -3,7 +3,6 @@ from datetime import timedelta
 
 from flask import Blueprint, session
 
-from src.ABTestSimulation.ABTestSimulation import remove_tuples
 from src.extensions import database_connection
 
 api_statistics = Blueprint("api_statistics", __name__)
@@ -298,8 +297,8 @@ def get_active_users_over_time(abtest_id):
         end=abtest_information.end_date,
         dataset_name=abtest_information.dataset_name
     )
-    XFnY = [[str(r.bought_on), r.count] for r in active_users_over_time]
-    XFnY.insert(0, ['Date', 'Users'])
+    XFnY = [(str(r.bought_on), r.count) for r in active_users_over_time]
+    XFnY.insert(0, ('Date', 'Users'))
     return {'graphdata': XFnY}
 
 
@@ -310,8 +309,8 @@ def get_purchases_over_time(abtest_id):
         end=abtest_information.end_date,
         dataset_name=abtest_information.dataset_name
     )
-    XFnY = [[str(r.bought_on), r.count] for r in active_users_over_time]
-    XFnY.insert(0, ['Date', 'Users'])
+    XFnY = [(str(r.bought_on), r.count) for r in active_users_over_time]
+    XFnY.insert(0, ('Date', 'Users'))
     return {'graphdata': XFnY}
 
 
@@ -364,12 +363,26 @@ def getTopKPerAlgoithm(abtest_id, start_date, end_date):
     # for algorithm_id in algorithm_ids:
     return {'returnvalue': return_array}
 
-@api_statistics.route("/api/abtest/statistics/get_top_k_purchased/<int:abtest_id>/<start_date>/<end_date>")
+@api_statistics.route("/api/abtest/statistics/get_top_k_purchased/<int:abtest_id>/<string:start_date>/<string:end_date>")
 def getTopKPurchased(abtest_id, start_date, end_date):
     top_k = database_connection.getABTestInfo(abtest_id).top_k
     query_result = database_connection.getTopKPurchased(abtest_id,start_date, end_date, top_k)
     return_array = [{'count': row.count, 'article':row.unique_article_id} for row in query_result]
     return {'returnvalue': return_array}
+
+
+@api_statistics.route("/api/abtest/get_active_usercount/<int:abtest_id>/<string:start_date>/<string:end_date>")
+def get_active_usercount(abtest_id, start_date, end_date):
+    query_result = database_connection.getActiveUsersBetween(abtest_id,start_date, end_date)
+    return {'returnvalue': query_result.count}
+
+@api_statistics.route("/api/abtest/get_total_revenue_over_time/<int:abtest_id>")
+def get_total_revenue_over_time(abtest_id):
+    query_result = database_connection.getRevenueOverTime(abtest_id)
+    returnvalue = [(str(r.revenue_on), r.revenue) for r in query_result]
+
+    return {'returnvalue': returnvalue}
+
 
 
 @api_statistics.route("/api/abtest/statistics/<int:abtest_id>/<stat>")
@@ -399,4 +412,5 @@ def get_stat(abtest_id, stat):
 
     elif stat == "CTR_over_time":
         return get_CRT_over_time(abtest_id)
+
 

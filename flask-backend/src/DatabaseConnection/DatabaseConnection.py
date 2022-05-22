@@ -144,13 +144,11 @@ class DatabaseConnection:
                      from (
             --       Find the count of recommendations per algorithm for one article
                               select algorithm_id, unique_article_id, count(*) count
-                              from ab_test
-                                       natural join algorithm
-                                       natural join statistics
+                              from (
+                                       (select * from algorithm where abtest_id = {abtest_id})) algorithm
+                                       natural join (select * from statistics where date_of between '{start_date}' and '{end_date}' ) statistics
                                        natural join customer_specific_statistics
                                        natural join recommendation
-                              where abtest_id = {abtest_id}
-                                and date_of between '{start_date}' and '{end_date}'
                               group by algorithm_id, unique_article_id
                               ) counted_table
                      ) ranked_table
@@ -220,6 +218,16 @@ class DatabaseConnection:
     def getCRTOverTime(self, abtest_id):
         return self.getDynamicStepsizeVar(abtest_id, parameter_name="CTR")
 
+    def getRevenueOverTime(self, abtest_id):
+        abtest = self.getABTestInfo(abtest_id)
+        query = f'''
+                select bought_on revenue_on, sum(price) revenue
+                from purchase
+                where bought_on between '{abtest.start_date}' and '{abtest.end_date}' and dataset_name = '{abtest.dataset_name}'
+                group by bought_on;
+            '''
+        return self.session_execute_and_fetch(query)
+
     def getAttributionRateOverTime(self, abtest_id):
         return self.getDynamicStepsizeVar(abtest_id, parameter_name="ATTR_RATE")
 
@@ -252,16 +260,13 @@ class DatabaseConnection:
             '''
             self.session_execute(query)
 
-
-    def getTopKPurchased(self, abtest_id,start_date, end_date, top_k):
+    def getTopKPurchased(self, abtest_id, start_date, end_date, top_k):
         query = f'''
             select unique_article_id, count(*)
-            from ab_test
+            from (select * from ab_test where abtest_id = {abtest_id}) ab_test
                      natural join dataset
-                     natural join purchase
-                     natural join article
-            where abtest_id = {abtest_id}
-              and bought_on between '{start_date}' and '{end_date}'
+                     natural join (select * from purchase where bought_on between '{start_date}' and '{end_date}') purchase
+                     natural join article              
             group by unique_article_id
             order by count(*) desc
             limit {top_k};
@@ -283,6 +288,28 @@ class DatabaseConnection:
                 order by buckets;
             '''
         return self.engine_execute_and_fetch(query)
+
+    def getAllUniqueCumstomerIDs(self, dataset_name):
+        query = f'''
+                    SELECT unique_customer_id FROM customer where dataset_name='{dataset_name}'
+            '''
+        return self.session_execute_and_fetch(query)
+
+    def getAllUniqueArticleIDs(self, dataset_name):
+        query = f'''
+                    SELECT unique_article_id FROM article where dataset_name='{dataset_name}'
+            '''
+        return self.session_execute_and_fetch(query)
+
+    def getActiveUsersBetween(self, abtest_id, start_date, end_date):
+        query = f'''
+            SELECT count(distinct (unique_customer_id))
+            FROM customer
+                     natural join purchase
+                     natural join (select dataset_name from ab_test where abtest_id = {abtest_id} ) ab_test
+            where bought_on between '{start_date}' and '{end_date}';
+            '''
+        return self.session_execute_and_fetch(query, fetchall=False)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 import random
 import threading
-
+import time
 import numpy
 import pandas as pd
 from psycopg2.extensions import register_adapter, AsIs
@@ -30,6 +30,8 @@ class UserDataPerStep:
 def remove_tuples(arr):
     for i in range(len(arr)):
         arr[i] = arr[i][0]
+    e = time.time()
+
 
 
 def generateRandomTopK(listx, items):
@@ -43,7 +45,7 @@ class ABTestSimulation(threading.Thread):
         self.frontend_data = []
         self.done = False
         self.abtest = abtest
-        self.database_connection = database_connection
+        self.database_connection: database_connection = database_connection
 
         self.prev_progress = 0
         self.current_progress = 0
@@ -77,33 +79,26 @@ class ABTestSimulation(threading.Thread):
         self.database_connection.session.commit()
 
     def run(self):
-
+        # Start Date
         dt_start = pd.to_datetime(self.abtest["start"], format='%Y-%m-%d')
-        dt_current_date = pd.to_datetime(
-            self.abtest["start"], format='%Y-%m-%d')
+        # Current Date = Start Date
+        dt_current_date = dt_start
+        # End Date
         dt_end = pd.to_datetime(self.abtest["end"], format='%Y-%m-%d')
+        # Date Diff
         dayz = (dt_end - dt_start).days
-
-        last_time_train = dt_current_date.strftime('%Y-%m-%d')
-
-        # data statistics over time (x-axis = time)
-        top_k_over_time_statistics = {'time': []}
-        active_users_over_time_statistics = {'time': [], 'n_users': []}
-        data_per_user_over_time_statistics = {'time': [], 'customer_id': {}}
 
         # dynamic algorithms info that changes during simulation
         dynamic_info_algorithms = {}
         dataset_name = self.abtest["dataset_name"]
-        all_customer_ids = self.database_connection.session.execute(
-            f"SELECT DISTINCT unique_customer_id FROM customer where dataset_name='{dataset_name}'").fetchall()
-
-        all_unique_item_ids = self.database_connection.session.execute(
-            f"SELECT DISTINCT unique_article_id FROM article where dataset_name='{dataset_name}'").fetchall()
+        all_customer_ids = self.database_connection.getAllUniqueCumstomerIDs(dataset_name)
+        all_unique_item_ids = self.database_connection.getAllUniqueArticleIDs(dataset_name)
         remove_tuples(all_unique_item_ids)
 
-        for i in range(len(all_customer_ids)):
-            data_per_user_over_time_statistics['customer_id'][all_customer_ids[i][0]] = [
-            ]
+        # data statistics over time (x-axis = time)
+        top_k_over_time_statistics = {'time': []}
+        active_users_over_time_statistics = {'time': [], 'n_users': []}
+        data_per_user_over_time_statistics = {'time': [], 'customer_id': { customer_id[0]: [] for customer_id in all_customer_ids}}
 
         for i in range(len(self.abtest["algorithms"])):
             idx = int(self.abtest["algorithms"][i]["id"]) - \
@@ -225,7 +220,6 @@ class ABTestSimulation(threading.Thread):
                                 interactions[i][0], interactions[i][1])
 
                         if retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval']):
-                            last_time_train = current_date
                             # retrain interval bereikt => train de KNN algoritme
                             dynamic_info_algorithms[idx]["KNN"].train(
                                 interactions, unique_item_ids=all_unique_item_ids)

@@ -1,10 +1,9 @@
 import ItemDatatable from "../../components/datatable/ItemDatatable";
 import Sidebar from "../../components/sidebar/Sidebar";
-import {useEffect, useState, useSyncExternalStore} from "react";
+import React, {useEffect, useState} from "react";
 import "./list.css"
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
 import InputSelector from "../../components/InputSelector";
-import React from "react";
 import AlgorithmPicker from "../../components/Algorithmpicker";
 
 const ItemList = () => {
@@ -15,7 +14,7 @@ const ItemList = () => {
 
 
     function fetchCurrentUserAlgorithm() {
-        if(selected_abtest) {
+        if (selected_abtest) {
             let url = '/api/abtest/statistics/' + selected_abtest
             fetchData(url, setPersonalAlgorithms)
 
@@ -24,20 +23,21 @@ const ItemList = () => {
 
     function fetchCurrentUserABTestIDs() {
         let url = '/api/abtest/statistics/'
-        fetchData(url, setPersonalABTests)
+        fetchData(url, (data) => {
+                setPersonalABTests(data.personal_abtestids)
+            }
+        )
 
     }
 
 
-
-    useEffect(fetchCurrentUserABTestIDs,  [],);
-    useEffect(fetchCurrentUserAlgorithm,  [selected_abtest],);
+    useEffect(fetchCurrentUserABTestIDs, [],);
+    useEffect(fetchCurrentUserAlgorithm, [selected_abtest],);
     useEffect(() => {
         const abortCont = new AbortController();
         return () => abortCont.abort();
 
     }, [selected_abtest],);
-
     return (
 
         <div className="list">
@@ -45,22 +45,23 @@ const ItemList = () => {
             {/* {!pending && */}
             <div className="container-fluid my-auto">
                 {!selected_abtest &&
-                <div className="row text-center align-items-center mb-3">
-                    <InputSelector header={"Select AB-Test"} inputs={personal_abtests}  onChange={setSelectedABTest}
-                                   selected_input={selected_abtest}/>
-                </div>}
+                    <div className="row text-center align-items-center mb-3">
+                        <InputSelector header={"Select AB-Test"} inputs={personal_abtests} onChange={setSelectedABTest}
+                                       selected_input={selected_abtest}/>
+                    </div>}
                 {selected_abtest && !selected_algorithm &&
-                <div className="row text-center align-items-center mb-3">
-                    <AlgorithmPicker personal_algorithms={personal_algorithms} setSelectedAlgorithm={setSelectedAlgorithm}
-                                  selected_algorithm={selected_algorithm}/>
-                </div>}
+                    <div className="row text-center align-items-center mb-3">
+                        <AlgorithmPicker personal_algorithms={personal_algorithms}
+                                         setSelectedAlgorithm={setSelectedAlgorithm}
+                                         selected_algorithm={selected_algorithm}/>
+                    </div>}
                 {selected_abtest && selected_algorithm &&
-                <div className="listContainer">
-                    <ItemDatatable abtest_id={selected_abtest} algorithm_id={selected_algorithm}/>
-                </div>}
+                    <div className="listContainer">
+                        <ItemDatatable abtest_id={selected_abtest} algorithm_id={selected_algorithm}/>
+                    </div>}
                 {/* } */}
             </div>
-            // </div>
+        </div>
     );
 }
 

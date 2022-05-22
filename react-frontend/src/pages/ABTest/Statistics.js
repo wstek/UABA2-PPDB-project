@@ -203,12 +203,11 @@ function StatisticsInformation() {
         </div>
         <div className="row text-center align-content-center justify-content-center mx-auto">
             <div className="col-auto " style={{minHeight: "400px"}}>
-                <TopKPerAlgorithmTable abtest_id={abtest_id}
-                                       start_date={state.abtest_data && state.abtest_data.dates[state.selected_start_date]}
-                                       end_date={state.abtest_data && state.abtest_data.dates[state.selected_end_date]}/>
+                {state.abtest_data ? <TopKPerAlgorithmTable abtest_id={abtest_id}
+                                       start_date={state.abtest_data.dates[state.selected_start_date]}
+                                       end_date={state.abtest_data.dates[state.selected_end_date]}/>: <PurpleSpinner />}
             </div>
             <div className="col-auto my-auto" style={{minHeight: "400px"}}>
-
                 <TopKPurchasedTable abtest_id={abtest_id}/>
             </div>
         </div>

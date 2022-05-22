@@ -24,7 +24,7 @@ const UserList = () => {
 
     function fetchCurrentUserABTestIDs() {
         let url = '/api/abtest/statistics/'
-        fetchData(url, setPersonalABTests)
+        fetchData(url, (data) => setPersonalABTests(data.personal_abtestids) )
 
     }
 
