@@ -16,12 +16,10 @@ function GeneralUserOverview({abtest_id, date_start_index, date_end_index}) {
     const [activeUserCount, setActiveUserCount] = useState(null)
 
     const revenue = useMemo(() => {
-        console.log(revenue_per_day)
         let revenue = null
         if (revenue_per_day){
             revenue = revenue_per_day.slice(date_start_index, date_end_index - date_start_index).reduce((partialSum, a) => partialSum + a[1], 0).toFixed(2)
         }
-        console.log(revenue)
         return revenue
     }, [revenue_per_day,date_start_index,date_end_index]);
 
