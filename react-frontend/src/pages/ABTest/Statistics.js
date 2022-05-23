@@ -12,6 +12,7 @@ import React from 'react';
 import BootstrapTable from "../../components/table/BootstrapTable";
 import {PurpleSpinner} from "../../components/PurpleSpinner";
 import {TopKPerAlgorithmTable, TopKPurchasedTable} from "../../components/table/ReactTable";
+import CustomerOverview from "../../components/table/StatisticsCustomerTable";
 
 const reducer = (state, action) => {
     return {...state, [action.field]: action.value};
@@ -208,6 +209,7 @@ function StatisticsInformation() {
                                        end_date={state.abtest_data.dates[state.selected_end_date]}/>: <PurpleSpinner />}
             </div>
             <div className="col-auto my-auto" style={{minHeight: "400px"}}>
+                <CustomerOverview abtest_id={abtest_id} date_start_index={state.selected_start_date} date_end_index = {state.selected_end_date} />
                 <TopKPurchasedTable abtest_id={abtest_id}/>
             </div>
         </div>
@@ -244,5 +246,8 @@ function Statistics() {
         </Switch>
     </div>);
 }
+
+
+
 
 export default Statistics;

@@ -12,6 +12,7 @@ export function fetchData(api, fnt, abortCont = new AbortController(), onUnautho
         // console.log(data)
         fnt(data)
     }).catch(err => {
+        console.log(err)
             if (err.name === 'AbortError') {
                 console.log('fetch aborted')
             }

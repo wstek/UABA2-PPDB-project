@@ -311,6 +311,15 @@ class DatabaseConnection:
             '''
         return self.session_execute_and_fetch(query, fetchall=False)
 
+    def getDates(self, abtest_id):
+        query = f'''
+                Select distinct(date_of)
+                from statistics natural join algorithm natural join ab_test 
+                where abtest_id = {abtest_id}
+                order by date_of
+            '''
+        return self.session_execute_and_fetch(query, fetchall=True)
+
 
 if __name__ == '__main__':
     db_con = DatabaseConnection()

@@ -373,8 +373,16 @@ def getTopKPurchased(abtest_id, start_date, end_date):
 
 @api_statistics.route("/api/abtest/get_active_usercount/<int:abtest_id>/<string:start_date>/<string:end_date>")
 def get_active_usercount(abtest_id, start_date, end_date):
+
+
     query_result = database_connection.getActiveUsersBetween(abtest_id,start_date, end_date)
     return {'returnvalue': query_result.count}
+
+@api_statistics.route("/api/abtest/get_active_usercount/<int:abtest_id>/<int:start_date_index>/<int:end_date_index>")
+def relative_date_active_usercount(abtest_id, start_date_index, end_date_index):
+    query_result = database_connection.getDates(abtest_id)
+    [start_date, end_date] = query_result[start_date_index].date_of, query_result[end_date_index].date_of
+    return get_active_usercount(abtest_id, start_date, end_date)
 
 @api_statistics.route("/api/abtest/get_total_revenue_over_time/<int:abtest_id>")
 def get_total_revenue_over_time(abtest_id):

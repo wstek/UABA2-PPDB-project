@@ -7,7 +7,6 @@ import {PurpleSpinner} from "../PurpleSpinner";
 import Table from 'react-bootstrap/Table'
 
 const Styles = styled.div`
-  padding: 1rem;
 
   Table {
     
