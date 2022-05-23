@@ -6,7 +6,7 @@ function Footer() {
     const [isMobile, setIsMobile] = useState(false)
     //choose the screen size
     const handleResize = () => {
-        if (window.innerWidth < 720) {
+        if (window.innerWidth < 1000) {
             setIsMobile(true)
         } else {
             setIsMobile(false)
@@ -19,9 +19,8 @@ function Footer() {
 
     if (!isMobile) {
         return (
-            <footer className="text-center text-white fixed-bottom bg-purple">
-                <section className="">
-                    <div className="container-fluid text-center mt-1">
+            <footer className="py-2 text-white fixed-bottom bg-purple">
+                    <div className="container-fluid text-center ">
                         <div className="row vh-2 mt-0">
                             <div className="col-2 align-left">
                                 <img src={ua_logo} className="vh-2" alt="pic" id="footer"/>
@@ -37,7 +36,6 @@ function Footer() {
 
                         </div>
                     </div>
-                </section>
                 {/*<div className="row mx-4 mb-0">*/}
                 {/*    <div className="col-2 align-left maxwidth-250">*/}
                 {/*        <img src={ua_logo} className="img-fluid" alt="pic" id="footer"/>*/}

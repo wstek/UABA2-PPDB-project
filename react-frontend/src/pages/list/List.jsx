@@ -41,7 +41,6 @@ const UserList = () => {
     return (
 
         <div className="list">
-            <Sidebar/>
             {/* {!pending && */}
             <div className="container-fluid my-auto">
                 {!selected_abtest &&
