@@ -53,7 +53,6 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard">
-            <Sidebar/>
             <div className="dashboardContainer">
                 <div className="widgets">
                     <Widget type="user"/>

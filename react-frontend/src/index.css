@@ -18,7 +18,6 @@ body {
 
 .footer-text {
     color: #12375c;
-    font-size: 1.0vw;
 }
 
 .align-left {
@@ -31,11 +30,12 @@ body {
 
 .content {
     height: 70vh;
-    width: 100vw;
+    /*width: 100%;*/
     padding: 20px;
     display: flex;
     flex-direction: column;
-    max-width: 100vw;
+    max-width: 100%;
+    flex: 6;
 
 }
 
@@ -79,9 +79,16 @@ body {
     background: #0bcc62;
     transition: all 0.3s ease;
 }
+.sticky-sidebar{
+  position: sticky;
+  top: 0;
+}
+.max-100vh{
+    max-height: 100vh;
+}
 
 .bg-purple {
-    background: rgba(216, 196, 252, 1);
+    background: rgb(216, 196, 252);
 }
 .bg-darkpurple {
     background: #8040e8
@@ -90,10 +97,19 @@ body {
     background: rgb(193, 178, 243);
 }
 
-.border-dark {
+.border-dark-purple {
     border-color: #7734E7FF !important;
 }
-
+table.table-bordered{
+    border:1px solid blue;
+    margin-top:20px;
+  }
+table.table-bordered > thead > tr > th{
+    border:1px solid blue;
+}
+table.table-bordered > tbody > tr > td{
+    border:1px solid blue;
+}
 /*.footer {*/
 /*    max-height: 5vh;*/
 /*    position: fixed;*/
@@ -225,6 +241,9 @@ body {
 /*}*/
 .vh-2 {
     height: 2vh;
+}
+.min-vh-90 {
+    min-height: 92vh;
 }
 
 /*Account*/

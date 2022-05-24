@@ -6,7 +6,6 @@ import Tablex from "../../components/table/Tablex"
 const Single = () => {
     return (
         <div className="single">
-            <Sidebar/>
             <div className="singleContainer">
                 <div className="top">
                     <div className="left">
