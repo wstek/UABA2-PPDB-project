@@ -55,7 +55,6 @@ class DatabaseConnection:
 
     def session_execute(self, query: str):
         self.session.execute(query)
-        self.session.commit()
 
     def engine_execute_and_fetch(self, query: str, fetchall=True):
         result = self.engine.execute(text(query))
@@ -70,7 +69,6 @@ class DatabaseConnection:
         else:
             result = self.session.execute(query).fetchone()
 
-        self.session.commit()
         return result
 
     def session_query_table(self, table, query_data: dict):

@@ -1,4 +1,4 @@
-import json
+import copy
 import math
 import os
 import sys
@@ -15,41 +15,61 @@ from src.utils.Logger import Logger
 from src.utils.pathParser import getAbsPathFromProjectRoot
 
 
-# todo: check if multithreading interferes with database connection session
-
-
-def shallowCopyDfColumn(df_input, column_name_input, df_output, column_name_output, delete_empty=False):
+def shallow_copy_df_column(df_input, column_name_input, df_output, column_name_output, delete_empty=False,
+                           ignore_empty=False):
     df_output[column_name_output] = df_input[[column_name_input]].copy(deep=False)
 
-    if not delete_empty and df_output.isnull().values.any():
+    if not ignore_empty and not delete_empty and df_output.isnull().values.any():
         raise ValueError("merging columns with different sizes")
 
-    if delete_empty:
+    if not ignore_empty and delete_empty:
         df_output.dropna(inplace=True)
 
 
+def add_attribute_df(attribute, df_file, df_meta_id_table, df_meta_attribute_tables):
+    df_meta_attribute_table = df_meta_id_table.copy(deep=False)
+
+    shallow_copy_df_column(df_file, attribute["column_name"], df_meta_attribute_table,
+                           "attribute_value", delete_empty=True)
+
+    df_meta_attribute_table["attribute_name"] = attribute["name"]
+    df_meta_attribute_table["type"] = attribute["type"]
+
+    df_meta_attribute_tables.append(df_meta_attribute_table)
+
+
 class InsertDataset:
-    def __init__(self, database_connection: DatabaseConnection, uploader_name: str, filenames: Dict[str, list],
-                 column_select_data: dict):
+    def __init__(self, database_connection: DatabaseConnection, uploader_name: str, filenames: Dict[str, str],
+                 dataset_selection_data: dict):
         """
         Inserts a new dataset in the database
         :param database_connection: database connection
         :param uploader_name: name of the uploader
         :param filenames: dict with key: original dataset name, value: dataset filepath
-        :param column_select_data: dict that contains the selected columns
+        :param dataset_selection_data: dict that contains information about the selected columns
         """
         self.database_connection = database_connection
         self.uploader_name = uploader_name
         self.filenames = filenames
-        self.column_select_data = column_select_data
 
-        self.dataset_name = column_select_data["datasetName"]
+        self.dataset_selection_data = dataset_selection_data
+        self.dataset_name = dataset_selection_data["dataset_name"]
+
+        self.df_files = {}  # key: original dataset name, value: pandas dataframe
+
+        self.df_purchase_files = pd.DataFrame()
         self.df_purchase_data = pd.DataFrame()
 
-        self.df_dataset_files = {}  # key: original dataset name, value: pandas dataframe
+        self.df_article_id = pd.DataFrame()
+        self.df_article_id_table_list = []
+        self.df_article_attribute_table_list = []
 
-    def startInsert(self):
-        self.__insertDatasetName()
+        self.df_customer_id = pd.DataFrame()
+        self.df_customer_id_table_list = []
+        self.df_customer_attribute_table_list = []
+
+    def start_insert(self):
+        self.__insert_dataset_name()
 
         Logger.log(f"Inserting dataset {self.dataset_name}")
 
@@ -59,50 +79,62 @@ class InsertDataset:
 
         self.__parse_csv_files()
 
-        Logger.log(f"Parsed {len(self.filenames)} files in {math.floor(time.time() - stopwatch)} seconds")
+        Logger.log(f"parsed {len(self.filenames)} files in {math.floor(time.time() - stopwatch)} seconds")
         stopwatch = time.time()
 
-        self.__createPurchasedataDf()
+        # create purchase df from purchase files
+        self.__concatenate_purchase_files()
+        self.__create_purchasedata_df()
 
-        Logger.log(f"Created purchases dataframe in {math.floor(time.time() - stopwatch)} seconds")
+        Logger.log(f"created purchase df from purchase files in {math.floor(time.time() - stopwatch)} seconds")
         stopwatch = time.time()
 
-        # insert or generate metadata dataframes and insert into database
-        if self.column_select_data["generate_article_metadata"]:
-            self.__generateMetadata("article")
-        else:
-            self.__insertMetadata("article")
+        # create meta id dfs from purchase files
+        self.__create_meta_id_df_purchase("article", self.df_article_id, self.df_article_id_table_list)
+        self.__create_meta_id_df_purchase("customer", self.df_customer_id, self.df_customer_id_table_list)
 
-        Logger.log(
-            f"Created article dataframe and inserted in database in {math.floor(time.time() - stopwatch)} seconds")
+        Logger.log(f"created meta id dfs from purchase files in {math.floor(time.time() - stopwatch)} seconds")
         stopwatch = time.time()
 
-        if self.column_select_data["generate_customer_metadata"]:
-            self.__generateMetadata("customer")
-        else:
-            self.__insertMetadata("customer")
+        # create meta dfs from purchase files
+        self.__create_purchase_metadata_df("article", self.df_article_id, self.df_article_attribute_table_list)
+        self.__create_purchase_metadata_df("customer", self.df_customer_id, self.df_customer_attribute_table_list)
 
-        Logger.log(
-            f"Created customer dataframe and inserted in database in {math.floor(time.time() - stopwatch)} seconds")
+        Logger.log(f"created meta dfs from purchase files in {math.floor(time.time() - stopwatch)} seconds")
         stopwatch = time.time()
 
-        # insert purchase data dataframe into database
-        self.df_purchase_data.drop_duplicates(subset=["dataset_name", "customer_id", "article_id", "bought_on"],
-                                              inplace=True)
-        self.database_connection.insert_pd_dataframe(self.df_purchase_data, "purchase")
+        # create meta dfs from metadata files
+        self.__create_metadata_df("article", self.df_article_id_table_list, self.df_article_attribute_table_list)
+        self.__create_metadata_df("customer", self.df_customer_id_table_list, self.df_customer_attribute_table_list)
 
-        Logger.log(f"Inserted purchases dataframe in database in {math.floor(time.time() - stopwatch)} seconds")
+        Logger.log(f"created meta dfs from metadata files in {math.floor(time.time() - stopwatch)} seconds")
         stopwatch = time.time()
 
+        # insert all data into database
+        self.__insert_metadata("article", self.df_article_id_table_list, self.df_article_attribute_table_list)
+
+        Logger.log(f"inserted article metadata in {math.floor(time.time() - stopwatch)} seconds")
+        stopwatch = time.time()
+
+        self.__insert_metadata("customer", self.df_customer_id_table_list, self.df_customer_attribute_table_list)
+
+        Logger.log(f"inserted customer metadata in {math.floor(time.time() - stopwatch)} seconds")
+        stopwatch = time.time()
+
+        self.__insert_purchase_data()
+
+        Logger.log(f"inserted purchase data in {math.floor(time.time() - stopwatch)} seconds")
+        stopwatch = time.time()
+
+        # commit transaction to database
         self.database_connection.session.commit()
 
-        Logger.log(f"Commited changes to database in {math.floor(time.time() - stopwatch)} seconds")
-
-        Logger.log(f"Added dataset \"{self.dataset_name}\" in {math.floor(time.time() - start_time)} seconds")
+        Logger.log(f"added dataset \"{self.dataset_name}\" in {math.floor(time.time() - start_time)} seconds")
 
     def cleanup(self):
         # debug
-        # return
+        return
+
         for original_filename in self.filenames:
             filepath = self.filenames[original_filename][0]
             os.remove(filepath)
@@ -111,47 +143,124 @@ class InsertDataset:
         self.database_connection.session.rollback()
 
     def __parse_csv_files(self):
-        dataset_file_dtypes = {}
+        for original_filename in self.filenames:
+            current_filename = self.filenames[original_filename]
+            seperator = self.dataset_selection_data["file_seperators"][original_filename]
 
-        column_selection_custom_dtypes = [
-            [self.column_select_data["purchaseData"]["price"], "float"],
-            [self.column_select_data["purchaseData"]["article_id"], "Int64"],
-            [self.column_select_data["purchaseData"]["customer_id"], "Int64"],
-        ]
+            custom_dtypes = self.dataset_selection_data["file_column_data_types"][original_filename]
 
-        if not self.column_select_data["generate_article_metadata"]:
-            column_selection_custom_dtypes.append([self.column_select_data["articleMetadata"]["article_id"], "Int64"])
+            # date type is a special case
+            check_date = False
+            date_columns = []
+            new_custom_dtypes = copy.deepcopy(custom_dtypes)
+            for date_column, dtype in custom_dtypes.items():
+                if dtype == "date":
+                    check_date = True
+                    date_columns.append(date_column)
+                    new_custom_dtypes.pop(date_column, None)
 
-        if not self.column_select_data["generate_customer_metadata"]:
-            column_selection_custom_dtypes.append([self.column_select_data["customerMetadata"]["customer_id"], "Int64"])
+            custom_dtypes = new_custom_dtypes
 
-        for column_selection_custom_dtype in column_selection_custom_dtypes:
-            selection = column_selection_custom_dtype[0]
-            dtype = column_selection_custom_dtype[1]
+            # read column names
+            column_names = pd.read_csv(current_filename,
+                                       sep=seperator,
+                                       nrows=0
+                                       ).columns
 
-            if selection[0] not in dataset_file_dtypes:
-                dataset_file_dtypes[selection[0]] = {}
+            # update dtypes dict so that every column has, except the one who already had a type, string as type
+            custom_dtypes.update({column: str for column in column_names if column not in custom_dtypes})
 
-            dataset_file_dtypes[selection[0]][selection[1]] = dtype
+            self.df_files[original_filename] = pd.read_csv(current_filename,
+                                                           sep=seperator,
+                                                           dtype=custom_dtypes,
+                                                           on_bad_lines="skip"
+                                                           )
 
-        # parse dataset files into pandas dataframes
-        for original_dataset_name in self.filenames:
-            dataset_filename = self.filenames[original_dataset_name][0]
-            delimiter = self.filenames[original_dataset_name][1]
+            self.df_files[original_filename].drop_duplicates(inplace=True)
 
-            custom_dtypes = {}
+            # if date column contains a timestamp, remove it (expensive operation)
+            if check_date:
+                for date_column in date_columns:
+                    if len(self.df_files[original_filename][date_column][0].split()) > 1:
+                        Logger.log("Converting timestamp to date")
+                        self.df_files[original_filename][date_column] = pd.to_datetime(
+                            self.df_files[original_filename][date_column]).dt.date
 
-            if original_dataset_name in dataset_file_dtypes:
-                custom_dtypes = dataset_file_dtypes[original_dataset_name]
+                        self.df_files[original_filename].drop_duplicates(inplace=True)
 
-            self.df_dataset_files[original_dataset_name] = pd.read_csv(dataset_filename,
-                                                                       sep=delimiter,
-                                                                       dtype=custom_dtypes
-                                                                       )
+    def __concatenate_file_df(self, filenames: list):
+        df_file_list = []
 
-            self.df_dataset_files[original_dataset_name].drop_duplicates(inplace=True)
+        column_names = self.df_files[filenames[0]].columns
 
-    def __insertDatasetName(self):
+        for filename in filenames:
+            df_file = self.df_files[filename]
+
+            if df_file.columns.all() != column_names.all():
+                raise ValueError("concatenating files with different column names")
+
+            df_file_list.append(df_file)
+
+        df_files = pd.concat(df_file_list, ignore_index=True, sort=False, copy=False)
+        df_files.drop_duplicates(inplace=True)
+
+        return df_files
+
+    def __concatenate_purchase_files(self):
+        purchase_select_data = self.dataset_selection_data["purchase_data"]
+        self.df_purchase_files = self.__concatenate_file_df(purchase_select_data["filenames"])
+
+    def __create_purchasedata_df(self):
+        purchase_select_data = self.dataset_selection_data["purchase_data"]
+
+        shallow_copy_df_column(self.df_purchase_files, purchase_select_data["column_name_bought_on"],
+                               self.df_purchase_data, "bought_on", ignore_empty=True)
+        shallow_copy_df_column(self.df_purchase_files, purchase_select_data["column_name_price"], self.df_purchase_data,
+                               "price", ignore_empty=True)
+        shallow_copy_df_column(self.df_purchase_files, purchase_select_data["column_name_article_id"],
+                               self.df_purchase_data,
+                               "article_id", ignore_empty=True)
+        shallow_copy_df_column(self.df_purchase_files, purchase_select_data["column_name_customer_id"],
+                               self.df_purchase_data,
+                               "customer_id", ignore_empty=True)
+
+        self.df_purchase_data.dropna(inplace=True)
+        self.df_purchase_data.drop_duplicates(subset=["customer_id", "article_id", "bought_on"], inplace=True)
+
+        self.df_purchase_data["dataset_name"] = self.dataset_name
+
+    def __create_meta_id_df_purchase(self, metadata_type: str, df_meta_id, df_meta_id_tables):
+        metadata_id_name = metadata_type + "_id"
+
+        shallow_copy_df_column(self.df_purchase_data, metadata_id_name, df_meta_id, metadata_id_name)
+        df_meta_id["dataset_name"] = self.dataset_name
+
+        df_meta_id_tables.append(df_meta_id)
+
+    def __create_purchase_metadata_df(self, metadata_type: str, df_meta_id_table, df_meta_attribute_tables):
+        purchase_select_data = self.dataset_selection_data["purchase_data"]
+
+        for attribute in purchase_select_data[metadata_type + "_metadata_attributes"]:
+            add_attribute_df(attribute, self.df_purchase_files, df_meta_id_table, df_meta_attribute_tables)
+
+    def __create_metadata_df(self, metadata_type: str, df_meta_id_tables, df_meta_attribute_tables):
+        metadata_id_name = metadata_type + "_id"
+        metadata_selection = self.dataset_selection_data[metadata_type + "_metadata"]
+
+        for metadata in metadata_selection:
+            df_meta_id_table = pd.DataFrame()
+
+            df_file = self.__concatenate_file_df(metadata["filenames"])
+
+            shallow_copy_df_column(df_file, metadata["column_name_id"], df_meta_id_table, metadata_id_name)
+            df_meta_id_table["dataset_name"] = self.dataset_name
+
+            df_meta_id_tables.append(df_meta_id_table)
+
+            for attribute in metadata["attributes"]:
+                add_attribute_df(attribute, df_file, df_meta_id_table, df_meta_attribute_tables)
+
+    def __insert_dataset_name(self):
         query = f"""
         INSERT INTO dataset (name, uploaded_by) 
         VALUES ('{self.dataset_name}', '{self.uploader_name}')
@@ -159,108 +268,132 @@ class InsertDataset:
 
         self.database_connection.session_execute(query)
 
-    def __createPurchasedataDf(self):
-        # get purchase data column selection
-        purchase_select_data = self.column_select_data["purchaseData"]
+    def __insert_purchase_data(self):
+        self.database_connection.insert_pd_dataframe(self.df_purchase_data, "purchase")
 
-        # insert purchase data into purchase data dataframe
-        for database_column_name in purchase_select_data:
-            selection = purchase_select_data[database_column_name]
-            shallowCopyDfColumn(self.df_dataset_files[selection[0]], selection[1], self.df_purchase_data,
-                                database_column_name, delete_empty=True)
+    def __insert_metadata(self, metadata_type: str, df_meta_id_tables, df_meta_attribute_tables):
+        df_meta_ids = pd.concat(df_meta_id_tables, ignore_index=True, sort=False, copy=False)
+        df_meta_ids.drop_duplicates(inplace=True)
 
-        self.df_purchase_data["dataset_name"] = self.dataset_name
+        self.database_connection.insert_pd_dataframe(df_meta_ids, metadata_type)
 
-        # remove timestamps if it contains them (expensive operation)
-        if len(self.df_purchase_data["bought_on"][0].split()) > 1:
-            Logger.log("Converting timestamp to date")
-            self.df_purchase_data["bought_on"] = pd.to_datetime(self.df_purchase_data["bought_on"]).dt.date
+        df_meta_attributes = pd.concat(df_meta_attribute_tables, ignore_index=True, sort=False, copy=False)
+        df_meta_attributes.drop_duplicates(subset=["attribute_name", metadata_type + "_id"], inplace=True)
 
-        self.df_purchase_data.drop_duplicates(subset=["dataset_name", "customer_id", "article_id", "bought_on"],
-                                              inplace=True)
-
-        print(self.df_purchase_data.head(10))
-
-    def __generateMetadata(self, metadata_type: str):
-        metadata_id_name = metadata_type + "_id"
-
-        # create meta table dataframe
-        df_meta_table = pd.DataFrame()
-
-        shallowCopyDfColumn(self.df_purchase_data, metadata_id_name, df_meta_table, metadata_id_name)
-
-        df_meta_table.drop_duplicates(inplace=True)
-
-        df_meta_table["dataset_name"] = self.dataset_name
-
-        # insert into database
-        self.database_connection.insert_pd_dataframe(df_meta_table, metadata_type)
-
-    def __insertMetadata(self, metadata_type: str):
-        metadata_id_name = metadata_type + "_id"
-
-        # get metadata column selection
-        column_select_metadata = self.column_select_data[metadata_type + "Metadata"]
-
-        # create meta table dataframe
-        df_meta_table = pd.DataFrame()
-
-        meta_id_selection = column_select_metadata[metadata_id_name]
-        shallowCopyDfColumn(self.df_dataset_files[meta_id_selection[0]], meta_id_selection[1], df_meta_table,
-                            metadata_id_name)
-
-        df_meta_table["dataset_name"] = self.dataset_name
-
-        # insert into database
-        self.database_connection.insert_pd_dataframe(df_meta_table, metadata_type)
-
-        # create new dataframe for each attribute type
-        for column_selection in column_select_metadata:
-            if column_selection == metadata_type + "_id":
-                continue
-
-            meta_attribute_selection = column_select_metadata[column_selection]
-
-            df_meta_attribute_table = df_meta_table.copy(deep=False)
-
-            df_meta_attribute_table["attribute_name"] = column_selection
-
-            shallowCopyDfColumn(self.df_dataset_files[meta_attribute_selection[0]], meta_attribute_selection[1],
-                                df_meta_attribute_table, "attribute_value", delete_empty=True)
-
-            df_meta_attribute_table["type"] = meta_attribute_selection[2]
-
-            self.database_connection.insert_pd_dataframe(df_meta_attribute_table, metadata_type + "_attribute")
+        self.database_connection.insert_pd_dataframe(df_meta_attributes, metadata_type + "_attribute")
 
 
 if __name__ == "__main__":
-    filenames = '{"product_metadata.csv": ["/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_product_metadata.csv", ","], "purchases.csv": ["/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_purchases2.csv", ","], "user_metadata.csv": ["/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_user_metadata.csv", ","]}'
-    column_select_data = '{"datasetName": "dummy", "purchaseData": {"bought_on": ["purchases.csv", "time_of_purchase"], "price": ["purchases.csv", " price_of_product"], "article_id": ["purchases.csv", " product_id"], "customer_id": ["purchases.csv", " user_id"]}, "generate_article_metadata": false, "articleMetadata": {"article_id": ["product_metadata.csv", "product_id"], ' \
-                         '"color": ["product_metadata.csv", "color", "string"]}, "generate_customer_metadata": false, "customerMetadata": {"customer_id": ["user_metadata.csv", "user_id"]}}'
+    filenames_HM = {
+        # project root = flask-backend directory
+        "purchases.csv": getAbsPathFromProjectRoot("../datasets/h_m/purchases.csv"),
+        "articles.csv": getAbsPathFromProjectRoot("../datasets/h_m/articles.csv"),
+        "customers.csv": getAbsPathFromProjectRoot("../datasets/h_m/customers.csv")
+    }
 
-    # filenames = '{"articles.csv": "/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_articles.csv", "customers.csv": "/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_customers.csv", "purchases.csv": "/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_purchases.csv"}'
-    # column_select_data = '{"datasetName": "H&M", "purchaseData": {"bought_on": ["purchases.csv", "t_dat"], "price": ["purchases.csv", "price"], "article_id": ["purchases.csv", "article_id"], "customer_id": ["purchases.csv", "customer_id"]}, "generate_article_metadata": false, "articleMetadata": {"article_id": ["articles.csv", "article_id"]}, "generate_customer_metadata": false, "customerMetadata": {"customer_id": ["customers.csv", "customer_id"]}}'
+    dataset_selection_data_HM = {
+        "dataset_name": "H&M",
+        "file_seperators": {
+            "purchases.csv": ",",
+            "articles.csv": ",",
+            "customers.csv": ","
+        },
+        "file_column_data_types": {
+            "purchases.csv": {
+                "t_dat": "date",
+                "price": "float",
+                "article_id": "Int64",
+                "customer_id": "Int64"
+            },
+            "articles.csv": {
+                "article_id": "Int64"
+            },
+            "customers.csv": {
+                "customer_id": "Int64"
+            }
+        },
+        "purchase_data": {
+            "filenames": [
+                "purchases.csv"
+            ],
 
-    # filenames = '{"2020-Jan.csv": ["/mnt/c/dev/Programming-project-databases/flask-backend/uploaded-files/mosh_2020-Jan.csv", ","]}'
-    # column_select_data = '{"datasetName": "bro_wtf", "purchaseData": {"bought_on": ["2020-Jan.csv", "event_time"], "price": ["2020-Jan.csv", "price"], "article_id": ["2020-Jan.csv", "product_id"], "customer_id": ["2020-Jan.csv", "user_id"]}, "generate_article_metadata": true, "generate_customer_metadata": true, "delimiter": ","}'
+            "column_name_bought_on": "t_dat",
+            "column_name_price": "price",
+            "column_name_article_id": "article_id",
+            "column_name_customer_id": "customer_id",
+
+            "article_metadata_attributes": [],
+            "customer_metadata_attributes": []
+        },
+        "article_metadata": [
+            {
+                "filenames": [
+                    "articles.csv"
+                ],
+
+                "column_name_id": "article_id",
+
+                "attributes": [
+                    {
+                        "column_name": "product_code",
+                        "name": "product_code",
+                        "type": "int"
+                    },
+                    {
+                        "column_name": "graphical_appearance_name",
+                        "name": "graphical_appearance_name",
+                        "type": "string"
+                    },
+                    {
+                        "column_name": "image_url",
+                        "name": "image_url",
+                        "type": "image"
+                    }
+                ]
+            }
+        ],
+        "customer_metadata": [
+            {
+                "filenames": [
+                    "customers.csv"
+                ],
+
+                "column_name_id": "customer_id",
+
+                "attributes": [
+                    {
+                        "column_name": "age",
+                        "name": "age",
+                        "type": "float"
+                    },
+                    {
+                        "column_name": "postal_code",
+                        "name": "postal_code",
+                        "type": "string"
+                    }
+                ]
+            }
+        ]
+    }
 
     db_con = DatabaseConnection()
     db_con.connect(filename=getAbsPathFromProjectRoot("config-files/database.ini"))
     db_con.log_version()
 
-    insert_dataset_obj = InsertDataset(db_con, "mosh", json.loads(filenames), json.loads(column_select_data))
+    insert_dataset_obj = InsertDataset(db_con, "mosh", filenames_HM, dataset_selection_data_HM)
 
     try:
-        insert_dataset_obj.startInsert()
-    # except SoftTimeLimitExceeded:
-    #     insert_dataset_obj.abort()
-    except ValueError as e:
-        Logger.logError(str(e))
-    except Exception as e:
-        insert_dataset_obj.abort()
+        insert_dataset_obj.start_insert()
 
-        # debug
-        Logger.logError(str(e))
-        raise Exception
+    except ValueError as err:
+        insert_dataset_obj.abort()
+        Logger.logError(str(err))
+        raise err
+
+    except Exception as err:
+        insert_dataset_obj.abort()
+        Logger.logError(str(err))
+        raise err
+
     finally:
         insert_dataset_obj.cleanup()
