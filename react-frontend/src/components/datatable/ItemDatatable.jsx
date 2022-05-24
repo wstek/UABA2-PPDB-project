@@ -7,6 +7,7 @@ import {object} from "prop-types";
 
 function ItemDatatable({abtest_id, algorithm_id}) {
 
+    const [maxDays,setMaxDays] = useState(0);
     const [loaded, setLoaded] = useState(false);
     const [select, setSelection] = React.useState([]);
     const [allRows, setAllRows] = useState(null);
@@ -16,6 +17,8 @@ function ItemDatatable({abtest_id, algorithm_id}) {
     const [amountOfRecommendations, setAmountOfRecommendations] = useState(null)
     const [amountOfSuccesfullRecommendations, setAmountOfSuccesfullRecommendations] = useState(null)
     const [selectedGraphs, setSelectedGraphs] = useState(false)
+    const [selectedImage, setSelectedImage] = useState(false)
+    const [image, setImage] = useState(null)
 
 
     useEffect(() => {
@@ -36,7 +39,7 @@ function ItemDatatable({abtest_id, algorithm_id}) {
                 }
 
                 setAllRows(row_list)
-
+                setMaxDays(data.max_days)
                 // console.log(data.userlist)
 
             }).catch((err) => {
@@ -60,6 +63,7 @@ function ItemDatatable({abtest_id, algorithm_id}) {
                 setAttributes(data)
                 setSelectedAttributes(true)
                 setSelectedGraphs(false)
+                setSelectedImage(false)
             }).catch((err) => {
             console.log(err);
         })
@@ -134,7 +138,7 @@ function ItemDatatable({abtest_id, algorithm_id}) {
                 setAmountOfRecommendations(map)
                 setSelectedGraphs(true)
                 setSelectedAttributes(false)
-
+                setSelectedImage(false)
 
             }).catch((err) => {
             console.log(err);
@@ -165,8 +169,6 @@ function ItemDatatable({abtest_id, algorithm_id}) {
                 }
 
                 setAmountOfSuccesfullRecommendations(map)
-                setSelectedAttributes(false)
-
 
             }).catch((err) => {
             console.log(err);
@@ -181,6 +183,28 @@ function ItemDatatable({abtest_id, algorithm_id}) {
 
         }
     }
+
+    function fetchImageUrl(){
+         fetch('/api/items/image/' + select[0], {
+            method: 'GET',
+            credentials: 'include',
+            headers: {"Content-Type": "application/json", 'Accept': 'application/json'}
+        }).then(res => res.json())
+            .then((data) => {
+                if (data.error) {
+                    throw Error(data.error);
+                }
+                setImage(data.image_url)
+                setSelectedImage(true)
+                setSelectedAttributes(false)
+                setSelectedGraphs(false)
+            }).catch((err) => {
+            console.log(err);
+        })
+    }
+
+
+
 
     return (
         <div className="page">
@@ -204,7 +228,8 @@ function ItemDatatable({abtest_id, algorithm_id}) {
             </div>
             <button className="position-relative " onClick={showAttributeTab}>Metadata</button>
             <button className="position-relative " onClick={fetchGraphs}>Purchases</button>
-            {selectedAttributes && !selectedGraphs &&
+            <button className="position-relative " onClick={fetchImageUrl}>Image</button>
+            {selectedAttributes && !selectedGraphs && !selectedImage &&
                 <br></br> &&
                 <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 ">
                     <label>Attributes </label>
@@ -212,28 +237,33 @@ function ItemDatatable({abtest_id, algorithm_id}) {
                         {showAttribute()}
                     </div>
                 </div>}
-            {selectedGraphs && <br></br> && !selectedAttributes &&
+            {selectedGraphs && <br></br> && !selectedAttributes && !selectedImage &&
                 <div>
                     <div className="row text-center align-content-center justify-content-center">
                         <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
                             <LineChart chart_id={1} title="Amount Of Purchases" xMin={0}
-                                       xMax={amountOfPurchases.size}
+                                       xMax={maxDays}
                                        XFnY={amountOfPurchases}/>
                         </div>
                         <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
                             <LineChart chart_id={2} title={"Recommendations"} xMin={0}
-                                       xMax={amountOfRecommendations.size} XFnY={amountOfRecommendations}/>
+                                       xMax={maxDays} XFnY={amountOfRecommendations}/>
                         </div>
                     </div>
                     <div className="row text-center align-content-center justify-content-center">
                         <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
                             <LineChart chart_id={2} title="Amount Of Succesfull reccomendations" xMin={0}
-                                       xMax={amountOfSuccesfullRecommendations.size}
+                                       xMax={maxDays}
                                        XFnY={amountOfSuccesfullRecommendations}/>
                         </div>
                     </div>
                 </div>
             }
+            {!selectedGraphs && <br></br> && !selectedAttributes && selectedImage &&
+                <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 ">
+                    <label>Image </label>
+                    <img src={image}/>
+                </div>}
         </div>
     );
 }

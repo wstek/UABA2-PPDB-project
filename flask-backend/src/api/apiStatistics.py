@@ -64,7 +64,16 @@ natural join
     for items in range(len(active_items)):
         active_items[items] = active_items[items][0]
 
-    return {"itemlist": active_items}
+    max_days = database_connection.session_execute_and_fetch(
+        f'''
+            select end_date - start_date as difference from ab_test where abtest_id = {abtest_id}
+        '''
+    )
+    response = dict()
+    response["itemlist"] = active_items
+    response["max_days"] = max_days[0][0]
+
+    return response
 
 
 @api_statistics.route("/api/items/purchases/<int:abtest_id>/<int:article_id>", methods=['GET'])
@@ -164,7 +173,8 @@ def get_item_recommendations_and_purchases_over_time(abtest_id, article_id, algo
     )
 
     if not amount_of_recommendations:
-        return {"error": "Page does not exist"}, 404
+        return response
+
 
     date = None
     d = None
@@ -190,6 +200,24 @@ def get_item_attribute(abtest_id, article_id):
     response = dict()
     for items in range(len(active_items)):
         response[active_items[items][0]] = active_items[items][1]
+
+    return response
+
+
+@api_statistics.route("/api/items/image/<int:article_id>", methods=['GET'])
+def get_item_image( article_id):
+    image_url = database_connection.session_execute_and_fetch(
+        f"select distinct(attribute_value) from article natural join ab_test natural join article_attribute "
+        f"where unique_article_id = {article_id} and attribute_name = 'image_url'"
+    )
+    if not image_url:
+        return {"error": "Page does not exist"}, 404
+    response = dict()
+    string = ""
+    for items in image_url[0]:
+        if items != ',':
+            string += items
+    response["image_url"] = string
 
     return response
 
