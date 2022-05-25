@@ -1,3 +1,4 @@
+//7 10 14 28 30 31 55 81 92 95
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import React, {useEffect, useState} from "react";
 import Navbar from './components/Navbar';
@@ -106,7 +107,7 @@ function App() {
                                 <ProtectedRoute component={ChangeInfo} isLoading={isLoading} auth={auth} exact
                                                 path="/account/changeinfo"/>
 
-                                <Route exact path="/users">
+                                <Route exact path="/ABTest/:abtest_id/User/:user_id">
                                     <UserList/>
                                 </Route>
 

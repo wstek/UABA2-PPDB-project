@@ -100,7 +100,7 @@ export function TopKPerAlgorithmTable({abtest_id, start_date, end_date}) {
         const abortCont = new AbortController();
         let api = `/api/abtest/statistics/get_top_k_per_algorithm/${abtest_id}/${start_date}/${end_date}`
         if (abtest_id) fetchData(api, (data) => setTopKPerAlgorithm(data.returnvalue), abortCont)
-
+        console.log(top_k_per_algorithm)
         return () => abortCont.abort();
     }
     useEffect(fetchTopKPerAlgorithm, [start_date,end_date,abtest_id],)

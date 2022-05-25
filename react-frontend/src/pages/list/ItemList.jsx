@@ -5,6 +5,7 @@ import "./list.css"
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
 import InputSelector from "../../components/InputSelector";
 import AlgorithmPicker from "../../components/Algorithmpicker";
+import {useParams} from "react-router-dom";
 
 const ItemList = () => {
     const [personal_abtests, setPersonalABTests] = useState(null);

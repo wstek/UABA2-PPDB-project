@@ -33,6 +33,68 @@ def get_personal_algorithms(abtest_id):
     return {"personal_algorithms": personal_algorithms}
 
 
+@api_statistics.route("/api/user/get_top_k_per_algorithm/<int:abtest_id>/<int:user_id>")
+def getTopKPerAlgorithmPerDay(abtest_id, user_id):
+    dates = database_connection.session_execute_and_fetch(
+        f'''
+        select start_date, end_date from ab_test where abtest_id = {abtest_id}
+        '''
+    )
+    start_date = dates[0][0]
+    start_date = start_date.strftime("%d-%b-%Y")
+    end_date = dates[0][1]
+    end_date = end_date.strftime("%d-%b-%Y")
+
+    query_result = database_connection.session_execute_and_fetch(f''' 
+            -- take top k out
+            select date_of, unique_article_id, algorithm_id, recommendation_id
+            from algorithm natural join statistics natural join customer_specific_statistics 
+            natural join recommendation
+            where abtest_id = {abtest_id} and date_of between '{start_date}' and '{end_date}'
+            and unique_customer_id = '{user_id}' order by date_of, recommendation_id, algorithm_id
+            ''')
+
+    response = dict()
+    date = None
+    d = None
+    rid = None
+
+    for row in query_result:
+        if not date or d != row[0]:
+
+            date = row[0]
+            d = row[0]
+            date = date.strftime("%d-%b-%Y")
+            response[date] = []
+
+        if rid != row.recommendation_id or not rid:
+            rid = row.recommendation_id
+            response[date].append({})
+        response[date][rid - 1][str(row[2])] = {"article" : row[1]}
+
+    dates = []
+
+    for key in response:
+        dates.append(key)
+
+    return {"resp": response, "dates": dates}
+
+@api_statistics.route("/api/user/metadata/<int:abtest_id>/<int:user_id>")
+def getMetadata(abtest_id, user_id):
+
+    query_result = database_connection.session_execute_and_fetch(f''' 
+            -- take top k out
+            select attribute_name, attribute_value
+            from customer natural join customer_attribute natural join ab_test
+            where abtest_id = '{abtest_id}'and unique_customer_id = '{user_id}'
+            ''')
+
+    response = dict()
+    for row in query_result:
+        response[row[0]] = row[1]
+    return response
+
+
 @api_statistics.route("/api/items/<int:abtest_id>/<int:algorithm_id>", methods=['GET'])
 def get_items(abtest_id, algorithm_id):
     active_items = database_connection.session_execute_and_fetch(
