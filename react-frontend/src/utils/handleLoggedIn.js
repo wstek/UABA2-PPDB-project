@@ -1,13 +1,15 @@
-export function handleLoggedIn(setAdmin, setAuthed, setIsLoading, setJustLoggedIn) {
+export function handleLoggedIn(setUser, setIsLoading, setJustLoggedIn) {
     setIsLoading(true);
     fetch('/api/me', {
         method: 'GET',
         credentials: 'include'
     }).then(res => {
-        setAuthed(res.ok);
-        return res.json()
+        if (res.ok) return res.json()
+        return null
     }).then(data => {
-        setAdmin(data.admin)
+        setUser(data)
+        // console.log(data)
+        // setAdmin(data.admin)
         setIsLoading(false);
     })
 }

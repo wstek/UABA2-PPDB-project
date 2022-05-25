@@ -11,7 +11,7 @@ export function DatasetStatistics() {
     const [dataset_information, setDatasetInformation] = useState(null)
     const fetchDatasetInformation = () => {
         setDatasetInformation(null)
-        let url = '/api/get_*datasets_information/' + dataset_name
+        let url = '/api/get_dataset_information/' + dataset_name
         fetchData(url, (data) => {
             console.log(data)
             setDatasetInformation(data)
@@ -22,9 +22,9 @@ export function DatasetStatistics() {
     if (!dataset_information) return <PurpleSpinner/>
     // console.log(dataset_information)
     return (<>
-            <div className="row row-cols-1 row-cols-lg-3 g-4 text-center center mx-auto align-content-center">
+            <div className="row row-cols-1 row-cols-lg-3 g-4 text-center mx-auto align-content-center">
                 <div className={"col-12 col-4-lg"}>
-                    <div className="card" >
+                    <div className="card h-100" >
                         <div className="card-body">
                             <h4 className="card-title">#Customers: {dataset_information.user_count}</h4>
                             <p className="card-text">Unique customers present in this dataset.</p>
@@ -32,8 +32,8 @@ export function DatasetStatistics() {
                         </div>
                     </div>
                 </div>
-                <div className={"col-12 col-4-lg"}>
-                    <div className="card">
+                <div className={"col-12  col-4-lg"}>
+                    <div className="card h-100">
                         <div className="card-body">
                             <h4 className="card-title">#Interactions: {dataset_information.purchase_count}</h4>
                             <p className="card-text">Unique purchases made in this dataset.</p>
@@ -41,7 +41,7 @@ export function DatasetStatistics() {
                     </div>
                 </div>
                 <div className={"col-12 col-4-lg"}>
-                    <div className="card">
+                    <div className="card h-100">
                         <div className="card-body">
                             <h4 className="card-title">#Articles: {dataset_information.purchase_count}</h4>
                             <p className="card-text">Unique articles present in this dataset.</p>

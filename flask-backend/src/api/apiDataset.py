@@ -54,10 +54,9 @@ def upload_dataset():
     return {"task_id": task.id}, 202
 
 
-@api_dataset.route("/api/get_datasets_information/<dataset_name>")
+@api_dataset.route("/api/get_dataset_information/<dataset_name>")
 def get_dataset_information(dataset_name):
     information = dict()
-
     # User Count
     query_result = database_connection.getUserCount(dataset_name)
     information["user_count"] = query_result.count

@@ -1,6 +1,8 @@
 import {Link} from "react-router-dom";
 import logo from "../images/logo/logo-with-right-text.png";
 import React from 'react';
+import {useContext} from "react";
+import {UserContext} from "../utils/UserContext";
 
 function LoginButton() {
     return (
@@ -89,7 +91,8 @@ function ViewDataSetButton() {
     )
 }
 
-function Navbar({admin, auth}) {
+function Navbar() {
+    const {user} = useContext(UserContext);
     return (
         <nav className="navbar navbar-expand-md navbar-light bg-purple justify-content-center sticky-lg-top">
             <div className="container-fluid">
@@ -100,16 +103,16 @@ function Navbar({admin, auth}) {
                     </ul>
 
                     <ul className="navbar-nav w-100 justify-content-center ">
-                        {admin && <ViewDataSetButton/>}
+                        {user && <ViewDataSetButton/>}
 
-                        {admin && <UploadDataSetButton/>}
+                        {(user && user.admin) && <UploadDataSetButton/>}
                     </ul>
                     <ul className="navbar-nav w-100 justify-content-center ">
-                        {auth && <SetupButton/>}
-                        {auth && <DashboardButton/>}
-                        {auth && <AccountButton/>}
-                        {!auth && <LoginButton/>}
-                        {!auth && <SignUpButton/>}
+                        {user && <SetupButton/>}
+                        {user && <DashboardButton/>}
+                        {user && <AccountButton/>}
+                        {!user && <LoginButton/>}
+                        {!user && <SignUpButton/>}
                     </ul>
                 </div>
             </div>

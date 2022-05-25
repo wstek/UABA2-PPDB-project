@@ -7,7 +7,6 @@ import axios from "axios";
 // todo: don't upload and process csv files that are not used
 
 export default function DatasetUpload() {
-    console.log("hi")
     // dataset files
     const [files, setFiles] = useState([]);
 

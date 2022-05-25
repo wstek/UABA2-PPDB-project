@@ -1,8 +1,8 @@
 from io import StringIO
-from psycopg2.extensions import register_adapter, AsIs
 
-import sqlalchemy
 import numpy
+import sqlalchemy
+from psycopg2.extensions import register_adapter, AsIs
 from sqlalchemy import MetaData, text
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -94,7 +94,8 @@ class DatabaseConnection:
         query = f'''
             select abtest_id 
             from ab_test 
-            where created_by = '{username}';
+            where created_by = '{username}'
+            order by abtest_id;
             '''
         return self.session_execute_and_fetch(query)
 
@@ -315,6 +316,19 @@ class DatabaseConnection:
                 from statistics natural join algorithm natural join ab_test 
                 where abtest_id = {abtest_id}
                 order by date_of
+            '''
+        return self.session_execute_and_fetch(query, fetchall=True)
+
+    def getUniqueCustomerStats(self, abtest_id, start_date, end_date):
+        query = f'''
+            select unique_customer_id, count(*) as purchases, to_char(sum(price), '99999999990.999') as revenue, 
+                    count(distinct (bought_on)) as days_active
+            from customer
+                     natural join (select dataset_name from ab_test where abtest_id = {abtest_id}) ab_test
+                     natural join (select customer_id, dataset_name, bought_on, price
+                                   from purchase
+                                   where bought_on between '{start_date}' and '{end_date}') purchase
+            group by unique_customer_id ;
             '''
         return self.session_execute_and_fetch(query, fetchall=True)
 

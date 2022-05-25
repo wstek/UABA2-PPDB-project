@@ -3,8 +3,8 @@ import styled from 'styled-components'
 import {useTable} from 'react-table'
 
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
-import {PurpleSpinner} from "../PurpleSpinner";
 import Table from 'react-bootstrap/Table'
+import {PurpleSpinner} from "../PurpleSpinner";
 
 const Styles = styled.div`
 
@@ -41,41 +41,42 @@ function ReactTable({columns, data}) {
         columns, data,
     })
     // Render the UI for your table
-    return (
-        <div className="row justify-content-center">
+    return (<div className="row justify-content-center">
             <div className="col-auto">
-        <Table responsive className={"border-dark avoid-break-inside border-2 border"} {...getTableProps()}>
-        <thead className={"bg-darkpurple"}>
-        {headerGroups.map(headerGroup => (<tr {...headerGroup.getHeaderGroupProps()}>
-            {headerGroup.headers.map(column => (<th className={"text-white"} {...column.getHeaderProps()}>{column.render('Header')}</th>))}
-        </tr>))}
-        </thead >
-        <tbody className={"bg-purple"} {...getTableBodyProps()}>
-        {rows.map((row, i) => {
-            prepareRow(row)
-            return (<tr {...row.getRowProps()}>
-                {row.cells.map(cell => {
-                    return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                })}
-            </tr>)
-        })}
-        </tbody>
-    </Table>
+                <Table responsive className={"border-dark avoid-break-inside border-2 border"} {...getTableProps()}>
+                    <thead className={"bg-darkpurple"}>
+                    {headerGroups.map(headerGroup => (<tr {...headerGroup.getHeaderGroupProps()}>
+                        {headerGroup.headers.map(column => (
+                            <th className={"text-white"} {...column.getHeaderProps()}>{column.render('Header')}</th>))}
+                    </tr>))}
+                    </thead>
+                    <tbody className={"bg-purple"} {...getTableBodyProps()}>
+                    {rows.map((row, i) => {
+                        prepareRow(row)
+                        return (<tr {...row.getRowProps()}>
+                            {row.cells.map(cell => {
+                                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                            })}
+                        </tr>)
+                    })}
+                    </tbody>
+                </Table>
             </div>
-            </div>
-                )
+        </div>)
 }
 
 export function TopKPurchasedTable({abtest_id, start_date, end_date}) {
     const [top_k_purchased, setTopKPurchased] = useState()
-     const fetchTopKPerAlgorithm = () => {
+    const fetchTopKPerAlgorithm = () => {
         const abortCont = new AbortController();
-        let api = '/api/abtest/statistics/get_top_k_purchased/' + abtest_id + '/2020-01-01/2020-01-10'
-        if (abtest_id) fetchData(api, (data) => setTopKPurchased(data.returnvalue), abortCont)
+        console.log(abtest_id , start_date , end_date)
+        let api = `/api/statistics/abtest/${abtest_id}/get_top_k_purchased/${start_date}/${end_date}`
+        if (abtest_id != null && start_date != null && end_date != null) fetchData(api, (data) => setTopKPurchased(data.returnvalue), abortCont)
 
         return () => abortCont.abort();
     }
-    useEffect(fetchTopKPerAlgorithm, [abtest_id],)
+
+    useEffect(fetchTopKPerAlgorithm, [abtest_id,start_date,end_date],)
     const makeColomns = (top_k_purchased) => {
         let columns
         if (top_k_purchased) {
@@ -98,7 +99,7 @@ export function TopKPerAlgorithmTable({abtest_id, start_date, end_date}) {
     const [top_k_per_algorithm, setTopKPerAlgorithm] = useState()
     const fetchTopKPerAlgorithm = () => {
         const abortCont = new AbortController();
-        let api = `/api/abtest/statistics/get_top_k_per_algorithm/${abtest_id}/${start_date}/${end_date}`
+        let api = `/api/statistics/abtest/${abtest_id}/get_top_k_per_algorithm//${start_date}/${end_date}`
         if (abtest_id) fetchData(api, (data) => setTopKPerAlgorithm(data.returnvalue), abortCont)
         console.log(top_k_per_algorithm)
         return () => abortCont.abort();

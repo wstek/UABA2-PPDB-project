@@ -4,28 +4,28 @@ import BootstrapTable from "./BootstrapTable";
 import React, {useEffect, useMemo, useState} from 'react'
 import {PurpleSpinner} from "../PurpleSpinner"
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
+import {DataGrid} from '@mui/x-data-grid';
 
 
 function GeneralUserOverview({abtest_id, date_start_index, date_end_index}) {
     const columns1 = [{Header: 'Active User Count', accessor: 'user_count'}, {
         Header: 'Revenue Over Period', accessor: 'revenue'
     }]
-    let abortCont = null
     // const [activeUserCount,setActiveUserCount] = useState(null)
     const [revenue_per_day, setRevenuePerDay] = useState(null)
     const [activeUserCount, setActiveUserCount] = useState(null)
 
     const revenue = useMemo(() => {
         let revenue = null
-        if (revenue_per_day){
-            revenue = revenue_per_day.slice(date_start_index, date_end_index - date_start_index).reduce((partialSum, a) => partialSum + a[1], 0).toFixed(2)
+        if (revenue_per_day) {
+            revenue = revenue_per_day.slice(date_start_index, date_end_index+1).reduce((partialSum, a) => partialSum + a[1], 0).toFixed(2)
         }
         return revenue
-    }, [revenue_per_day,date_start_index,date_end_index]);
+    }, [revenue_per_day, date_start_index, date_end_index]);
 
     function fetchActiveUserCount() {
-        abortCont = new AbortController()
-        let api = `/api/abtest/get_active_usercount/${abtest_id}/${date_start_index}/${date_end_index}`
+        const abortCont = new AbortController()
+        let api = `/api/abtest/${abtest_id}/get_active_usercount/${date_start_index}/${date_end_index}`
         fetchData(api, (data) => {
             setActiveUserCount(data.returnvalue)
         }, abortCont)
@@ -33,12 +33,13 @@ function GeneralUserOverview({abtest_id, date_start_index, date_end_index}) {
     }
 
     function fetchRevenuePerDay() {
-        abortCont = new AbortController()
-        let api = `/api/abtest/get_total_revenue_over_time/${abtest_id}`
+        const abortCont = new AbortController()
+        let api = `/api/abtest/${abtest_id}/get_total_revenue_over_time`
         fetchData(api, (data) => {
             setRevenuePerDay(data.returnvalue)
         }, abortCont)
         return () => abortCont.abort();
+
     }
 
     useEffect(() => {
@@ -55,11 +56,61 @@ function GeneralUserOverview({abtest_id, date_start_index, date_end_index}) {
     }]}/>)
 }
 
-function CustomerOverview({abtest_id, date_start_index, date_end_index}) {
+function CustomerList({abtest_id, date_start_index, date_end_index}) {
+    const columns = [{headerName: 'Customer', field: 'Customer', width: '150', headerAlign: 'center',}, {
+        headerName: 'Purchases', field: 'Purchases', width: '150', headerAlign: 'center',
+    }, {headerName: 'Revenue', field: 'Revenue', width: '150', headerAlign: 'center',}, {
+        headerName: 'Days Active',
+        field: 'Days Active',
+        width: '150',
+        headerAlign: 'center',
+    }]
+    const [customerData, setCustomerData] = useState(null)
 
+    function fetchCustomerData() {
+        const abortCont = new AbortController()
+        const api = `/api/statistics/abtest/${abtest_id}/get_unique_customer_stats/${date_start_index}/${date_end_index}`
+        fetchData(api, (data) => {
+            setCustomerData(data.returnvalue)
+        }, abortCont)
+        return () => abortCont.abort()
+    }
+
+    useEffect(fetchCustomerData, [abtest_id, date_start_index, date_end_index])
+    if (customerData == null) return <PurpleSpinner/>
+    return (
+        <div style={{height: '80vh', width: '100%'}}>
+            <DataGrid className={''}
+                      getRowId={(row) => row.Customer}
+                      rows={customerData}
+                      columns={columns}
+                      autoPageSize
+                      sx={{
+                          boxShadow: 5,
+                          border: 3,
+                          borderColor: '#7734E7FF',
+                      }}
+            />
+        </div>
+    )
+}
+
+
+function CustomerOverview({abtest_id, date_start_index, date_end_index}) {
     if (!(abtest_id != null && date_start_index != null && date_end_index != null)) return <PurpleSpinner/>
-    return <GeneralUserOverview abtest_id={abtest_id} date_start_index={date_start_index}
-                                date_end_index={date_end_index}/>
+    return (<>
+        <div className={"row text-center align-content-center justify-content-center mx-auto"}>
+            <GeneralUserOverview
+                abtest_id={abtest_id} date_start_index={date_start_index}
+                date_end_index={date_end_index}/>
+        </div>
+        <div className={"row text-center align-content-center justify-content-center mx-auto"}>
+            <CustomerList abtest_id={abtest_id} date_start_index={date_start_index}
+                          date_end_index={date_end_index}/>
+
+        </div>
+    </>)
+
 }
 
 export default CustomerOverview;

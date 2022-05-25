@@ -5,15 +5,22 @@ import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import SsidChartIcon from '@mui/icons-material/SsidChart';
 import HomeIcon from '@mui/icons-material/Home';
 import BiotechIcon from '@mui/icons-material/Biotech';
-import {Link} from "react-router-dom"
+import {Link, useParams} from "react-router-dom"
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import PreviewIcon from '@mui/icons-material/Preview';
 import PersonIcon from '@mui/icons-material/Person';
-
+import InfoIcon from '@mui/icons-material/Info';
+import logOut from '../../utils/logOut'
 const Sidebar = () => {
-    return (<div className="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-purple border-dark-purple sticky-sidebar">
+// const queryParams = new URLSearchParams(window.location.search);
+// const id = queryParams.get('abtest_id');
+//     console.log(path)
+    let {abtest_id} = useParams()
+    // console.log(id); // 55 test null
+
+    return (<div className="d-flex flex-column col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-purple border-dark-purple sticky-sidebar">
         <div
             className="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-90">
             <Link to="/"
@@ -53,9 +60,13 @@ const Sidebar = () => {
                         <ul className="collapse nav flex-column ms-1" id="statistics_menu"
                             data-bs-parent="#abtest_menu">
                             <li className="w-100">
-                                <Link to="/ABTest/Statistics" className="nav-link px-4"> <HourglassEmptyIcon/>
+                                <Link to={() => {
+                                    if (abtest_id)
+                                        return `/Statistics/ABTest/${abtest_id}/GeneralInfo`
+                                    return `/Statistics/ABTest/GeneralInfo`}
+                                } className="nav-link px-4"> <InfoIcon/>
                                     <span
-                                        className="d-none d-sm-inline">Info</span></Link>
+                                        className="d-none d-sm-inline"> Info</span></Link>
                             </li>
                         </ul>
                     </ul>
@@ -95,7 +106,7 @@ const Sidebar = () => {
                     <li>
                         <hr className="dropdown-divider"/>
                     </li>
-                    <li><Link className="dropdown-item" to="#">Sign out</Link></li>
+                    <li><Link className="dropdown-item" to="/sign_in" onClick={logOut}>Sign out</Link></li>
                 </ul>
             </div>
         </div>

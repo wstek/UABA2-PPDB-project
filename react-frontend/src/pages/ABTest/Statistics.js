@@ -87,14 +87,14 @@ function StatisticsInformation() {
 
     function fetchABTestData(abortCont) {
         setABTestData(null)
-        let url = '/api/abtest/statistics/' + abtest_id + '/ABTest_information'
+        let url = '/api/statistics/abtest/' + abtest_id + '/ABTest_information'
         fetchData(url, setABTestData, abortCont, {}, onNotFound)
     }
 
     function fetchInputParameters(abortCont) {
         setInputAlgorithms(null)
 
-        let url = '/api/abtest/statistics/' + abtest_id + '/algorithm_information'
+        let url = '/api/statistics/abtest/' + abtest_id + '/algorithm_information'
         fetchData(url, (data) => {
             setInputAlgorithms(data);
         }, abortCont, {}, onNotFound)
@@ -103,22 +103,22 @@ function StatisticsInformation() {
 
     function fetchInputActiveUsersOverTime(abortCont) {
         setActiveUsersOverTime(null)
-        fetchData('/api/abtest/statistics/' + abtest_id + '/active_users_over_time', setActiveUsersOverTime, abortCont, {}, onNotFound)
+        fetchData('/api/statistics/abtest/' + abtest_id + '/active_users_over_time', setActiveUsersOverTime, abortCont, {}, onNotFound)
     }
 
     function fetchInputPurchasesOverTime(abortCont) {
         setPurchasesOverTime(null)
-        fetchData('/api/abtest/statistics/' + abtest_id + '/purchases_over_time', setPurchasesOverTime, abortCont, {}, onNotFound)
+        fetchData('/api/statistics/abtest/' + abtest_id + '/purchases_over_time', setPurchasesOverTime, abortCont, {}, onNotFound)
     }
 
     function fetchCTROverTime(abortCont) {
         setClickThroughRate(null)
-        fetchData('/api/abtest/statistics/' + abtest_id + '/CTR_over_time', setClickThroughRate, abortCont, {}, onNotFound)
+        fetchData('/api/statistics/abtest/' + abtest_id + '/CTR_over_time', setClickThroughRate, abortCont, {}, onNotFound)
     }
 
     function fetchAttRateOverTime(abortCont) {
         setAttributionRate(null)
-        fetchData('/api/abtest/statistics/' + abtest_id + '/AttrRate_over_time', setAttributionRate, abortCont, {}, onNotFound)
+        fetchData('/api/statistics/abtest/' + abtest_id + '/AttrRate_over_time', setAttributionRate, abortCont, {}, onNotFound)
     }
 
     useEffect(() => {
@@ -138,7 +138,7 @@ function StatisticsInformation() {
     }, [abtest_id],);
 
     function handleDeleteABTest() {
-        let api = '/api/abtest/delete/' + abtest_id + '/'
+        let api = '/api/abtest/' + abtest_id + '/delete/'
         if (!window.confirm("Are you sure you want to delete the ABTest?")) {
             return
         }
@@ -209,10 +209,12 @@ function StatisticsInformation() {
                                        end_date={state.abtest_data.dates[state.selected_end_date]}/>: <PurpleSpinner />}
             </div>
             <div className="col-auto my-auto" style={{minHeight: "400px"}}>
-                <CustomerOverview abtest_id={abtest_id} date_start_index={state.selected_start_date} date_end_index = {state.selected_end_date} />
-                <TopKPurchasedTable abtest_id={abtest_id}/>
+                <TopKPurchasedTable start_date={state.selected_start_date} end_date={state.selected_end_date} abtest_id={abtest_id}/>
             </div>
         </div>
+                <div className="row text-center align-content-center justify-content-center mx-auto">
+                    <CustomerOverview abtest_id={abtest_id} date_start_index={state.selected_start_date} date_end_index = {state.selected_end_date} />
+                </div>
         <ColoredLine color={"purple"}/>
     </>;
 }
@@ -222,27 +224,33 @@ function Statistics() {
     const history = useHistory();
 
     function fetchCurrentUserABTestIDs() {
-        let url = '/api/abtest/statistics/'
+        let url = '/api/statistics/'
         fetchData(url, (data) => setPersonalAbTests(data.personal_abtestids))
     }
 
     useEffect(fetchCurrentUserABTestIDs, [])
-
-
-    // setSelectedABTest(null)
 
     return (<div className="container-fluid">
         <div className="row text-center align-items-center pt-4 mb-3">
             <InputSelector inputs={personal_abtests}
                            onClick={fetchCurrentUserABTestIDs}
                            onChange={(selected_abtest_id) => {
-                               history.push('/ABTest/' + selected_abtest_id + '/Statistics/');
+                               let url_array= history.location.pathname.split('/')
+                               let abtest_id_index = url_array.findIndex(element=>element==='ABTest') + 1
+                               if (! Number.isInteger(Number(url_array[abtest_id_index]))) {
+                                   url_array.splice(abtest_id_index,0,selected_abtest_id)
+                               }
+                               else {
+                                   url_array[abtest_id_index] = selected_abtest_id
+                               }
+                               history.push(url_array.join('/'));
                            }}
                            header={"Select AB-Test"}
             />
         </div>
         <Switch>
-            <Route exact path="/ABTest/:abtest_id/Statistics/" children={<StatisticsInformation/>}/>
+            {/*<Route exact path="/Statistics/ABTest/:abtest_id/" children={<StatisticsInformation/>}/>*/}
+            <Route path="/Statistics/ABTest/:abtest_id/GeneralInfo" children={<StatisticsInformation/>}/>
         </Switch>
     </div>);
 }
