@@ -1,4 +1,5 @@
 //7 10 14 28 30 31 55 81 92 95
+//
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import React, {useEffect, useState, createContext } from "react";
 import Navbar from './components/Navbar';
@@ -104,7 +105,7 @@ function App() {
                                 <Route exact path="/ABTest/:abtest_id/User/:user_id">
                                     <UserList/>
                                 </Route>
-                                <Route exact path="/items">
+                                <Route exact path="/ABTest/:abtest_id/Item/:item_id">
                                     <ItemList/>
                                 </Route>
                                 <Route exact path="/stats">

@@ -95,8 +95,8 @@ def getMetadata(abtest_id, user_id):
     return response
 
 
-@api_statistics.route("/api/items/<int:abtest_id>/<int:algorithm_id>", methods=['GET'])
-def get_items(abtest_id, algorithm_id):
+@api_statistics.route("/api/items/<int:abtest_id>", methods=['GET'])
+def get_items(abtest_id):
     active_items = database_connection.session_execute_and_fetch(
         f'''
         select unique_article_id
@@ -141,114 +141,166 @@ natural join
 @api_statistics.route("/api/items/purchases/<int:abtest_id>/<int:article_id>", methods=['GET'])
 def get_item_purchases_over_time(abtest_id, article_id):
     amount_of_purchases = database_connection.session_execute_and_fetch(
-        f"select distinct bought_on from article natural join ab_test natural join purchase "
-        f"where bought_on >= start_date and bought_on <= end_date and abtest_id = {abtest_id}  "
+       f'''
+        select distinct date_of from statistics natural join ab_test natural join algorithm
+        where date_of >= start_date and date_of <= end_date and abtest_id = 18 order by date_of
+       '''
     )
 
     response = dict()
     for i in amount_of_purchases:
         j = i[0]
         j = j.strftime("%d-%b-%Y")
-        response[j] = []
+        response[j] = 0
 
     amount_of_purchases = database_connection.session_execute_and_fetch(
-        f"select bought_on, customer_id from article natural join ab_test natural join purchase "
-        f"where bought_on >= start_date and bought_on <= end_date and abtest_id = {abtest_id} and  unique_article_id = {article_id} "
+        f'''
+            SELECT bought_on,COUNT(unique_article_id)
+            FROM purchase natural join article natural join ab_test
+            WHERE start_date <= bought_on and bought_on <= end_date 
+            and abtest_id = '{abtest_id}' and unique_article_id = '{article_id}'
+            group by bought_on ;        
+        '''
     )
 
     if not amount_of_purchases:
-        return {"error": "Page does not exist"}, 404
+        return response
 
     date = None
     d = None
-    for article in amount_of_purchases:
-        if not date or d != article[0]:
-            date = article[0]
-            d = article[0]
-            date = date.strftime("%d-%b-%Y")
-            response[date] = []
-
-        response[date].append(article[1])
+    for purchase in amount_of_purchases:
+        date = purchase.bought_on
+        date = date.strftime("%d-%b-%Y")
+        response[date] = (purchase[1])
     return response
 
 
 @api_statistics.route("/api/items/recommendations/<int:abtest_id>/<int:article_id>", methods=['GET'])
 def get_item_recommendations_over_time(abtest_id, article_id):
     amount_of_recommendations = database_connection.session_execute_and_fetch(
-        f"select distinct date_of  from recommendation natural join statistics natural join ab_test "
-        f"where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id}"
+        f'''
+         select distinct date_of from statistics natural join ab_test natural join algorithm
+         where date_of >= start_date and date_of <= end_date and abtest_id = 18 order by date_of
+        '''
     )
 
+    algorithms = database_connection.session_execute_and_fetch(
+        f'''
+            select algorithm_id from algorithm where abtest_id = 18;
+        '''
+    )
+    dates = []
+    aids = []
     response = dict()
     for key in amount_of_recommendations:
         date = key[0]
         date = date.strftime("%d-%b-%Y")
-        response[date] = []
+        dates.append(date)
+        response[date] = {}
+        for i in algorithms:
+            algorithm = i[0]
+            if algorithm not in aids:
+                aids.append(algorithm)
+            response[date][algorithm] = 0
 
     amount_of_recommendations = database_connection.session_execute_and_fetch(
-        f"select date_of, unique_customer_id  "
-        f"from recommendation natural join statistics natural join ab_test natural join purchase "
-        f"natural join article natural join customer_specific_statistics natural join customer "
-        f"where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id} and  unique_article_id = {article_id} "
+        f'''
+            select date_of, algorithm_id, recommendation_id
+            from algorithm natural join statistics
+            natural join recommendation natural join ab_test
+            where abtest_id = '{abtest_id}' and date_of between start_date and end_date and  unique_article_id = '{article_id}'
+            group by date_of, algorithm_id, recommendation_id;
+        '''
     )
 
     if not amount_of_recommendations:
-        return {"error": "Page does not exist"}, 404
+        return {"resp": response, "aids": aids}
 
     date = None
     d = None
+    algorithm_id = None
     for article in amount_of_recommendations:
         if not date or d != article[0]:
             date = article[0]
             d = article[0]
             date = date.strftime("%d-%b-%Y")
-            response[date] = []
 
-        response[date].append(article[1])
-    return response
+        if not algorithm_id or algorithm_id != article[1]:
+            algorithm_id = article[1]
+
+        response[date][algorithm_id] += 1
+    return {"resp": response, "aids": aids}
 
 
-@api_statistics.route("/api/items/recommendations/purchases/<int:abtest_id>/<int:article_id>/<int:algorithm_id>",
+@api_statistics.route("/api/items/recommendations/purchases/<int:abtest_id>/<int:article_id>",
                       methods=['GET'])
-def get_item_recommendations_and_purchases_over_time(abtest_id, article_id, algorithm_id):
+def get_item_recommendations_and_purchases_over_time(abtest_id, article_id):
     amount_of_recommendations = database_connection.session_execute_and_fetch(
-        f"select distinct date_of  from recommendation natural join statistics natural join ab_test "
-        f"where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id}"
+        f'''
+         select distinct date_of from statistics natural join ab_test natural join algorithm
+         where date_of >= start_date and date_of <= end_date and abtest_id = 18 order by date_of
+        '''
     )
 
+    algorithms = database_connection.session_execute_and_fetch(
+        f'''
+            select algorithm_id from algorithm where abtest_id = 18;
+        '''
+    )
+    dates = []
+    aids = []
     response = dict()
     for key in amount_of_recommendations:
         date = key[0]
         date = date.strftime("%d-%b-%Y")
-        response[date] = []
+        dates.append(date)
+        response[date] = {}
+        for i in algorithms:
+            algorithm = i[0]
+            if algorithm not in aids:
+                aids.append(algorithm)
+            response[date][algorithm] = 0
+
+    dates = database_connection.session_execute_and_fetch(
+        f'''
+        select start_date, end_date from ab_test where abtest_id = {abtest_id}
+        '''
+    )
+    start_date = dates[0][0]
+    start_date = start_date.strftime("%d-%b-%Y")
+    end_date = dates[0][1]
+    end_date = end_date.strftime("%d-%b-%Y")
 
     amount_of_recommendations = database_connection.session_execute_and_fetch(
         f'''
-        select date_of, count(*)
-        from recommendation natural join statistics natural join ab_test natural join purchase natural join article natural join customer_specific_statistics
+        select date_of,  algorithm_id, recommendation_id, unique_article_id
+        from recommendation natural join statistics natural join algorithm natural join purchase natural join article natural join customer_specific_statistics
         natural join customer
-        where abtest_id  = {abtest_id} and date_of >= start_date and date_of <= end_date
-        and algorithm_id = {algorithm_id} and date_of = bought_on and unique_article_id = {article_id}
-        group by date_of, unique_article_id
+        where abtest_id  = '{abtest_id}' and bought_on >= '{start_date}' and bought_on <= '{end_date}' 
+        and date_of = bought_on and unique_article_id = '{article_id}'
+        group by date_of, algorithm_id, recommendation_id, unique_article_id;
     '''
 
     )
 
     if not amount_of_recommendations:
-        return response
+        return {"resp": response, "aids": aids}
 
 
     date = None
     d = None
+    algorithm_id = None
     for article in amount_of_recommendations:
         if not date or d != article[0]:
             date = article[0]
             d = article[0]
             date = date.strftime("%d-%b-%Y")
-            response[date] = []
 
-        response[date].append(article[1])
-    return response
+        if not algorithm_id or algorithm_id != article[1]:
+            algorithm_id = article[1]
+
+        response[date][algorithm_id] += 1
+    return {"resp": response, "aids": aids}
 
 
 @api_statistics.route("/api/items/metadata/<int:abtest_id>/<int:article_id>", methods=['GET'])
@@ -266,21 +318,18 @@ def get_item_attribute(abtest_id, article_id):
     return response
 
 
-@api_statistics.route("/api/items/image/<int:article_id>", methods=['GET'])
-def get_item_image( article_id):
+@api_statistics.route("/api/items/image/<int:abtest_id>/<int:article_id>", methods=['GET'])
+def get_item_image(abtest_id, article_id):
     image_url = database_connection.session_execute_and_fetch(
         f"select distinct(attribute_value) from article natural join ab_test natural join article_attribute "
-        f"where unique_article_id = {article_id} and attribute_name = 'image_url'"
+        f"where unique_article_id = {article_id} and attribute_name = 'image_url' and abtest_id = '{abtest_id}'"
     )
+
     if not image_url:
         return {"error": "Page does not exist"}, 404
-    response = dict()
-    string = ""
-    for items in image_url[0]:
-        if items != ',':
-            string += items
-    response["image_url"] = string
 
+    response = dict()
+    response["image"] = image_url[0][0]
     return response
 
 
