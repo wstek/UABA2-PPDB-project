@@ -19,7 +19,7 @@ import Home from "./pages/Home";
 import UserList from "./pages/list/List"
 import Single from './pages/single/Single';
 import Stats from './pages/stats/Stats';
-import TaskTest from "./pages/TaskTest";
+import TaskTest from "./pages/BackgroundTasks/TaskTest";
 import DatasetPage, {DatasetStatistics} from "./pages/Dataset";
 
 
