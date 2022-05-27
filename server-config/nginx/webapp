@@ -1,3 +1,21 @@
+upstream backend {
+    server unix:/home/app/Programming-project-databases/flask-backend/src/webapp1.sock;
+    server unix:/home/app/Programming-project-databases/flask-backend/src/webapp2.sock;
+    server unix:/home/app/Programming-project-databases/flask-backend/src/webapp3.sock;
+}
+
+upstream socketio {
+    ip_hash;
+
+    server unix:/home/app/Programming-project-databases/flask-backend/src/webapp1.sock;
+    server unix:/home/app/Programming-project-databases/flask-backend/src/webapp2.sock;
+    server unix:/home/app/Programming-project-databases/flask-backend/src/webapp3.sock;
+}
+
+upstream webhook {
+    server 127.0.0.1:9000;
+}
+
 server {
     server_name 34.76.219.133 team6.ua-ppdb.me;
     root /home/app/Programming-project-databases/react-frontend/build;
@@ -17,22 +35,26 @@ server {
         add_header Cache-Control "public";
     }
 
-    # Backend Python Flask micro web framework
-    location /api/ {
+    # Backend Python Flask webserver
+    location /api {
         include proxy_params;
+        proxy_pass http://backend;
+    }
 
-        proxy_set_header Connection '';
+    # Backend websocketio connection
+    location /api/socket.io {
+        include proxy_params;
         proxy_http_version 1.1;
-        chunked_transfer_encoding off;
         proxy_buffering off;
-        proxy_cache off;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
 
-        proxy_pass http://unix:/home/app/Programming-project-databases/flask-backend/src/webapp.sock;
+        proxy_pass http://socketio;
     }
 
     # GitHub CI/CD webhook
-    location /hooks/ {
-        proxy_pass http://127.0.0.1:9000/hooks/;
+    location /hooks {
+        proxy_pass http://webhook/hooks;
     }
 
     listen 443 ssl; # managed by Certbot

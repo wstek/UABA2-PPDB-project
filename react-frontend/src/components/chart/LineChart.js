@@ -1,5 +1,5 @@
 import {Chart} from "react-google-charts";
-import {PurpleSpinner} from "./PurpleSpinner"
+import {PurpleSpinner} from "../PurpleSpinner"
 import {useEffect, useState} from "react";
 
 function LineChart({XFnY, title, xMin = 0, xMax = 10}) {
@@ -13,7 +13,7 @@ function LineChart({XFnY, title, xMin = 0, xMax = 10}) {
                 hAxis: {
                     viewWindow: {
                         min: xMin,
-                        max: xMax + 1
+                        max: xMax
                     },
                 }
             }

@@ -1,3 +1,16 @@
+CREATE SCHEMA public;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO public;
+
+create domain algorithmname varchar check (VALUE IN ('ItemKNN', 'Popularity', 'Recency'));
+
+CREATE EXTENSION if not exists citext;
+CREATE DOMAIN email AS citext
+    CHECK ( value ~
+            '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
+CREATE DOMAIN nat_int bigint check ( value >= 0 );
+
+
 CREATE TABLE IF NOT EXISTS "datascientist"
 (
     "username"       varchar PRIMARY KEY,
@@ -108,7 +121,8 @@ CREATE TABLE IF NOT EXISTS "algorithm"
     foreign key (abtest_id) references ab_test (abtest_id) on update cascade on delete cascade,
 
     "algorithm_name" algorithmname NOT NULL,
-    PRIMARY KEY ("algorithm_id", "abtest_id")
+
+    PRIMARY KEY ("algorithm_id")
 );
 
 
@@ -116,12 +130,11 @@ CREATE TABLE IF NOT EXISTS "parameter"
 (
     "parameter_name" varchar not null,
     "algorithm_id"   nat_int not null,
-    "abtest_id"      nat_int not null,
     "type"           varchar not null,
 
-    foreign key (algorithm_id, abtest_id) references algorithm (algorithm_id, abtest_id) on update cascade on delete cascade,
+    foreign key (algorithm_id) references algorithm (algorithm_id) on update cascade on delete cascade,
     "value"          varchar not null,
-    PRIMARY KEY ("parameter_name", "algorithm_id", "abtest_id")
+    PRIMARY KEY ("parameter_name", "algorithm_id")
 );
 
 
@@ -130,11 +143,10 @@ CREATE TABLE IF NOT EXISTS "statistics"
     "statistics_id" serial PRIMARY KEY,
     "date_of"       date    not null,
     "algorithm_id"  nat_int not null,
-    "abtest_id"     int     not null,
 
-    unique (abtest_id, algorithm_id, date_of),
+    unique (algorithm_id, date_of),
 
-    foreign key (algorithm_id, abtest_id) references algorithm (algorithm_id, abtest_id) on update cascade on delete cascade
+    foreign key (algorithm_id) references algorithm (algorithm_id) on update cascade on delete cascade
 );
 
 
@@ -163,14 +175,8 @@ CREATE TABLE IF NOT EXISTS "recommendation"
 
 CREATE TABLE IF NOT EXISTS "dynamic_stepsize_var"
 (
-    statistics_id   int references statistics (statistics_id),
+    statistics_id   int references statistics (statistics_id) on update cascade on delete cascade,
     parameter_name  varchar,
     parameter_value varchar,
     PRIMARY KEY (statistics_id, parameter_name)
 );
-
-
-insert into "datascientist" (username, first_name, last_name, birthdate, password, email_address)
-values ('xSamx33', 'Sam', 'Roggeman', '2001-06-14', '123456789', 'sam.roggeman@gmail.com');
-insert into "admin" (username)
-values ('xSamx33')

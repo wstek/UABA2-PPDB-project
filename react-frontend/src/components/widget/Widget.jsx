@@ -36,13 +36,6 @@ const Widget = ({type}) => {
                     <span className="link">{data.link}</span>
                 </Link>
             </div>
-            {/* <div className="right">
-                <div className="percentage positive">
-                    <KeyboardArrowUpIcon />
-                    {diff}%
-                </div> */}
-            {/* {data.icon} */}
-            {/* </div> */}
         </div>
     );
 }

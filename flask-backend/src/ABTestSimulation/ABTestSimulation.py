@@ -1,5 +1,6 @@
 import random
 import threading
+import time
 
 import numpy
 import pandas as pd
@@ -30,6 +31,7 @@ class UserDataPerStep:
 def remove_tuples(arr):
     for i in range(len(arr)):
         arr[i] = arr[i][0]
+    e = time.time()
 
 
 def generateRandomTopK(listx, items):
@@ -37,13 +39,13 @@ def generateRandomTopK(listx, items):
 
 
 class ABTestSimulation(threading.Thread):
-    def __init__(self, database_connection, sse, abtest):
+    def __init__(self, database_connection, abtest):
         super().__init__()
-        self.sse = sse
+        # self.sse = sse
         self.frontend_data = []
         self.done = False
         self.abtest = abtest
-        self.database_connection = database_connection
+        self.database_connection: database_connection = database_connection
 
         self.prev_progress = 0
         self.current_progress = 0
@@ -77,33 +79,27 @@ class ABTestSimulation(threading.Thread):
         self.database_connection.session.commit()
 
     def run(self):
-
+        # Start Date
         dt_start = pd.to_datetime(self.abtest["start"], format='%Y-%m-%d')
-        dt_current_date = pd.to_datetime(
-            self.abtest["start"], format='%Y-%m-%d')
+        # Current Date = Start Date
+        dt_current_date = dt_start
+        # End Date
         dt_end = pd.to_datetime(self.abtest["end"], format='%Y-%m-%d')
+        # Date Diff
         dayz = (dt_end - dt_start).days
-
-        last_time_train = dt_current_date.strftime('%Y-%m-%d')
-
-        # data statistics over time (x-axis = time)
-        top_k_over_time_statistics = {'time': []}
-        active_users_over_time_statistics = {'time': [], 'n_users': []}
-        data_per_user_over_time_statistics = {'time': [], 'customer_id': {}}
 
         # dynamic algorithms info that changes during simulation
         dynamic_info_algorithms = {}
         dataset_name = self.abtest["dataset_name"]
-        all_customer_ids = self.database_connection.session.execute(
-            f"SELECT DISTINCT unique_customer_id FROM customer where dataset_name='{dataset_name}'").fetchall()
-
-        all_unique_item_ids = self.database_connection.session.execute(
-            f"SELECT DISTINCT unique_article_id FROM article where dataset_name='{dataset_name}'").fetchall()
+        all_customer_ids = self.database_connection.getAllUniqueCumstomerIDs(dataset_name)
+        all_unique_item_ids = self.database_connection.getAllUniqueArticleIDs(dataset_name)
         remove_tuples(all_unique_item_ids)
 
-        for i in range(len(all_customer_ids)):
-            data_per_user_over_time_statistics['customer_id'][all_customer_ids[i][0]] = [
-            ]
+        # data statistics over time (x-axis = time)
+        top_k_over_time_statistics = {'time': []}
+        active_users_over_time_statistics = {'time': [], 'n_users': []}
+        data_per_user_over_time_statistics = {'time': [],
+                                              'customer_id': {customer_id[0]: [] for customer_id in all_customer_ids}}
 
         for i in range(len(self.abtest["algorithms"])):
             idx = int(self.abtest["algorithms"][i]["id"]) - \
@@ -183,12 +179,12 @@ class ABTestSimulation(threading.Thread):
             if len(D_prev_recommendations) == D + 1:
                 D_prev_recommendations.pop(0)
             D_prev_recommendations.append({})
-
             for algo in range(len(self.abtest["algorithms"])):
                 # print(self.frontend_data)
-                self.database_connection.session.execute("INSERT INTO statistics(date_of, algorithm_id, abtest_id) VALUES(:datetime, :algorithm_id,\
-                :abtest_id)", {"datetime": current_date, "algorithm_id": self.abtest["algorithms"][algo]["id"],
-                               "abtest_id": self.abtest["abtest_id"]})
+                self.database_connection.session.execute(
+                    "INSERT INTO statistics(date_of, algorithm_id)"
+                    "VALUES(:datetime, :algorithm_id)",
+                    {"datetime": current_date, "algorithm_id": self.abtest["algorithms"][algo]["id"]})
                 statistics_id = self.database_connection.session.execute(
                     f'SELECT last_value FROM statistics_statistics_id_seq').fetchone()[0]
                 self.database_connection.session.commit()
@@ -225,7 +221,6 @@ class ABTestSimulation(threading.Thread):
                                 interactions[i][0], interactions[i][1])
 
                         if retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval']):
-                            last_time_train = current_date
                             # retrain interval bereikt => train de KNN algoritme
                             dynamic_info_algorithms[idx]["KNN"].train(
                                 interactions, unique_item_ids=all_unique_item_ids)
@@ -648,10 +643,10 @@ class ABTestSimulation(threading.Thread):
 
                 self.prev_progress = self.current_progress
                 self.current_progress = round(n_day / float(dayz), 2) * 100.0
-                self.sse.publish(self.current_progress, type='simulation_progress')
+                # self.sse.publish(self.current_progress, type='simulation_progress')
 
         self.done = True
-        self.sse.publish(100, type='simulation_progress')
+        # self.sse.publish(100, type='simulation_progress')
         self.prev_progress = 0
         self.current_progress = 100
         return

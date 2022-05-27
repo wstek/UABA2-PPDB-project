@@ -1,67 +1,102 @@
-import Datatable from "../../components/datatable/Datatable";
-import Sidebar from "../../components/sidebar/Sidebar";
-import {useEffect, useState, useSyncExternalStore} from "react";
+import React, {useEffect, useState} from "react";
 import "./list.css"
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
-import ABTestPicker from "../../components/ABTestpicker";
-import React from "react";
-import AlgorithmPicker from "../../components/Algorithmpicker";
-
-const List = () => {
-    const [personal_abtests, setPersonalABTests] = useState(null);
-    const [personal_algorithms, setPersonalAlgorithms] = useState(null);
-    const [selected_abtest, setSelectedABTest] = useState(null);
-    const [selected_algorithm, setSelectedAlgorithm] = useState(null);
+import InputSelector from "../../components/InputSelector";
+import {useParams} from "react-router-dom";
+import ReactTable from "../../components/table/ReactTable";
+import styled from 'styled-components'
 
 
-    function fetchCurrentUserAlgorithm() {
-        if(selected_abtest) {
-            let url = '/api/abtest/statistics/' + selected_abtest
-            fetchData(url, setPersonalAlgorithms)
+const Styles = styled.div`
 
+  Table {
+    
+    border-spacing: 0;
+    border: 1px solid black;
+    tr {
+      :last-child {
+        td {
+          border-bottom: 0;
         }
+      }
     }
 
-    function fetchCurrentUserABTestIDs() {
-        let url = '/api/abtest/statistics/'
-        fetchData(url, setPersonalABTests)
+    th,
+    td {
+      margin: 0;
+      padding: 0.5rem;
+      border-bottom: 1px solid black;
+      border-right: 1px solid black;
+      :last-child {
+        border-right: 0;
+      }
+    }
+  }
+`
 
+const UserList = () => {
+    let {abtest_id, customer_id} = useParams();
+    const [top_k_per_algorithm, setTopKPerAlgorithm] = useState(null)
+    const [dates, setDates] = useState(null)
+    const [selectedDate, setSelectedDate] = useState(null)
+    const [columns, setColumns] = useState(null)
+
+    const makeColomns = (top_k_per_algorithm) => {
+        let columns1
+        const keys = Object.keys(top_k_per_algorithm[selectedDate][0])
+        if (top_k_per_algorithm) {
+            columns1 = [{
+                Header: 'Top K Per Algorithm', columns: [{
+                    Header: 'Algorithm ID', accessor: '', columns: [{
+                        Header: 'Rank', accessor: '', Cell: (row) => <div>{parseInt(row.row.id) + 1}</div>,
+                    }]
+                }]
+
+            }]
+            for (let algorithm_id = 0; algorithm_id < keys.length; algorithm_id++) {
+                columns1[0].columns.push({
+                    Header: keys[algorithm_id].toString(), columns: [{
+                        Header: 'Article ID', accessor: keys[algorithm_id] + '.article'
+                    }]
+                })
+            }
+        }
+        return columns1
     }
 
-
-
-    useEffect(fetchCurrentUserABTestIDs,  [],);
-    useEffect(fetchCurrentUserAlgorithm,  [selected_abtest],);
-    useEffect(() => {
+    const fetchTopKPerAlgorithm = () => {
         const abortCont = new AbortController();
+        let api = `/api/user/get_top_k_per_algorithm/${abtest_id}/${customer_id}`
+        if (abtest_id) fetchData(api, (data) => {
+            setTopKPerAlgorithm(data.resp);
+            setDates(data.dates)
+        }, abortCont)
         return () => abortCont.abort();
+    }
+    useEffect(fetchTopKPerAlgorithm, [],)
 
-    }, [selected_abtest],);
 
-    return (
+    function setRow() {
+        if (selectedDate) {
+            const column = makeColomns(top_k_per_algorithm)
+            setColumns(column)
+        }
 
-        <div className="list">
-            <Sidebar/>
-            {/* {!pending && */}
-            <div className="container-fluid my-auto">
-                {!selected_abtest &&
-                <div className="row text-center align-items-center mb-3">
-                    <ABTestPicker personal_abtests={personal_abtests} setSelectedABTest={setSelectedABTest}
-                                  selected_abtest={selected_abtest}/>
-                </div>}
-                {selected_abtest && !selected_algorithm &&
-                <div className="row text-center align-items-center mb-3">
-                    <AlgorithmPicker personal_algorithms={personal_algorithms} setSelectedAlgorithm={setSelectedAlgorithm}
-                                  selected_algorithm={selected_algorithm}/>
-                </div>}
-                {selected_abtest && selected_algorithm &&
-                <div className="listContainer">
-                    <Datatable abtest_id={selected_abtest} algorithm_id={selected_algorithm}/>
-                </div>}
-                {/* } */}
+    }
+    useEffect(setRow, [selectedDate],)
+
+    return (<>
+            <div className={'row text-center mt-3'}>
+                {top_k_per_algorithm && <InputSelector selected_input={selectedDate} inputs={dates} onChange={setSelectedDate}/>}
             </div>
-            // </div>
+            { selectedDate !== 0 && columns && top_k_per_algorithm && top_k_per_algorithm[selectedDate] && <div className={'row text-center mt-3'}>
+                <Styles>
+                    <ReactTable columns={columns} data={top_k_per_algorithm[selectedDate]}/>
+                </Styles>
+            </div>
+            }
+        </>
     );
 }
 
-export default List;
+export default UserList;

@@ -1,6 +1,8 @@
 import "../../index.css"
 import React, {useState} from "react";
 import {Link, useHistory} from "react-router-dom";
+import {useContext} from "react";
+import {UserContext} from "../../utils/UserContext";
 
 
 function POST(path, data) {
@@ -12,7 +14,7 @@ function POST(path, data) {
 }
 
 
-function SignIn({setAuthed, setAdmin, ...props}) {
+function SignIn({...props}) {
     // console.log(props);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -21,6 +23,8 @@ function SignIn({setAuthed, setAdmin, ...props}) {
     const [isPending, setIsPending] = useState(false);
     const [error, setError] = useState(null);
     const history = useHistory();
+    const {updateUser} = useContext(UserContext);
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -48,8 +52,8 @@ function SignIn({setAuthed, setAdmin, ...props}) {
             // history.go(-1);
             setIsPending(false);
             setError(null);
-            setAuthed(true)
-            setAdmin(data.admin)
+            console.log(data)
+            updateUser(data)
             if (props.location.state !== undefined)
                 history.push(props.location.state.from);
             else

@@ -40,8 +40,8 @@ def start_simulation():
         algorithms[i]["id"] = algorithm_id
         for param, value in algorithms[i]["parameters"].items():
             database_connection.session.execute(
-                "INSERT INTO parameter(parameter_name, algorithm_id, abtest_id, type, value) VALUES(:parametername, "
-                ":algorithm_id, :abtest_id, :type, :value)",
+                "INSERT INTO parameter(parameter_name, algorithm_id, type, value) VALUES(:parametername, "
+                ":algorithm_id, :type, :value)",
                 {"parametername": param, "algorithm_id": algorithm_id, "abtest_id": abtest_id, "type": "string",
                  "value": value})
         database_connection.session.commit()
@@ -59,8 +59,3 @@ def start_simulation():
     task = background_start_simulation.delay(user_id=session["user_id"], simulation_input=simulation_input)
 
     return {"task_id": task.id}, 202
-
-
-@api_simulation.route("/api/progress", methods=['GET'])
-def get_data():
-    return {'start': 0, 'end': 0, 'started': False}

@@ -43,12 +43,42 @@ def upload_dataset():
         uploaded_file.save(new_filepath)
 
         # insert into filenames object
-        filenames[original_filename] = new_filepath
+        filenames[original_filename] = [new_filepath, column_select_data["delimiter"]]
 
     # start the dataset insert background process
-    task = insert_dataset.delay(user_id, filenames, column_select_data)
+    print(json.dumps(filenames))
+    print(json.dumps(column_select_data))
+    task = insert_dataset.delay(filenames, column_select_data, user_id=user_id)
 
     return {"task_id": task.id}, 202
+
+
+@api_dataset.route("/api/get_dataset_information/<dataset_name>")
+def get_dataset_information(dataset_name):
+    information = dict()
+    # User Count
+    query_result = database_connection.getUserCount(dataset_name)
+    information["user_count"] = query_result.count
+
+    # Interaction Count
+    query_result = database_connection.getPurchaseCount(dataset_name)
+    information["purchase_count"] = query_result.count
+
+    # Item count
+    query_result = database_connection.getItemCount(dataset_name)
+    information["item_count"] = query_result.count
+
+    query_result = database_connection.getPriceDistribution(dataset_name=dataset_name, intervals=1000)
+
+    information["prices"] = {row.average: row.count for row in query_result}
+    # price_interval_min = price_min
+    # while price_interval_min < price_max:
+    #     price_interval_max = price_interval_min + price_diff
+    #     query_result = database_connection.getPriceCount(price_interval_min, price_interval_max, dataset_name)
+    #     information["prices"][price_interval_min + price_diff / 2] = query_result.count
+    #     price_interval_min = price_interval_max
+
+    return information
 
 
 @api_dataset.route("/api/get_datasets")

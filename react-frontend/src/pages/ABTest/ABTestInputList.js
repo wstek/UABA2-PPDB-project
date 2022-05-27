@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useHistory} from 'react-router-dom';
 import {ColoredLine} from "../../components/ColoredLine";
 
+
 const ABTestInputList = ({abs_algorithms}) => {
     const [id, setId] = useState(1);
     const [isPending, setIsPending] = useState(false);
@@ -49,6 +50,12 @@ const ABTestInputList = ({abs_algorithms}) => {
         document.getElementById('end').value = '2020-01-10'
     }
 
+    function handleResetClicked() {
+        if (window.confirm("Are you sure you want to reset the input?")) {
+            resetInput()
+        }
+    }
+
     const renderFields = () => {
         return (
             <div className="algorithms">
@@ -85,6 +92,7 @@ const ABTestInputList = ({abs_algorithms}) => {
             for (let k = 0; k < con_algorithms[i].parameters.length; k++) {
                 const val = document.getElementById(con_algorithms[i].parameters[k] + con_algorithms[i].id).value;
                 if (!val) {
+                    window.alert("Please fill in all the fields");
                     throw Error('Please fill in all the fields')
                 }
                 algorithmParams.parameters[con_algorithms[i].parameters[k]] = val;
@@ -100,6 +108,7 @@ const ABTestInputList = ({abs_algorithms}) => {
         const dataset_name = select.options[select.selectedIndex].value;
 
         if (!start || !end || !topk || !stepsize || !dataset_name) {
+            window.alert("Please fill in all the fields");
             throw Error('Please fill in all the fields');
         } else {
             const abtest_setup = {start, end, topk, stepsize, dataset_name, algorithms};
@@ -137,13 +146,14 @@ const ABTestInputList = ({abs_algorithms}) => {
         }
     }
 
+
     return (
         <div className="container-fluid pt-5 pb-5 pl-5 pr-5" id='algorithms'>
             <div className="row text-center align-items-center">
 
                 <div className="col-6 text-end">
                     <button className="btn-lg red-hover button-purple red_onhover" type="reset"
-                            onClick={resetInput}>Reset
+                            onClick={handleResetClicked}>Reset
                     </button>
                 </div>
                 <div className="col-6 text-start">
@@ -158,22 +168,22 @@ const ABTestInputList = ({abs_algorithms}) => {
 
                 <div className="col-6">
                     <label htmlFor="start">Start:</label>
-                    <input type="date" className="form-control datefield" id="start"/>
+                    <input type="date" required className="form-control datefield" id="start"/>
                 </div>
                 <div className="col-6">
                     <label htmlFor="end">End:</label>
-                    <input type="date" className="form-control datefield" id="end"/>
+                    <input type="date" required className="form-control datefield" id="end"/>
                 </div>
             </div>
             <div className="row text-center align-items-center mb-5">
                 <div className="col-4">
                     <label htmlFor="topk">Top-K:</label>
-                    <input type="number" className="form-control" id="topk" min="1"
+                    <input type="number" required className="form-control" id="topk" min="1"
                            placeholder="Enter top-k"/>
                 </div>
                 <div className="col-4">
                     <br/>
-                    <select className="selector form-control" id="dataset_name">
+                    <select className="selector form-control" id="dataset_name" required>
                         {datasetsx.map((d) => (
                             <option key={d} value={d}>{d}</option>
                         ))}
@@ -182,7 +192,7 @@ const ABTestInputList = ({abs_algorithms}) => {
 
                 <div className="col-4 ">
                     <label htmlFor="stepsize">Step size:</label>
-                    <input type="number" className="form-control" id="stepsize" min="1"
+                    <input type="number" className="form-control" id="stepsize" min="1" required
                            placeholder="Enter stepsize"/>
                 </div>
             </div>

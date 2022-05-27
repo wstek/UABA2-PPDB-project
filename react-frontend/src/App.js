@@ -1,3 +1,4 @@
+//7 10 14 28 30 31 55 81 92 95
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import React, {useEffect, useState} from "react";
 import Navbar from './components/Navbar';
@@ -7,7 +8,6 @@ import NotFound from './pages/NotFound';
 import SignUp from './pages/Account/SignUp';
 import Account from './pages/Account/Account';
 import SignIn from './pages/Account/SignIn';
-import Contact from './pages/Contact';
 import ABTestInput from "./pages/ABTest/ABTestInput";
 import Dashboard from './pages/dashboard/Dashboard';
 import ProtectedRoute from './utils/ProtectedRoute';
@@ -16,106 +16,121 @@ import {handleLoggedIn} from './utils/handleLoggedIn'
 import Simulation from "./pages/Account/Simulation";
 import ChangeInfo from "./pages/Account/ChangeInfo";
 import Home from "./pages/Home";
-import List from "./pages/list/List"
+import UserList from "./pages/list/List"
 import Single from './pages/single/Single';
 import Stats from './pages/stats/Stats';
 import TaskTest from "./pages/TaskTest";
+import DatasetPage, {DatasetStatistics} from "./pages/Dataset";
+
+
+import ItemList from "./pages/list/ItemList";
+import Sidebar from "./components/sidebar/Sidebar";
+import {UserContext} from "./utils/UserContext.js";
+
 
 function App() {
-    const [admin, setAdmin] = useState(false);
-    const [auth, setAuthed] = useState(false);
+    const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => handleLoggedIn(setAdmin, setAuthed, setIsLoading), [])
+    function updateUser(u) {
+        setUser(u)
+    }
+
+    useEffect(() => handleLoggedIn(updateUser, setIsLoading), [])
 
     return (
-        <Router>
+        <UserContext.Provider value={{user, updateUser}}>
+            <Router>
+                {/*<div className="dashboard">*/}
+                {/*    <div className="dashboardContainer">*/}
+                <div className="App ">
+                    <Navbar/>
 
-            <div className="App">
 
-                {/*{window.location.pathname === "/api/" + integer + "/" + integer  && <Navbar admin={admin} auth={auth}></Navbar>}*/}
-                <Navbar admin={admin} auth={auth}/>
+                    <div className="max-100vw ">
+                        {/*                        bg-purple rounded border border-5 rounded-5 border-dark-purple position-fixed*/}
+                        <div className="row  flex-nowrap">
+                            <ProtectedRoute component={Sidebar} isLoading={isLoading}
+                                            path={["/Statistics/ABTest/:abtest_id", "/"]}/>
+                            <div className="col py-3">
+                                <Switch>
+                                    <Route exact path="/tasktest">
+                                        <TaskTest/>
+                                    </Route>
 
-                <div className="content">
-                    <Switch>
-                        <Route exact path="/tasktest">
-                            <TaskTest/>
-                        </Route>
+                                    <Route exact path="/">
+                                        <Home/>
+                                    </Route>
+                                    <ProtectedRoute component={Account} isLoading={isLoading}
+                                                    exact
+                                                    path="/account"/>
+                                    <ProtectedRoute component={ABTestInput} isLoading={isLoading}
+                                                    exact path="/abtest/setup"/>
+                                    <Route exact path="/sign_in"
+                                           render={(props) =>
+                                               <SignIn                                                                   {...props} />}/>
+                                    <ProtectedRoute component={Account} isLoading={isLoading}
 
-                        <Route exact path="/">
-                            <Home/>
-                        </Route>
+                                                    exact
+                                                    path="/account"/>
+                                    <ProtectedRoute component={ABTestInput} isLoading={isLoading}
 
-                        <ProtectedRoute component={Account} setAdmin={setAdmin} isLoading={isLoading}
-                                        setAuthed={setAuthed} auth={auth} exact
-                                        path="/account"/>
-                        <ProtectedRoute component={ABTestInput} setAdmin={setAdmin} isLoading={isLoading}
-                                        setAuthed={setAuthed} auth={auth}
-                                        exact path="/abtest/setup"/>
+                                                    exact path="/abtest/setup"/>
+                                    <Route exact path="/sign_in"
+                                           render={(props) => <SignIn
+                                               {...props} />}/>
+                                    <Route exact path="/sign_up">
+                                        <SignUp/>
+                                    </Route>
+                                    <Route exact path="/dataset">
+                                        <DatasetPage/>
+                                    </Route>
+                                    <Route exact path="/dataset/:dataset_name">
+                                        <DatasetStatistics/>
+                                    </Route>
+                                    <ProtectedRoute component={Dashboard} isLoading={isLoading}
+                                                    exact path="/dashboard"/>
+                                    <ProtectedRoute component={Simulation} isLoading={isLoading}
+                                                    exact path="/simulation"/>
+                                    <ProtectedRoute component={Statistics} isLoading={isLoading}
+                                                    path={"/Statistics/(ABTest)?/:abtest_id?/:statistics?"}/>
+                                    {/*<ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth}*/}
+                                    {/*                exact path={"/ABTest/:abtest_id/statistics"}/>*/}
 
-                        <Route exact path="/sign_in"
-                               render={(props) => <SignIn setAdmin={setAdmin} setAuthed={setAuthed} {...props} />}/>
+                                    <ProtectedRoute component={DatasetUpload} isLoading={isLoading} exact
+                                                    path="/dataset-upload"/>
+                                    <ProtectedRoute component={ChangeInfo} isLoading={isLoading} exact
+                                                    path="/account/changeinfo"/>
 
-                        <ProtectedRoute component={Account} auth={auth} isLoading={isLoading} setAuthed={setAuthed}
-                                        setAdmin={setAdmin} exact
-                                        path="/account"/>
-                        <ProtectedRoute component={ABTestInput} auth={auth} isLoading={isLoading} setAuthed={setAuthed}
-                                        setAdmin={setAdmin}
-                                        exact path="/abtest/setup"/>
+                                    <Route exact path="/ABTest/:abtest_id/Customer/:customer_id">
+                                        <UserList/>
+                                    </Route>
+                                <Route exact path="/ABTest/:abtest_id/Item/:item_id">
+                                        <ItemList/>
+                                    </Route>
+                                    <Route exact path="/stats">
+                                        <Stats/>
+                                    </Route>
+                                    <Route exact path="/users/:userId">
+                                        <Single/>
+                                    </Route>
+                                    <Route exact path="/items/:itemId">
+                                        <Single/>
+                                    </Route>
+                                    <Route path="*">
+                                        <NotFound/>
+                                    </Route>
+                                </Switch>
+                                <div className={"clear"}/>
 
-                        <Route exact path="/sign_in"
-                               render={(props) => <SignIn admin={admin} auth={auth} setAuthed={setAuthed}
-                                                          setAdmin={setAdmin} {...props} />}/>
-
-                        <Route exact path="/sign_up">
-                            <SignUp setAdmin={setAdmin} setAuthed={setAuthed}/>
-                        </Route>
-
-                        <Route exact path="/contact">
-                            <Contact/>
-                        </Route>
-
-                        <ProtectedRoute component={Dashboard} isLoading={isLoading} auth={auth} setAuthed={setAuthed}
-                                        setAdmin={setAdmin} exact path="/dashboard"/>
-                        <ProtectedRoute component={Simulation} isLoading={isLoading} auth={auth} setAuthed={setAuthed}
-                                        setAdmin={setAdmin} exact path="/simulation"/>
-                        <ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth} exact
-                                        path="/statistics"/>
-                        <ProtectedRoute component={DatasetUpload} isLoading={isLoading} auth={auth} exact
-                                        path="/dataset/upload"/>
-                        <ProtectedRoute component={ChangeInfo} isLoading={isLoading} auth={auth} exact
-                                        path="/account/changeinfo"/>
-
-                        <Route exact path="/users">
-                            <List/>
-                        </Route>
-
-                        <Route exact path="/items">
-                            <List/>
-                        </Route>
-
-                        <Route exact path="/stats">
-                            <Stats/>
-                        </Route>
-
-                        <Route exact path="/users/:userId">
-                            <Single/>
-                        </Route>
-
-                        <Route exact path="/items/:itemId">
-                            <Single/>
-                        </Route>
-
-                        <Route path="*">
-                            <NotFound/>
-                        </Route>
-                    </Switch>
+                            </div>
+                        </div>
+                        <Footer/>
+                    </div>
                 </div>
-                <div className="clear"/>
-                <Footer/>
 
-            </div>
-        </Router>
+            </Router>
+        </UserContext.Provider>
     );
 }
 

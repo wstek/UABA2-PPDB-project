@@ -1,7 +1,7 @@
 from flask import Blueprint, request, session
 
+from src.extensions import bcrypt_extension
 from src.extensions import database_connection
-from src.extensions import flask_bcrypt
 from src.utils.Logger import Logger
 
 api_account = Blueprint("api_account", __name__)
@@ -41,7 +41,7 @@ def register_user():
     if user:
         return {"error": "User already exists"}, 409
 
-    hashed_password = flask_bcrypt.generate_password_hash(password).decode('utf-8')
+    hashed_password = bcrypt_extension.generate_password_hash(password).decode('utf-8')
     database_connection.session.execute(
         "INSERT INTO datascientist("
         "first_name, last_name, birthdate, email_address, username, password) "
@@ -51,6 +51,16 @@ def register_user():
     database_connection.session.commit()
     session["user_id"] = username
     return {"username": username, "email": email}
+
+
+@api_account.route("/api/make_admin")
+def make_admin():
+    try:
+        username = session.get("user_id")
+        database_connection.makeAdmin(username)
+        return 'Success'
+    except:
+        return 'Failure'
 
 
 @api_account.route("/api/login", methods=["POST"])
@@ -63,13 +73,14 @@ def login_user1():
     if not user:
         return {"error": "Account Does Not Exist"}, 401
 
-    if not flask_bcrypt.check_password_hash(user.password, password):
+    if not bcrypt_extension.check_password_hash(user.password, password):
         return {"error": "Wrong Password"}, 401
     admin = database_connection.session.execute("SELECT * FROM admin WHERE username = :username",
                                                 {"username": username}).fetchone()
 
     session["user_id"] = user.username
-    return {"username": user.username, "email": user.email_address, "admin": admin is not None}
+    return {"username": user.username, "first_name": user.first_name, "last_name": user.last_name,
+            "email": user.email_address, 'admin': admin is not None}
 
 
 @api_account.route("/api/logout")
@@ -102,6 +113,5 @@ def change_info(stat, username):
 
 @api_account.route("/api/aaa", methods=["GET"])
 def logIpAddress():
-    Logger.log("User visited, IP: " +
-               request.environ.get('HTTP_X_REAL_IP', request.remote_addr), True)
+    Logger.log("User visited, IP: " + request.environ.get('HTTP_X_REAL_IP', request.remote_addr), True)
     return "200"

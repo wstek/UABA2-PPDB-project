@@ -18,7 +18,6 @@ body {
 
 .footer-text {
     color: #12375c;
-    font-size: 1.0vw;
 }
 
 .align-left {
@@ -28,22 +27,27 @@ body {
 .align-right {
     text-align: right;
 }
-
-.content {
-    height: 70vh;
-    width: 100vw;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
+.max-100vw{
     max-width: 100vw;
+}
+.content {
+    /*height: 70vh;*/
+    /*width: 100%;*/
+    /*padding: 20px;*/
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    /*max-width: 100%;*/
+    /*flex: 8;*/
 
+}
+.flex-6{
+    flex:6
 }
 
 .flexible {
     display: flex;
     margin-right: 10px;
 }
-
 .button-purple {
     background: rgba(119, 52, 231);
     color: #fff;
@@ -55,7 +59,9 @@ body {
     outline: none;
     border-radius: 10px;
 }
-
+.purple-active  {
+    background-color: rgb(119, 52, 231);
+}
 .dateField {
     background: rgb(119, 52, 231);
     color: white;
@@ -79,19 +85,34 @@ body {
     background: #0bcc62;
     transition: all 0.3s ease;
 }
+.sticky-sidebar{
+  position: sticky;
+  top: 0;
+}
+.max-100vh{
+    max-height: 100vh;
+}
 
 .bg-purple {
-    background: rgba(216, 196, 252, 1);
+    background: rgb(216, 196, 252);
+}
+.bg-darkpurple {
+    background: #8040e8
 }
 
-.bg-lightpurple {
-    background: rgb(214, 203, 248);
-}
-
-.border-dark {
+.border-dark-purple {
     border-color: #7734E7FF !important;
 }
-
+table.table-bordered{
+    border:1px solid blue;
+    margin-top:20px;
+  }
+table.table-bordered > thead > tr > th{
+    border:1px solid blue;
+}
+table.table-bordered > tbody > tr > td{
+    border:1px solid blue;
+}
 /*.footer {*/
 /*    max-height: 5vh;*/
 /*    position: fixed;*/
@@ -224,6 +245,9 @@ body {
 .vh-2 {
     height: 2vh;
 }
+.min-vh-90 {
+    min-height: 92vh;
+}
 
 /*Account*/
 
@@ -326,4 +350,8 @@ body {
     border-bottom-color: rgba(214, 203, 248) !important;
     border-top-color: rgba(214, 203, 248) !important;
     border-left-color: rgba(119, 52, 231) !important;
+}
+
+.avoid-break-inside {
+    white-space: nowrap;
 }

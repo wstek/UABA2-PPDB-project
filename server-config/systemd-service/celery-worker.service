@@ -1,5 +1,5 @@
 [Unit]
-Description=Celery worker for the webapp backend
+Description=Celery worker for the webapp api
 After=network.target
 
 [Service]
@@ -9,7 +9,7 @@ Group=www-data
 
 WorkingDirectory=/home/app/Programming-project-databases/flask-backend
 Environment="PATH=/home/app/Programming-project-databases/env/bin"
-ExecStart=/home/app/Programming-project-databases/env/bin/celery -A src.worker worker -l INFO
+ExecStart=celery -A src.worker worker -l INFO
 Restart=on-failure
 
 [Install]

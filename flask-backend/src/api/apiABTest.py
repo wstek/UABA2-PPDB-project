@@ -1,4 +1,5 @@
 from flask import Blueprint, session
+from sqlalchemy import exc
 
 from src.extensions import database_connection
 
@@ -11,9 +12,12 @@ def del_abtest(abtest_id):
     if not username:
         return {"error": "unauthorized"}, 401
     owned = database_connection.session.execute(
-        f"select abtest_id from ab_test where created_by = '{username}' and abtest_id = '{abtest_id}';").fetchall()
-
-    database_connection.session.execute(
-        f"delete from ab_test where created_by = '{username}' and abtest_id = '{abtest_id}';")
+        f"select abtest_id from ab_test where created_by = '{username}' and abtest_id = '{abtest_id}';").fetchone()
     database_connection.session.commit()
+    try:
+        database_connection.session.execute(
+            f"delete from ab_test where created_by = '{username}' and abtest_id = '{abtest_id}';")
+        database_connection.session.commit()
+    except exc.SQLAlchemyError:
+        database_connection.session.rollback()
     return "200"
