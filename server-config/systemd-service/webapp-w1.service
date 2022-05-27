@@ -9,7 +9,7 @@ Group=www-data
 
 WorkingDirectory=/home/app/Programming-project-databases/flask-backend/src
 Environment="PATH=/home/app/Programming-project-databases/env/bin"
-ExecStart=gunicorn wsgi:app --worker-class eventlet -w 1 -b unix:webapp1.sock -m 007
+ExecStart=/home/app/Programming-project-databases/env/bin/gunicorn wsgi:app --worker-class eventlet -w 1 -b unix:webapp1.sock -m 007
 Restart=on-failure
 
 [Install]
