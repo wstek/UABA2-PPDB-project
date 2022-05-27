@@ -27,8 +27,8 @@
     "react-scripts": "^5.0.1",
     "react-table": "^7.8.0",
     "sass": "^1.51.0",
+    "socket.io-client": "^4.5.1",
     "styled-components": "^5.3.5"
-
   },
   "scripts": {
     "start": "react-scripts start",

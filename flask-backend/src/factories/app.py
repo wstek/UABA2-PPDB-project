@@ -2,15 +2,15 @@ import os
 import sys
 
 from flask import Flask
-from flask_sse import sse
 
 # appends parent directory to the python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.factories.appConfig import Config
 from src.extensions import database_connection
-from src.extensions import flask_bcrypt
-from src.extensions import flask_session
+from src.extensions import bcrypt_extension
+from src.extensions import session_extension
+from src.extensions import socketio_extension
 from src.utils.pathParser import getAbsPathFromProjectRoot
 
 from src.api.apiABTest import api_abtest
@@ -25,22 +25,13 @@ def create_app() -> Flask:
     flask_app = Flask(__name__)
     flask_app.config.from_object(Config)
 
-    # databse
+    # connect to database
     database_connection.connect(filename=getAbsPathFromProjectRoot("config-files/database.ini"))
 
-    # bcrypt
-    flask_bcrypt.init_app(flask_app)
-
-    # sessions
-    flask_session.init_app(flask_app)
-
-    # server side events
-    @sse.after_request
-    def add_header(response):
-        response.headers["X-Accel-Buffering"] = "no"
-        return response
-
-    flask_app.register_blueprint(sse, url_prefix='/api/stream')
+    # initialize extensions
+    bcrypt_extension.init_app(flask_app)
+    session_extension.init_app(flask_app)
+    socketio_extension.init_app(flask_app, message_queue=Config.REDIS_URL)
 
     # api blueprints
     flask_app.register_blueprint(api_account)

@@ -1,6 +1,5 @@
 import json
 import os
-import time
 
 from flask import Blueprint, request, abort, current_app, session
 from werkzeug.utils import secure_filename
@@ -49,7 +48,7 @@ def upload_dataset():
     # start the dataset insert background process
     print(json.dumps(filenames))
     print(json.dumps(column_select_data))
-    task = insert_dataset.delay(user_id, filenames, column_select_data)
+    task = insert_dataset.delay(filenames, column_select_data, user_id=user_id)
 
     return {"task_id": task.id}, 202
 
@@ -69,9 +68,9 @@ def get_dataset_information(dataset_name):
     query_result = database_connection.getItemCount(dataset_name)
     information["item_count"] = query_result.count
 
-    query_result = database_connection.getPriceDistribution(dataset_name=dataset_name,intervals=1000)
+    query_result = database_connection.getPriceDistribution(dataset_name=dataset_name, intervals=1000)
 
-    information["prices"] = { row.average : row.count for row in query_result}
+    information["prices"] = {row.average: row.count for row in query_result}
     # price_interval_min = price_min
     # while price_interval_min < price_max:
     #     price_interval_max = price_interval_min + price_diff

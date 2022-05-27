@@ -1,4 +1,3 @@
-import time
 from datetime import timedelta
 
 from flask import Blueprint, session
@@ -61,7 +60,6 @@ def getTopKPerAlgorithmPerDay(abtest_id, user_id):
 
     for row in query_result:
         if not date or d != row[0]:
-
             date = row[0]
             d = row[0]
             date = date.strftime("%d-%b-%Y")
@@ -70,7 +68,7 @@ def getTopKPerAlgorithmPerDay(abtest_id, user_id):
         if rid != row.recommendation_id or not rid:
             rid = row.recommendation_id
             response[date].append({})
-        response[date][rid - 1][str(row[2])] = {"article" : row[1]}
+        response[date][rid - 1][str(row[2])] = {"article": row[1]}
 
     dates = []
 
@@ -79,9 +77,9 @@ def getTopKPerAlgorithmPerDay(abtest_id, user_id):
 
     return {"resp": response, "dates": dates}
 
+
 @api_statistics.route("/api/user/metadata/<int:abtest_id>/<int:user_id>")
 def getMetadata(abtest_id, user_id):
-
     query_result = database_connection.session_execute_and_fetch(f''' 
             -- take top k out
             select attribute_name, attribute_value
@@ -141,7 +139,7 @@ natural join
 @api_statistics.route("/api/items/purchases/<int:abtest_id>/<int:article_id>", methods=['GET'])
 def get_item_purchases_over_time(abtest_id, article_id):
     amount_of_purchases = database_connection.session_execute_and_fetch(
-       f'''
+        f'''
         select distinct date_of from statistics natural join ab_test natural join algorithm
         where date_of >= start_date and date_of <= end_date and abtest_id = 18 order by date_of
        '''
@@ -285,7 +283,6 @@ def get_item_recommendations_and_purchases_over_time(abtest_id, article_id):
 
     if not amount_of_recommendations:
         return {"resp": response, "aids": aids}
-
 
     date = None
     d = None
@@ -492,48 +489,57 @@ def get_CRT_over_time(abtest_id):
     return attr_rows_to_XFnY(attr_rate_rows)
 
 
-@api_statistics.route("/api/statistics/abtest/<int:abtest_id>/get_unique_customer_stats/<int:start_date_index>/<int:end_date_index>")
+@api_statistics.route(
+    "/api/statistics/abtest/<int:abtest_id>/get_unique_customer_stats/<int:start_date_index>/<int:end_date_index>")
 def getUniqueCustomerStatsRelativeDates(abtest_id, start_date_index, end_date_index):
     query_result = database_connection.getDates(abtest_id)
     [start_date, end_date] = query_result[start_date_index].date_of, query_result[end_date_index].date_of
     return getUniqueCustomerStats(abtest_id, start_date, end_date)
 
-@api_statistics.route("/api/statistics/abtest/<int:abtest_id>/get_unique_customer_stats/<string:start_date>/<string:end_date>")
+
+@api_statistics.route(
+    "/api/statistics/abtest/<int:abtest_id>/get_unique_customer_stats/<string:start_date>/<string:end_date>")
 def getUniqueCustomerStats(abtest_id, start_date, end_date):
     query_result = database_connection.getUniqueCustomerStats(abtest_id, start_date, end_date)
-    return_array = [{'Customer': row.unique_customer_id, 'Purchases' : row.purchases, 'Revenue':float(row.revenue), 'Days Active': row.days_active} for row in query_result]
+    return_array = [{'Customer': row.unique_customer_id, 'Purchases': row.purchases, 'Revenue': float(row.revenue),
+                     'Days Active': row.days_active} for row in query_result]
     return {'returnvalue': return_array}
+
 
 @api_statistics.route("/api/statistics/abtest/<int:abtest_id>/get_top_k_per_algorithm/<start_date>/<end_date>")
 def getTopKPerAlgorithm(abtest_id, start_date, end_date):
     top_k = database_connection.getABTestInfo(abtest_id).top_k
-    query_result = database_connection.getTopkRecommended(abtest_id,start_date, end_date, top_k)
+    query_result = database_connection.getTopkRecommended(abtest_id, start_date, end_date, top_k)
     return_array = [{} for rank in range(top_k)]
     for row in query_result:
-        return_array[row.rank-1][row.algorithm_id] = {'count': row.count, 'article':row.unique_article_id}
+        return_array[row.rank - 1][row.algorithm_id] = {'count': row.count, 'article': row.unique_article_id}
     # for algorithm_id in algorithm_ids:
     return {'returnvalue': return_array}
 
 
-
-@api_statistics.route("/api/statistics/abtest/<int:abtest_id>/get_top_k_purchased/<int:start_date_index>/<int:end_date_index>")
+@api_statistics.route(
+    "/api/statistics/abtest/<int:abtest_id>/get_top_k_purchased/<int:start_date_index>/<int:end_date_index>")
 def getTopKPurchasedRelative(abtest_id, start_date_index, end_date_index):
     query_result = database_connection.getDates(abtest_id)
     [start_date, end_date] = query_result[start_date_index].date_of, query_result[end_date_index].date_of
     return getTopKPurchased(abtest_id, start_date, end_date)
 
-@api_statistics.route("/api/statistics/abtest/<int:abtest_id>/get_top_k_purchased/<string:start_date>/<string:end_date>")
+
+@api_statistics.route(
+    "/api/statistics/abtest/<int:abtest_id>/get_top_k_purchased/<string:start_date>/<string:end_date>")
 def getTopKPurchased(abtest_id, start_date, end_date):
     top_k = database_connection.getABTestInfo(abtest_id).top_k
-    query_result = database_connection.getTopKPurchased(abtest_id,start_date, end_date, top_k)
-    return_array = [{'count': row.count, 'article':row.unique_article_id} for row in query_result]
+    query_result = database_connection.getTopKPurchased(abtest_id, start_date, end_date, top_k)
+    return_array = [{'count': row.count, 'article': row.unique_article_id} for row in query_result]
     return {'returnvalue': return_array}
 
 
-@api_statistics.route("/api/statistics/abtest/<int:abtest_id>/get_active_usercount/<string:start_date>/<string:end_date>")
+@api_statistics.route(
+    "/api/statistics/abtest/<int:abtest_id>/get_active_usercount/<string:start_date>/<string:end_date>")
 def get_active_usercount(abtest_id, start_date, end_date):
-    query_result = database_connection.getActiveUsersBetween(abtest_id,start_date, end_date)
+    query_result = database_connection.getActiveUsersBetween(abtest_id, start_date, end_date)
     return {'returnvalue': query_result.count}
+
 
 @api_statistics.route("/api/abtest/<int:abtest_id>/get_active_usercount/<int:start_date_index>/<int:end_date_index>")
 def relative_date_active_usercount(abtest_id, start_date_index, end_date_index):
@@ -541,13 +547,13 @@ def relative_date_active_usercount(abtest_id, start_date_index, end_date_index):
     [start_date, end_date] = query_result[start_date_index].date_of, query_result[end_date_index].date_of
     return get_active_usercount(abtest_id, start_date, end_date)
 
+
 @api_statistics.route("/api/abtest/<int:abtest_id>/get_total_revenue_over_time")
 def get_total_revenue_over_time(abtest_id):
     query_result = database_connection.getRevenueOverTime(abtest_id)
     returnvalue = [(str(r.revenue_on), r.revenue) for r in query_result]
 
     return {'returnvalue': returnvalue}
-
 
 
 @api_statistics.route("/api/statistics/abtest/<int:abtest_id>/<stat>")
@@ -577,5 +583,3 @@ def get_stat(abtest_id, stat):
 
     elif stat == "CTR_over_time":
         return get_CRT_over_time(abtest_id)
-
-

@@ -132,9 +132,6 @@ class InsertDataset:
         Logger.log(f"added dataset \"{self.dataset_name}\" in {math.floor(time.time() - start_time)} seconds")
 
     def cleanup(self):
-        # debug
-        return
-
         for original_filename in self.filenames:
             filepath = self.filenames[original_filename][0]
             os.remove(filepath)
@@ -193,6 +190,7 @@ class InsertDataset:
 
         column_names = self.df_files[filenames[0]].columns
 
+        # check if the column names match between all files
         for filename in filenames:
             df_file = self.df_files[filename]
 
@@ -396,4 +394,7 @@ if __name__ == "__main__":
         raise err
 
     finally:
-        insert_dataset_obj.cleanup()
+        # production
+        # insert_dataset_obj.cleanup()
+
+        pass

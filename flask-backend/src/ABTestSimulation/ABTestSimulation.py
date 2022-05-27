@@ -1,6 +1,7 @@
 import random
 import threading
 import time
+
 import numpy
 import pandas as pd
 from psycopg2.extensions import register_adapter, AsIs
@@ -33,15 +34,14 @@ def remove_tuples(arr):
     e = time.time()
 
 
-
 def generateRandomTopK(listx, items):
     return random.sample(listx, items)
 
 
 class ABTestSimulation(threading.Thread):
-    def __init__(self, database_connection, sse, abtest):
+    def __init__(self, database_connection, abtest):
         super().__init__()
-        self.sse = sse
+        # self.sse = sse
         self.frontend_data = []
         self.done = False
         self.abtest = abtest
@@ -98,7 +98,8 @@ class ABTestSimulation(threading.Thread):
         # data statistics over time (x-axis = time)
         top_k_over_time_statistics = {'time': []}
         active_users_over_time_statistics = {'time': [], 'n_users': []}
-        data_per_user_over_time_statistics = {'time': [], 'customer_id': { customer_id[0]: [] for customer_id in all_customer_ids}}
+        data_per_user_over_time_statistics = {'time': [],
+                                              'customer_id': {customer_id[0]: [] for customer_id in all_customer_ids}}
 
         for i in range(len(self.abtest["algorithms"])):
             idx = int(self.abtest["algorithms"][i]["id"]) - \
@@ -642,10 +643,10 @@ class ABTestSimulation(threading.Thread):
 
                 self.prev_progress = self.current_progress
                 self.current_progress = round(n_day / float(dayz), 2) * 100.0
-                self.sse.publish(self.current_progress, type='simulation_progress')
+                # self.sse.publish(self.current_progress, type='simulation_progress')
 
         self.done = True
-        self.sse.publish(100, type='simulation_progress')
+        # self.sse.publish(100, type='simulation_progress')
         self.prev_progress = 0
         self.current_progress = 100
         return

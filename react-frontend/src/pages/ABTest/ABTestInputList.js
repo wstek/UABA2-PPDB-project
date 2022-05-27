@@ -3,8 +3,6 @@ import {useHistory} from 'react-router-dom';
 import {ColoredLine} from "../../components/ColoredLine";
 
 
-
-
 const ABTestInputList = ({abs_algorithms}) => {
     const [id, setId] = useState(1);
     const [isPending, setIsPending] = useState(false);
@@ -51,11 +49,13 @@ const ABTestInputList = ({abs_algorithms}) => {
         document.getElementById('start').value = '2020-01-01'
         document.getElementById('end').value = '2020-01-10'
     }
+
     function handleResetClicked() {
         if (window.confirm("Are you sure you want to reset the input?")) {
-          resetInput()
+            resetInput()
         }
     }
+
     const renderFields = () => {
         return (
             <div className="algorithms">
@@ -145,7 +145,6 @@ const ABTestInputList = ({abs_algorithms}) => {
             console.log("started simulation!")
         }
     }
-
 
 
     return (
