@@ -2,7 +2,7 @@ import React, {useEffect, useRef} from "react";
 import axios from "axios";
 import socketIOClient from "socket.io-client"
 
-function TaskTest() {
+function TaskProgress() {
     const socketRef = useRef(null);
 
     useEffect(() => {
@@ -37,8 +37,6 @@ function TaskTest() {
                 console.log("task progress: ", data);
             })
         });
-
-
     }
 
     return (
@@ -51,4 +49,4 @@ function TaskTest() {
     );
 }
 
-export default TaskTest;
+export default TaskProgress;

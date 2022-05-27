@@ -1,5 +1,6 @@
-export function handleLoggedIn(setUser, setIsLoading, setJustLoggedIn) {
+export function handleLoggedIn(setUser, setIsLoading) {
     setIsLoading(true);
+
     fetch('/api/me', {
         method: 'GET',
         credentials: 'include'
@@ -8,8 +9,6 @@ export function handleLoggedIn(setUser, setIsLoading, setJustLoggedIn) {
         return null
     }).then(data => {
         setUser(data)
-        // console.log(data)
-        // setAdmin(data.admin)
         setIsLoading(false);
     })
 }

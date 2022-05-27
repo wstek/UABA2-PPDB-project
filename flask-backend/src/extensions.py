@@ -15,4 +15,4 @@ session_extension = Session()
 socketio_extension = SocketIO(path="/api/socket.io", cors_allowed_origins='*')
 socketio_extension.on_namespace(Events("/"))
 
-celery_extension = Celery("worker", include=["src.celeryTasks.tasks"])
+celery_extension = Celery("worker", include=["src.celeryTasks.BackgroundTasks"])

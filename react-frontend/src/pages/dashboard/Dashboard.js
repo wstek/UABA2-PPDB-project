@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import {useHistory} from 'react-router-dom';
 import Chartx from "../../components/chart/Chartx";
 import Featured from "../../components/featured/Featured";
-import Sidebar from "../../components/sidebar/Sidebar";
 import Widget from "../../components/widget/Widget";
 import Tablex from "../../components/table/Tablex";
 import "./dashboard.css"

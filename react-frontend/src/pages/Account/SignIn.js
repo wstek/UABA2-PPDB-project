@@ -1,7 +1,6 @@
 import "../../index.css"
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import {Link, useHistory} from "react-router-dom";
-import {useContext} from "react";
 import {UserContext} from "../../utils/UserContext";
 
 

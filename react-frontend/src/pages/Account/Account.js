@@ -1,15 +1,15 @@
 import "../../index.css"
-import {Link, useHistory} from "react-router-dom"
-import React, {useState} from "react";
+import {Link} from "react-router-dom"
+import React, {useContext} from "react";
 import logOut from '../../utils/logOut'
-import {useContext} from "react";
 import {UserContext} from "../../utils/UserContext";
+
 function Account() {
-        const {user} = useContext(UserContext);
+    const {user} = useContext(UserContext);
     return (
         <div className="row h-100 ">
             <div className="col text-center mt-2">
-                 <h1>Info</h1>
+                <h1>Info</h1>
                 <div className="row mt-2">
                     <h3>First name: {user.first_name}</h3>
                 </div>
@@ -26,7 +26,7 @@ function Account() {
                 </div>
                 <div className="row mt-4">
                     <div className={"col"}>
-                            <Link to="/sign_in" onClick={logOut} className="button-purple red-hover">Log out</Link>
+                        <Link to="/sign_in" onClick={logOut} className="button-purple red-hover">Log out</Link>
                         <button disabled className="button-purple red-hover">Logging out...</button>
                     </div>
                 </div>

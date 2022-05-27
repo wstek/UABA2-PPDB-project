@@ -27,9 +27,11 @@ body {
 .align-right {
     text-align: right;
 }
-.max-100vw{
+
+.max-100vw {
     max-width: 100vw;
 }
+
 .content {
     /*height: 70vh;*/
     /*width: 100%;*/
@@ -40,14 +42,16 @@ body {
     /*flex: 8;*/
 
 }
-.flex-6{
-    flex:6
+
+.flex-6 {
+    flex: 6
 }
 
 .flexible {
     display: flex;
     margin-right: 10px;
 }
+
 .button-purple {
     background: rgba(119, 52, 231);
     color: #fff;
@@ -59,9 +63,11 @@ body {
     outline: none;
     border-radius: 10px;
 }
-.purple-active  {
+
+.purple-active {
     background-color: rgb(119, 52, 231);
 }
+
 .dateField {
     background: rgb(119, 52, 231);
     color: white;
@@ -85,17 +91,20 @@ body {
     background: #0bcc62;
     transition: all 0.3s ease;
 }
-.sticky-sidebar{
-  position: sticky;
-  top: 0;
+
+.sticky-sidebar {
+    position: sticky;
+    top: 0;
 }
-.max-100vh{
+
+.max-100vh {
     max-height: 100vh;
 }
 
 .bg-purple {
     background: rgb(216, 196, 252);
 }
+
 .bg-darkpurple {
     background: #8040e8
 }
@@ -103,16 +112,20 @@ body {
 .border-dark-purple {
     border-color: #7734E7FF !important;
 }
-table.table-bordered{
-    border:1px solid blue;
-    margin-top:20px;
-  }
-table.table-bordered > thead > tr > th{
-    border:1px solid blue;
+
+table.table-bordered {
+    border: 1px solid blue;
+    margin-top: 20px;
 }
-table.table-bordered > tbody > tr > td{
-    border:1px solid blue;
+
+table.table-bordered > thead > tr > th {
+    border: 1px solid blue;
 }
+
+table.table-bordered > tbody > tr > td {
+    border: 1px solid blue;
+}
+
 /*.footer {*/
 /*    max-height: 5vh;*/
 /*    position: fixed;*/
@@ -245,6 +258,7 @@ table.table-bordered > tbody > tr > td{
 .vh-2 {
     height: 2vh;
 }
+
 .min-vh-90 {
     min-height: 92vh;
 }

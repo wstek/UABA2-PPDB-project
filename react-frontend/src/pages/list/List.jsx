@@ -83,17 +83,20 @@ const UserList = () => {
         }
 
     }
+
     useEffect(setRow, [selectedDate],)
 
     return (<>
             <div className={'row text-center mt-3'}>
-                {top_k_per_algorithm && <InputSelector selected_input={selectedDate} inputs={dates} onChange={setSelectedDate}/>}
+                {top_k_per_algorithm &&
+                    <InputSelector selected_input={selectedDate} inputs={dates} onChange={setSelectedDate}/>}
             </div>
-            { selectedDate !== 0 && columns && top_k_per_algorithm && top_k_per_algorithm[selectedDate] && <div className={'row text-center mt-3'}>
-                <Styles>
-                    <ReactTable columns={columns} data={top_k_per_algorithm[selectedDate]}/>
-                </Styles>
-            </div>
+            {selectedDate !== 0 && columns && top_k_per_algorithm && top_k_per_algorithm[selectedDate] &&
+                <div className={'row text-center mt-3'}>
+                    <Styles>
+                        <ReactTable columns={columns} data={top_k_per_algorithm[selectedDate]}/>
+                    </Styles>
+                </div>
             }
         </>
     );

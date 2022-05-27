@@ -16,20 +16,22 @@ import TimelineIcon from '@mui/icons-material/Timeline';
 import logOut from '../../utils/logOut'
 import {UserContext} from '../../utils/UserContext'
 import {useContext} from "react";
+
 const Sidebar = () => {
 // const queryParams = new URLSearchParams(window.location.search);
 // const id = queryParams.get('abtest_id');
 //     console.log(path)
     let {abtest_id} = useParams()
-    const {user,updateUser} = useContext(UserContext);
+    const {user, updateUser} = useContext(UserContext);
     console.log(user)
     // console.log(id); // 55 test null
 
-    return (<div className="d-flex flex-column col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-purple border-dark-purple sticky-sidebar">
+    return (<div
+        className="d-flex flex-column col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-purple border-dark-purple sticky-sidebar">
         <div
             className="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-90">
             <Link to="/"
-               className="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                  className="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
                 <span className="fs-5 d-none d-sm-inline">Menu</span>
             </Link>
             <ul className="nav nav-pills flex-column mb-sm-auto mb-5 align-items-center align-items-sm-start text-nowrap"
@@ -59,7 +61,7 @@ const Sidebar = () => {
                         </li>
                         <li>
                             <Link to="#statistics_menu" data-bs-toggle="collapse"
-                               className="nav-link px-3 align-middle"><SsidChartIcon/> <span
+                                  className="nav-link px-3 align-middle"><SsidChartIcon/> <span
                                 className="d-none d-sm-inline">Statistics</span></Link>
                         </li>
                         <ul className="collapse nav flex-column ms-1" id="statistics_menu"
@@ -68,16 +70,18 @@ const Sidebar = () => {
                                 <Link to={() => {
                                     if (abtest_id)
                                         return `/Statistics/ABTest/${abtest_id}/GeneralInfo`
-                                    return `/Statistics/`}
+                                    return `/Statistics/`
+                                }
                                 } className="nav-link px-4"> <InfoIcon/>
                                     <span
                                         className="d-none d-sm-inline"> Info</span></Link>
                             </li>
-                         <li className="w-100">
+                            <li className="w-100">
                                 <Link to={() => {
                                     if (abtest_id)
                                         return `/Statistics/ABTest/${abtest_id}/Graphs`
-                                    return `/Statistics/`}
+                                    return `/Statistics/`
+                                }
                                 } className="nav-link px-4"> <TimelineIcon/>
                                     <span
                                         className="d-none d-sm-inline"> Graphs</span></Link>
@@ -88,7 +92,7 @@ const Sidebar = () => {
                 </li>
                 <li>
                     <Link to="#dataset_menu" data-bs-toggle="collapse"
-                       className="nav-link px-0 align-middle"><DataObjectIcon/> <span
+                          className="nav-link px-0 align-middle"><DataObjectIcon/> <span
                         className="d-none d-sm-inline">Dataset</span></Link>
                 </li>
                 <ul className="collapse nav flex-column ms-1" id="dataset_menu"
@@ -107,8 +111,8 @@ const Sidebar = () => {
             <hr/>
             <div className="dropdown pb-5">
                 <Link to="#"
-                   className="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
-                   id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                      className="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+                      id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                     <PersonIcon/>
                     <span className="d-none d-sm-inline mx-1">{user.first_name + ' ' + user.last_name}</span>
                 </Link>
@@ -120,7 +124,10 @@ const Sidebar = () => {
                     <li>
                         <hr className="dropdown-divider"/>
                     </li>
-                    <li><button className="dropdown-item" to="/sign_in" onClick={() => logOut(updateUser)}>Sign out</button></li>
+                    <li>
+                        <button className="dropdown-item" to="/sign_in" onClick={() => logOut(updateUser)}>Sign out
+                        </button>
+                    </li>
                 </ul>
             </div>
         </div>

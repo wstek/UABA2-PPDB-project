@@ -2,12 +2,11 @@ import "./datatable.css"
 import {DataGrid} from '@mui/x-data-grid';
 import React, {useEffect, useState} from "react";
 import LineChart from "../chart/LineChart";
-import {object} from "prop-types";
 
 
 function ItemDatatable({abtest_id, algorithm_id}) {
 
-    const [maxDays,setMaxDays] = useState(0);
+    const [maxDays, setMaxDays] = useState(0);
     const [loaded, setLoaded] = useState(false);
     const [select, setSelection] = React.useState([]);
     const [allRows, setAllRows] = useState(null);
@@ -184,8 +183,8 @@ function ItemDatatable({abtest_id, algorithm_id}) {
         }
     }
 
-    function fetchImageUrl(){
-         fetch('/api/items/image/' + select[0], {
+    function fetchImageUrl() {
+        fetch('/api/items/image/' + select[0], {
             method: 'GET',
             credentials: 'include',
             headers: {"Content-Type": "application/json", 'Accept': 'application/json'}
@@ -202,8 +201,6 @@ function ItemDatatable({abtest_id, algorithm_id}) {
             console.log(err);
         })
     }
-
-
 
 
     return (
