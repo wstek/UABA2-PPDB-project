@@ -78,8 +78,11 @@ def login_user1():
     admin = database_connection.session.execute("SELECT * FROM admin WHERE username = :username",
                                                 {"username": username}).fetchone()
 
+
+    
     session["user_id"] = user.username
-    return {"username": user.username, "email": user.email_address, "admin": admin is not None}
+    return {"username": user.username, "first_name": user.first_name, "last_name": user.last_name,
+            "email": user.email_address, 'admin': admin is not None}
 
 
 @api_account.route("/api/logout")

@@ -48,7 +48,6 @@ body {
     display: flex;
     margin-right: 10px;
 }
-
 .button-purple {
     background: rgba(119, 52, 231);
     color: #fff;
@@ -60,7 +59,9 @@ body {
     outline: none;
     border-radius: 10px;
 }
-
+.purple-active  {
+    background-color: rgb(119, 52, 231);
+}
 .dateField {
     background: rgb(119, 52, 231);
     color: white;
@@ -97,9 +98,6 @@ body {
 }
 .bg-darkpurple {
     background: #8040e8
-}
-.bg-lightpurple {
-    background: rgb(193, 178, 243);
 }
 
 .border-dark-purple {

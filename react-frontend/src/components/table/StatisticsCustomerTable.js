@@ -1,10 +1,12 @@
 import BootstrapTable from "./BootstrapTable";
 
 // import {useEffect} from "react";
-import React, {useEffect, useMemo, useState} from 'react'
+import React, {useEffect, useMemo, useState,useContext} from 'react'
 import {PurpleSpinner} from "../PurpleSpinner"
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
 import {DataGrid} from '@mui/x-data-grid';
+import {Link, useHistory} from "react-router-dom";
+import {ABTestContext} from "../../utils/Contexts";
 
 
 function GeneralUserOverview({abtest_id, date_start_index, date_end_index}) {
@@ -18,7 +20,7 @@ function GeneralUserOverview({abtest_id, date_start_index, date_end_index}) {
     const revenue = useMemo(() => {
         let revenue = null
         if (revenue_per_day) {
-            revenue = revenue_per_day.slice(date_start_index, date_end_index+1).reduce((partialSum, a) => partialSum + a[1], 0).toFixed(2)
+            revenue = revenue_per_day.slice(date_start_index, date_end_index + 1).reduce((partialSum, a) => partialSum + a[1], 0).toFixed(2)
         }
         return revenue
     }, [revenue_per_day, date_start_index, date_end_index]);
@@ -57,7 +59,13 @@ function GeneralUserOverview({abtest_id, date_start_index, date_end_index}) {
 }
 
 function CustomerList({abtest_id, date_start_index, date_end_index}) {
-    const columns = [{headerName: 'Customer', field: 'Customer', width: '150', headerAlign: 'center',}, {
+    const history = useHistory()
+    const columns = [{headerName: 'Customer', field: 'Customer', width: '150', headerAlign: 'center',
+        renderCell: (cellValues) => {
+            let customer_id = cellValues.row.Customer
+            return <Link style={{textDecoration: 'inherit'}} to={`/ABTest/${abtest_id}/Customer/${customer_id}`} > {customer_id} </Link>
+      }},
+        {
         headerName: 'Purchases', field: 'Purchases', width: '150', headerAlign: 'center',
     }, {headerName: 'Revenue', field: 'Revenue', width: '150', headerAlign: 'center',}, {
         headerName: 'Days Active',
@@ -80,33 +88,42 @@ function CustomerList({abtest_id, date_start_index, date_end_index}) {
     if (customerData == null) return <PurpleSpinner/>
     return (
         <div style={{height: '80vh', width: '100%'}}>
-            <DataGrid className={''}
-                      getRowId={(row) => row.Customer}
-                      rows={customerData}
-                      columns={columns}
-                      autoPageSize
-                      sx={{
-                          boxShadow: 5,
-                          border: 3,
-                          borderColor: '#7734E7FF',
-                      }}
+            <DataGrid
+                onCellClick={(params, event) => {
+                    if (params.colDef.field === 'Customer') {
+                        let customer_id = params.row.Customer
+                        history.push(`/ABTest/${abtest_id}/Customer/${customer_id}`)
+                    }
+                }}
+                className={''}
+                getRowId={(row) => row.Customer}
+                rows={customerData}
+                columns={columns}
+                autoPageSize
+                sx={{
+                    boxShadow: 5,
+                    border: 3,
+                    borderColor: '#7734E7FF',
+                }}
             />
         </div>
     )
 }
 
 
-function CustomerOverview({abtest_id, date_start_index, date_end_index}) {
-    if (!(abtest_id != null && date_start_index != null && date_end_index != null)) return <PurpleSpinner/>
+function CustomerOverview() {
+    const {abtest_id, start_date_index, end_date_index} = useContext(ABTestContext);
+
+    if (!(abtest_id != null && start_date_index != null && end_date_index != null)) return <PurpleSpinner/>
     return (<>
         <div className={"row text-center align-content-center justify-content-center mx-auto"}>
             <GeneralUserOverview
-                abtest_id={abtest_id} date_start_index={date_start_index}
-                date_end_index={date_end_index}/>
+                abtest_id={abtest_id} date_start_index={start_date_index}
+                date_end_index={end_date_index}/>
         </div>
         <div className={"row text-center align-content-center justify-content-center mx-auto"}>
-            <CustomerList abtest_id={abtest_id} date_start_index={date_start_index}
-                          date_end_index={date_end_index}/>
+            <CustomerList abtest_id={abtest_id} date_start_index={start_date_index}
+                          date_end_index={end_date_index}/>
 
         </div>
     </>)

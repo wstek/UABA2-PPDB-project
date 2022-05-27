@@ -328,7 +328,8 @@ class DatabaseConnection:
                      natural join (select customer_id, dataset_name, bought_on, price
                                    from purchase
                                    where bought_on between '{start_date}' and '{end_date}') purchase
-            group by unique_customer_id ;
+            group by unique_customer_id 
+            order by days_active desc;
             '''
         return self.session_execute_and_fetch(query, fetchall=True)
 

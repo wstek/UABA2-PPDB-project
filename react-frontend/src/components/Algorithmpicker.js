@@ -8,7 +8,6 @@ export default function AlgorithmPicker({setSelectedAlgorithm, personal_algorith
 
 
     function personalAlgorithms() {
-        console.log(personal_algorithms)
         var a = personal_algorithms
         let temp_personal_idtests_id_components = []
         if (personal_algorithms) {

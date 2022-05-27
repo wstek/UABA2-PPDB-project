@@ -1,16 +1,10 @@
-import Datatable from "../../components/datatable/Datatable";
-import Sidebar from "../../components/sidebar/Sidebar";
-import {useEffect, useState, useSyncExternalStore} from "react";
+import React, {useEffect, useState} from "react";
 import "./list.css"
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
 import InputSelector from "../../components/InputSelector";
-import React from "react";
-import AlgorithmPicker from "../../components/Algorithmpicker";
 import {useParams} from "react-router-dom";
-import {PurpleSpinner} from "../../components/PurpleSpinner";
 import ReactTable from "../../components/table/ReactTable";
 import styled from 'styled-components'
-import Table from 'react-bootstrap/Table'
 
 
 const Styles = styled.div`
@@ -41,71 +35,67 @@ const Styles = styled.div`
 `
 
 const UserList = () => {
-    let {abtest_id, user_id} = useParams();
+    let {abtest_id, customer_id} = useParams();
     const [top_k_per_algorithm, setTopKPerAlgorithm] = useState(null)
     const [dates, setDates] = useState(null)
     const [selectedDate, setSelectedDate] = useState(null)
     const [columns, setColumns] = useState(null)
-    const [selectedRows, setSelectedRows] = useState(false)
 
     const makeColomns = (top_k_per_algorithm) => {
-            let columns1
-            const keys = Object.keys(top_k_per_algorithm[selectedDate][0])
-            if (top_k_per_algorithm) {
-                columns1 = [{
-                    Header: 'Top K Per Algorithm', columns: [{
-                        Header: 'Algorithm ID', accessor: '', columns: [{
-                            Header: 'Rank', accessor: '', Cell: (row) => <div>{parseInt(row.row.id) + 1}</div>,
-                        }]
+        let columns1
+        const keys = Object.keys(top_k_per_algorithm[selectedDate][0])
+        if (top_k_per_algorithm) {
+            columns1 = [{
+                Header: 'Top K Per Algorithm', columns: [{
+                    Header: 'Algorithm ID', accessor: '', columns: [{
+                        Header: 'Rank', accessor: '', Cell: (row) => <div>{parseInt(row.row.id) + 1}</div>,
                     }]
-
                 }]
-                for (let algorithm_id = 0; algorithm_id <  keys.length; algorithm_id++) {
-                    columns1[0].columns.push({
-                        Header: keys[algorithm_id].toString(), columns: [{
-                            Header: 'Article ID', accessor: keys[algorithm_id] + '.article'
-                        }]
-                    })
-                }
-            }
-            return columns1
-        }
-    function TopKPerAlgorithmTablePerDay({abtest_id, user_id}) {
 
-        const fetchTopKPerAlgorithm = () => {
-            const abortCont = new AbortController();
-            let api = `/api/user/get_top_k_per_algorithm/${abtest_id}/${user_id}`
-            if (abtest_id) fetchData(api, (data) => {
-                setTopKPerAlgorithm(data.resp);
-                setDates(data.dates)
-            }, abortCont)
-            return () => abortCont.abort();
+            }]
+            for (let algorithm_id = 0; algorithm_id < keys.length; algorithm_id++) {
+                columns1[0].columns.push({
+                    Header: keys[algorithm_id].toString(), columns: [{
+                        Header: 'Article ID', accessor: keys[algorithm_id] + '.article'
+                    }]
+                })
+            }
         }
-        useEffect(fetchTopKPerAlgorithm, [abtest_id, user_id],)
+        return columns1
     }
 
-    useEffect(setRow, [selectedDate],)
+    const fetchTopKPerAlgorithm = () => {
+        const abortCont = new AbortController();
+        let api = `/api/user/get_top_k_per_algorithm/${abtest_id}/${customer_id}`
+        if (abtest_id) fetchData(api, (data) => {
+            setTopKPerAlgorithm(data.resp);
+            setDates(data.dates)
+        }, abortCont)
+        return () => abortCont.abort();
+    }
+    useEffect(fetchTopKPerAlgorithm, [],)
+
 
     function setRow() {
         if (selectedDate) {
-
             const column = makeColomns(top_k_per_algorithm)
             setColumns(column)
-            setSelectedRows(true)
         }
 
     }
+    useEffect(setRow, [selectedDate],)
 
-    return (
-        <div>
-            {!top_k_per_algorithm &&
-                <TopKPerAlgorithmTablePerDay abtest_id={abtest_id} user_id={user_id}/>}
-            {top_k_per_algorithm && <InputSelector inputs={dates} onChange={setSelectedDate}/>}
-            {!selectedRows && setRow()}
-            {selectedDate  && selectedRows && <Styles>
-                <ReactTable columns={columns} data={top_k_per_algorithm[selectedDate]}/>
-            </Styles>}
-        </div>
+    return (<>
+            <div className={'row text-center mt-3'}>
+                {top_k_per_algorithm && <InputSelector selected_input={selectedDate} inputs={dates} onChange={setSelectedDate}/>}
+            </div>
+            { selectedDate !== 0 && columns && top_k_per_algorithm && top_k_per_algorithm[selectedDate] && <div className={'row text-center mt-3'}>
+                <Styles>
+                    <ReactTable columns={columns} data={top_k_per_algorithm[selectedDate]}/>
+                </Styles>
+            </div>
+            }
+        </>
     );
 }
 

@@ -13,7 +13,6 @@ export function DatasetStatistics() {
         setDatasetInformation(null)
         let url = '/api/get_dataset_information/' + dataset_name
         fetchData(url, (data) => {
-            console.log(data)
             setDatasetInformation(data)
         })
     }

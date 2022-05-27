@@ -12,12 +12,17 @@ import FileUploadIcon from '@mui/icons-material/FileUpload';
 import PreviewIcon from '@mui/icons-material/Preview';
 import PersonIcon from '@mui/icons-material/Person';
 import InfoIcon from '@mui/icons-material/Info';
+import TimelineIcon from '@mui/icons-material/Timeline';
 import logOut from '../../utils/logOut'
+import {UserContext} from '../../utils/UserContext'
+import {useContext} from "react";
 const Sidebar = () => {
 // const queryParams = new URLSearchParams(window.location.search);
 // const id = queryParams.get('abtest_id');
 //     console.log(path)
     let {abtest_id} = useParams()
+    const {user,updateUser} = useContext(UserContext);
+    console.log(user)
     // console.log(id); // 55 test null
 
     return (<div className="d-flex flex-column col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-purple border-dark-purple sticky-sidebar">
@@ -63,10 +68,19 @@ const Sidebar = () => {
                                 <Link to={() => {
                                     if (abtest_id)
                                         return `/Statistics/ABTest/${abtest_id}/GeneralInfo`
-                                    return `/Statistics/ABTest/GeneralInfo`}
+                                    return `/Statistics/`}
                                 } className="nav-link px-4"> <InfoIcon/>
                                     <span
                                         className="d-none d-sm-inline"> Info</span></Link>
+                            </li>
+                         <li className="w-100">
+                                <Link to={() => {
+                                    if (abtest_id)
+                                        return `/Statistics/ABTest/${abtest_id}/Graphs`
+                                    return `/Statistics/`}
+                                } className="nav-link px-4"> <TimelineIcon/>
+                                    <span
+                                        className="d-none d-sm-inline"> Graphs</span></Link>
                             </li>
                         </ul>
                     </ul>
@@ -91,12 +105,12 @@ const Sidebar = () => {
 
             </ul>
             <hr/>
-            <div className="dropdown pb-4">
+            <div className="dropdown pb-5">
                 <Link to="#"
                    className="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
                    id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                     <PersonIcon/>
-                    <span className="d-none d-sm-inline mx-1">loser</span>
+                    <span className="d-none d-sm-inline mx-1">{user.first_name + ' ' + user.last_name}</span>
                 </Link>
                 <ul className="dropdown-menu dropdown-menu-dark text-small shadow"
                     aria-labelledby="dropdownUser1">
@@ -106,7 +120,7 @@ const Sidebar = () => {
                     <li>
                         <hr className="dropdown-divider"/>
                     </li>
-                    <li><Link className="dropdown-item" to="/sign_in" onClick={logOut}>Sign out</Link></li>
+                    <li><button className="dropdown-item" to="/sign_in" onClick={() => logOut(updateUser)}>Sign out</button></li>
                 </ul>
             </div>
         </div>
