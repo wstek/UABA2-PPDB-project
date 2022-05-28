@@ -39,7 +39,7 @@ function App() {
     useEffect(() => handleLoggedIn(updateUser, setIsLoading), [])
 
     return (
-        <UserContext.Provider value={{user}}>
+        <UserContext.Provider value={{user, updateUser}}>
             <Router>
                 <div className="App ">
                     <Navbar/>
