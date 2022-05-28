@@ -1,4 +1,3 @@
-//7 10 14 28 30 31 55 81 92 95
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import React, {useEffect, useState} from "react";
 import Navbar from './components/Navbar';
@@ -20,6 +19,7 @@ import UserList from "./pages/list/List"
 import Single from './pages/single/Single';
 import Stats from './pages/stats/Stats';
 import TaskTest from "./pages/BackgroundTasks/TaskTest";
+import TaskProgress from "./pages/BackgroundTasks/TaskProgress";
 import DatasetPage, {DatasetStatistics} from "./pages/Dataset";
 
 
@@ -39,96 +39,81 @@ function App() {
     useEffect(() => handleLoggedIn(updateUser, setIsLoading), [])
 
     return (
-        <UserContext.Provider value={{user, updateUser}}>
+        <UserContext.Provider value={{user}}>
             <Router>
-                {/*<div className="dashboard">*/}
-                {/*    <div className="dashboardContainer">*/}
                 <div className="App ">
                     <Navbar/>
-
-
                     <div className="max-100vw ">
-                        {/*                        bg-purple rounded border border-5 rounded-5 border-dark-purple position-fixed*/}
-                        <div className="row  flex-nowrap">
+                        <div className="row flex-nowrap">
                             <ProtectedRoute component={Sidebar} isLoading={isLoading}
                                             path={["/Statistics/ABTest/:abtest_id", "/"]}/>
                             <div className="col py-3">
                                 <Switch>
+                                    {/*debug*/}
                                     <Route exact path="/tasktest">
                                         <TaskTest/>
+                                    </Route>
+                                    <Route exact path="/taskprogress">
+                                        <TaskProgress/>
                                     </Route>
 
                                     <Route exact path="/">
                                         <Home/>
                                     </Route>
-                                    <ProtectedRoute component={Account} isLoading={isLoading}
-                                                    exact
-                                                    path="/account"/>
-                                    <ProtectedRoute component={ABTestInput} isLoading={isLoading}
-                                                    exact path="/abtest/setup"/>
-                                    <Route exact path="/sign_in"
-                                           render={(props) =>
-                                               <SignIn                                                                   {...props} />}/>
-                                    <ProtectedRoute component={Account} isLoading={isLoading}
+                                    <ProtectedRoute component={Dashboard} isLoading={isLoading}
+                                                    exact path="/dashboard"/>
 
-                                                    exact
-                                                    path="/account"/>
-                                    <ProtectedRoute component={ABTestInput} isLoading={isLoading}
-
-                                                    exact path="/abtest/setup"/>
-                                    <Route exact path="/sign_in"
-                                           render={(props) => <SignIn
-                                               {...props} />}/>
+                                    {/*account*/}
+                                    <Route exact path="/sign_in">
+                                        <SignIn/>
+                                    </Route>
                                     <Route exact path="/sign_up">
                                         <SignUp/>
                                     </Route>
-                                    <Route exact path="/dataset">
-                                        <DatasetPage/>
-                                    </Route>
-                                    <Route exact path="/dataset/:dataset_name">
-                                        <DatasetStatistics/>
-                                    </Route>
-                                    <ProtectedRoute component={Dashboard} isLoading={isLoading}
-                                                    exact path="/dashboard"/>
-                                    <ProtectedRoute component={Simulation} isLoading={isLoading}
-                                                    exact path="/simulation"/>
-                                    <ProtectedRoute component={Statistics} isLoading={isLoading}
-                                                    path={"/Statistics/(ABTest)?/:abtest_id?/:statistics?"}/>
-                                    {/*<ProtectedRoute component={Statistics} isLoading={isLoading} auth={auth}*/}
-                                    {/*                exact path={"/ABTest/:abtest_id/statistics"}/>*/}
-
-                                    <ProtectedRoute component={DatasetUpload} isLoading={isLoading} exact
-                                                    path="/dataset-upload"/>
+                                    <ProtectedRoute component={Account} isLoading={isLoading}
+                                                    exact path="/account"/>
                                     <ProtectedRoute component={ChangeInfo} isLoading={isLoading} exact
                                                     path="/account/changeinfo"/>
 
-                                    <Route exact path="/ABTest/:abtest_id/Customer/:customer_id">
-                                        <UserList/>
-                                    </Route>
-                                <Route exact path="/ABTest/:abtest_id/Item/:item_id">
-                                        <ItemList/>
-                                    </Route>
-                                    <Route exact path="/stats">
-                                        <Stats/>
-                                    </Route>
-                                    <Route exact path="/users/:userId">
-                                        <Single/>
-                                    </Route>
-                                    <Route exact path="/items/:itemId">
-                                        <Single/>
-                                    </Route>
+                                    {/*dataset*/}
+                                    <ProtectedRoute component={DatasetPage} isLoading={isLoading}
+                                                    exact path="/dataset"/>
+                                    <ProtectedRoute component={DatasetStatistics} isLoading={isLoading}
+                                                    exact path="/dataset/:dataset_name"/>
+                                    <ProtectedRoute component={DatasetUpload} isLoading={isLoading}
+                                                    exact path="/dataset-upload"/>
+
+                                    {/*simulation*/}
+                                    <ProtectedRoute component={Simulation} isLoading={isLoading}
+                                                    exact path="/simulation"/>
+                                    <ProtectedRoute component={ABTestInput} isLoading={isLoading}
+                                                    exact path="/abtest/setup"/>
+
+                                    {/*statistics / information*/}
+                                    <ProtectedRoute component={Statistics} isLoading={isLoading}
+                                                    exact path={"/Statistics/(ABTest)?/:abtest_id?/:statistics?"}/>
+                                    <ProtectedRoute component={UserList} isLoading={isLoading}
+                                                    exact path={"/ABTest/:abtest_id/Customer/:customer_id"}/>
+                                    <ProtectedRoute component={ItemList} isLoading={isLoading}
+                                                    exact path={"/ABTest/:abtest_id/Item/:item_id"}/>
+                                    <ProtectedRoute component={Stats} isLoading={isLoading}
+                                                    exact path={"/stats"}/>
+                                    <ProtectedRoute component={Single} isLoading={isLoading}
+                                                    exact path={"/users/:userId"}/>
+                                    <ProtectedRoute component={Single} isLoading={isLoading}
+                                                    exact path={"items/:itemId"}/>
+
+                                    {/*not found*/}
                                     <Route path="*">
                                         <NotFound/>
                                     </Route>
                                 </Switch>
                                 <div className={"clear"}/>
-
                             </div>
                         </div>
                         <Footer/>
                     </div>
                 </div>
-
             </Router>
         </UserContext.Provider>
     );
