@@ -23,7 +23,7 @@ export function DatasetStatistics() {
     return (<>
             <div className="row row-cols-1 row-cols-lg-3 g-4 text-center mx-auto align-content-center">
                 <div className={"col-12 col-4-lg"}>
-                    <div className="card h-100" >
+                    <div className="card h-100">
                         <div className="card-body">
                             <h4 className="card-title">#Customers: {dataset_information.user_count}</h4>
                             <p className="card-text">Unique customers present in this dataset.</p>

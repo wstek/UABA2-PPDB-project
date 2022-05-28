@@ -1,7 +1,6 @@
 import {Link} from "react-router-dom";
 import logo from "../images/logo/logo-with-right-text.png";
-import React from 'react';
-import {useContext} from "react";
+import React, {useContext} from 'react';
 import {UserContext} from "../utils/UserContext";
 
 function LoginButton() {

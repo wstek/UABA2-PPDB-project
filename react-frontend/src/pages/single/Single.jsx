@@ -1,5 +1,4 @@
 import "./single.css"
-import Sidebar from "../../components/sidebar/Sidebar"
 import Chartx from "../../components/chart/Chartx"
 import Tablex from "../../components/table/Tablex"
 

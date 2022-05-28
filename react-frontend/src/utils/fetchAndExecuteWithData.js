@@ -1,4 +1,6 @@
-export function fetchData(api, fnt, abortCont = new AbortController(), onUnauthorized = () =>{}, onNotFound = () =>{}) {
+export function fetchData(api, fnt, abortCont = new AbortController(), onUnauthorized = () => {
+}, onNotFound = () => {
+}) {
     fetch(api, {
         method: 'GET',
         credentials: 'include',
@@ -12,7 +14,7 @@ export function fetchData(api, fnt, abortCont = new AbortController(), onUnautho
         // console.log(data)
         fnt(data)
     }).catch(err => {
-        console.log(err)
+            console.log(err)
             if (err.name === 'AbortError') {
                 console.log('fetch aborted')
             }

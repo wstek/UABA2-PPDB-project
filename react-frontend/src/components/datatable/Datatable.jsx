@@ -75,7 +75,7 @@ function Datatable({abtest_id, algorithm_id}) {
     }
 
     function showPurchasesTab() {
-        fetch('/api/purchases/' + abtest_id + '/' +  select[0], {
+        fetch('/api/purchases/' + abtest_id + '/' + select[0], {
             method: 'GET',
             credentials: 'include',
             headers: {"Content-Type": "application/json", 'Accept': 'application/json'}
@@ -93,11 +93,11 @@ function Datatable({abtest_id, algorithm_id}) {
         })
     }
 
-    function showTopk(){
+    function showTopk() {
         let string = ""
-        for(let key in topk){
+        for (let key in topk) {
             string += key + ": "
-            for(let value = 0; value < topk[key].length; value++){
+            for (let value = 0; value < topk[key].length; value++) {
                 string += topk[key][value]
                 string += ", "
             }
@@ -105,11 +105,12 @@ function Datatable({abtest_id, algorithm_id}) {
         }
         return string
     }
-    function showPurchases(){
+
+    function showPurchases() {
         let string = ""
-        for(let key in purchases){
+        for (let key in purchases) {
             string += key + ": "
-            for(let value = 0; value < purchases[key].length; value++){
+            for (let value = 0; value < purchases[key].length; value++) {
                 string += purchases[key][value]
                 string += ", "
             }
@@ -137,22 +138,22 @@ function Datatable({abtest_id, algorithm_id}) {
                     </div>
                 </div>
                 {selectedTopkCustomer &&
-                <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 " >
-                    <label>Topk </label>
-                    <div style={{ flex: 1, padding: 20, backgroundColor: "grey", height: 400, width: '100%' }}>
-                        {showTopk()}
-                    </div>
-                </div>}
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 ">
+                        <label>Topk </label>
+                        <div style={{flex: 1, padding: 20, backgroundColor: "grey", height: 400, width: '100%'}}>
+                            {showTopk()}
+                        </div>
+                    </div>}
                 {selectedPurchasesCustomer &&
-                <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 " >
-                    <label>Purchases </label>
-                    <div style={{ flex: 1, padding: 20, backgroundColor: "grey", height: 400, width: '100%' }}>
-                        {showPurchases()}
-                    </div>
-                </div>}
+                    <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 ">
+                        <label>Purchases </label>
+                        <div style={{flex: 1, padding: 20, backgroundColor: "grey", height: 400, width: '100%'}}>
+                            {showPurchases()}
+                        </div>
+                    </div>}
             </div>
 
-             <button className="position-relative " onClick={showTopkTab}>Topk</button>
+            <button className="position-relative " onClick={showTopkTab}>Topk</button>
             <button className="position-relative " onClick={showPurchasesTab}>Purchases</button>
         </div>
     );

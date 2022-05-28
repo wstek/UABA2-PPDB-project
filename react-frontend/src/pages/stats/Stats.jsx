@@ -1,4 +1,3 @@
-import Sidebar from '../../components/sidebar/Sidebar';
 import './stats.css'
 
 const Stats = () => {

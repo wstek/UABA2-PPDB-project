@@ -20,17 +20,17 @@ function Footer() {
     if (!isMobile) {
         return (
             <footer className="py-2 text-white fixed-bottom bg-purple">
-                    <div className="container-fluid text-center ">
-                        <div className="row vh-2 mt-0">
-                            <div className="col-1 align-left">
-                                <img src={ua_logo} className="vh-2" alt="pic" id="footer"/>
-                            </div>
-                            <div className="col-11 footer-text">
-                                @Jorden Van Handenhoven, Mohammed Shakleya, Said Yandarbiev, Sam Roggeman, William
-                                Steklein
-                            </div>
+                <div className="container-fluid text-center ">
+                    <div className="row vh-2 mt-0">
+                        <div className="col-1 align-left">
+                            <img src={ua_logo} className="vh-2" alt="pic" id="footer"/>
+                        </div>
+                        <div className="col-11 footer-text">
+                            @Jorden Van Handenhoven, Mohammed Shakleya, Said Yandarbiev, Sam Roggeman, William
+                            Steklein
                         </div>
                     </div>
+                </div>
             </footer>
         )
     } else {

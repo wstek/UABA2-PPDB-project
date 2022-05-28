@@ -82,9 +82,12 @@ export function TopKPurchasedTable({abtest_id, start_date, end_date}) {
         let columns
         if (top_k_purchased) {
             columns = [
-                {Header: 'Article', accessor: 'article', Cell: (params)=>{
-                        return <Link style={{ textDecoration: 'inherit' }} to={`/ABTest/${abtest_id}/Item/${params.row.values.article}`} >{params.row.values.article}</Link>
-                    }}, {Header: 'Times Purchased', accessor: 'count'}
+                {
+                    Header: 'Article', accessor: 'article', Cell: (params) => {
+                        return <Link style={{textDecoration: 'inherit'}}
+                                     to={`/ABTest/${abtest_id}/Item/${params.row.values.article}`}>{params.row.values.article}</Link>
+                    }
+                }, {Header: 'Times Purchased', accessor: 'count'}
             ]
         }
         return columns
@@ -124,7 +127,8 @@ export function TopKPerAlgorithmTable({abtest_id, start_date, end_date}) {
                     Header: algorithm_id.toString(), columns: [{
                         Cell: (params) => {
                             let article_id = params.row.original[algorithm_id.toString()].article
-                            return <Link style={{ textDecoration: 'inherit' }} to={`/ABTest/${abtest_id}/Item/${article_id}`} >{article_id}</Link>
+                            return <Link style={{textDecoration: 'inherit'}}
+                                         to={`/ABTest/${abtest_id}/Item/${article_id}`}>{article_id}</Link>
 
                         },
                         Header: 'Article ID', accessor: algorithm_id.toString() + '.article'

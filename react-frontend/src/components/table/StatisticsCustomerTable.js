@@ -1,7 +1,7 @@
 import BootstrapTable from "./BootstrapTable";
 
 // import {useEffect} from "react";
-import React, {useEffect, useMemo, useState,useContext} from 'react'
+import React, {useContext, useEffect, useMemo, useState} from 'react'
 import {PurpleSpinner} from "../PurpleSpinner"
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
 import {DataGrid} from '@mui/x-data-grid';
@@ -60,19 +60,22 @@ function GeneralUserOverview({abtest_id, date_start_index, date_end_index}) {
 
 function CustomerList({abtest_id, date_start_index, date_end_index}) {
     const history = useHistory()
-    const columns = [{headerName: 'Customer', field: 'Customer', width: '150', headerAlign: 'center',
+    const columns = [{
+        headerName: 'Customer', field: 'Customer', width: '150', headerAlign: 'center',
         renderCell: (cellValues) => {
             let customer_id = cellValues.row.Customer
-            return <Link style={{textDecoration: 'inherit'}} to={`/ABTest/${abtest_id}/Customer/${customer_id}`} > {customer_id} </Link>
-      }},
+            return <Link style={{textDecoration: 'inherit'}}
+                         to={`/ABTest/${abtest_id}/Customer/${customer_id}`}> {customer_id} </Link>
+        }
+    },
         {
-        headerName: 'Purchases', field: 'Purchases', width: '150', headerAlign: 'center',
-    }, {headerName: 'Revenue', field: 'Revenue', width: '150', headerAlign: 'center',}, {
-        headerName: 'Days Active',
-        field: 'Days Active',
-        width: '150',
-        headerAlign: 'center',
-    }]
+            headerName: 'Purchases', field: 'Purchases', width: '150', headerAlign: 'center',
+        }, {headerName: 'Revenue', field: 'Revenue', width: '150', headerAlign: 'center',}, {
+            headerName: 'Days Active',
+            field: 'Days Active',
+            width: '150',
+            headerAlign: 'center',
+        }]
     const [customerData, setCustomerData] = useState(null)
 
     function fetchCustomerData() {

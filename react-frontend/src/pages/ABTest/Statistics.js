@@ -101,7 +101,7 @@ function ABTestCharts({graphdata}) {
 
 function TopK({}) {
     const {abtest_id, start_date, end_date, start_date_index, end_date_index} = useContext(ABTestContext);
-    console.log(start_date,end_date)
+    console.log(start_date, end_date)
     return (<>
         <div className="col-auto " style={{minHeight: "400px"}}>
             <TopKPerAlgorithmTable abtest_id={abtest_id}
@@ -210,29 +210,29 @@ function StatisticsInformation() {
         setSelectedStart,
         setSelectedEnd
     }}>
-                       <DateSlider dates={state.abtest_data && state.abtest_data.dates} style={{minHeight: "200px"}}/>
+        <DateSlider dates={state.abtest_data && state.abtest_data.dates} style={{minHeight: "200px"}}/>
 
-                <div className="row text-center align-content-center justify-content-center mx-auto mt-3">
+        <div className="row text-center align-content-center justify-content-center mx-auto mt-3">
 
-        <Switch>
-            <Route exact path="/Statistics/ABTest/:abtest_id/GeneralInfo"
-                   children={<GeneralABTestInformation abtest_data={state.abtest_data}
-                                                       input_algorithms={state.input_algorithms}/>}/>
-            <Route exact path="/Statistics/ABTest/:abtest_id/Graphs"
-                   children={
-                       <ABTestCharts graphdata={state}/>
-                   }/>
-            <Route exact path="/Statistics/ABTest/:abtest_id/TopK"
-                   children={
-                       <TopK/>
-                   }/>
-            <Route exact path="/Statistics/ABTest/:abtest_id/Customers"
-                   children={
-                            <CustomerOverview/>
-                   }/>
+            <Switch>
+                <Route exact path="/Statistics/ABTest/:abtest_id/GeneralInfo"
+                       children={<GeneralABTestInformation abtest_data={state.abtest_data}
+                                                           input_algorithms={state.input_algorithms}/>}/>
+                <Route exact path="/Statistics/ABTest/:abtest_id/Graphs"
+                       children={
+                           <ABTestCharts graphdata={state}/>
+                       }/>
+                <Route exact path="/Statistics/ABTest/:abtest_id/TopK"
+                       children={
+                           <TopK/>
+                       }/>
+                <Route exact path="/Statistics/ABTest/:abtest_id/Customers"
+                       children={
+                           <CustomerOverview/>
+                       }/>
 
-        </Switch>
-                </div>
+            </Switch>
+        </div>
     </ ABTestContext.Provider>
     return <>
         <div className="row text-center align-content-center justify-content-center mx-auto">
@@ -307,6 +307,7 @@ function Statistics() {
         if (statistics) link += `/${statistics}`
         history.push(link);
     }
+
     return (<div className="container-fluid">
         <div className="row text-center align-items-center">
             <div className="col">
@@ -320,7 +321,8 @@ function Statistics() {
                 <Route path="/Statistics/ABTest/:abtest_id/" children={<DeleteABTestButton/>}/>
             </div>
             {abtest_id && <div className="col">
-                <InputTabs selected_input={statistics} inputs={["GeneralInfo", "Graphs", "TopK", "Customers"]} header={"Select View"}
+                <InputTabs selected_input={statistics} inputs={["GeneralInfo", "Graphs", "TopK", "Customers"]}
+                           header={"Select View"}
                            linkTo={(selected_stat) => `/Statistics/ABTest/${abtest_id}/${selected_stat}`}/>
             </div>}
 

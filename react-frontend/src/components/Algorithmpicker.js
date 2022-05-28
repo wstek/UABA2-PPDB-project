@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {PurpleSpinner} from "./PurpleSpinner"
 
-export default function AlgorithmPicker({setSelectedAlgorithm, personal_algorithms,selected_algorithm}) {
+export default function AlgorithmPicker({setSelectedAlgorithm, personal_algorithms, selected_algorithm}) {
     const [personal_idtests_id_components, setPersonalABTestsElements] = useState([])
     let value = selected_algorithm
     if (!value) value = 0
@@ -22,19 +22,22 @@ export default function AlgorithmPicker({setSelectedAlgorithm, personal_algorith
         }
         setPersonalABTestsElements(temp_personal_idtests_id_components)
     }
+
     useEffect(personalAlgorithms, [personal_algorithms],);
+
     function handleChange(e) {
         setSelectedAlgorithm(e.target.value)
     }
 
-    if ( ! personal_algorithms ) return <PurpleSpinner />
+    if (!personal_algorithms) return <PurpleSpinner/>
     return (
-            <div className={"col-auto mx-auto"}>
-                <h1>Select Algorithm</h1>
-                <select id="abtestIds" value={value} name="abtestIds" className="custom-select bg-purple form-select-lg" onChange={handleChange}>
-                    <option disabled value={0}> -- select an option -- </option>
-                    {personal_idtests_id_components.length && personal_idtests_id_components}
-                </select>
-            </div>
+        <div className={"col-auto mx-auto"}>
+            <h1>Select Algorithm</h1>
+            <select id="abtestIds" value={value} name="abtestIds" className="custom-select bg-purple form-select-lg"
+                    onChange={handleChange}>
+                <option disabled value={0}> -- select an option --</option>
+                {personal_idtests_id_components.length && personal_idtests_id_components}
+            </select>
+        </div>
     )
 }

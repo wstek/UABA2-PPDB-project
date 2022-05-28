@@ -36,11 +36,13 @@ function DataTable({abtest_id}) {
             console.log(err);
         })
     }, [abtest_id]);
-    function openTabs(){
-        for (let i = 0; i < select.length; i++){
+
+    function openTabs() {
+        for (let i = 0; i < select.length; i++) {
             window.open("/api/" + abtest_id + "/" + select[i])
         }
     }
+
     return (
         <div style={{height: 400, width: '100%'}}>
             {loaded && <DataGrid

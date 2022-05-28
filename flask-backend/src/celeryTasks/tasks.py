@@ -6,18 +6,18 @@ from celery.exceptions import SoftTimeLimitExceeded
 from src.ABTestSimulation.ABTestSimulation import ABTestSimulation
 from src.DatabaseConnection.InsertDataset import InsertDataset
 from src.extensions import celery_extension, database_connection
-from src.socketioEvents.reportProgress import report_progress
+from src.socketioEvents.reportProgress import report_progress_steps
 from src.utils.Logger import Logger
 from src.utils.pathParser import getAbsPathFromProjectRoot
 
 
 def dummy_task_func(duration, task_id=None):
-    report_progress(task_id, 0, duration)
+    report_progress_steps(task_id, 0, duration)
 
     for i in range(duration):
         sleep(1)
 
-        report_progress(task_id, i + 1, duration)
+        report_progress_steps(task_id, i + 1, duration)
 
 
 @celery_extension.task(name="dummy_task", bind=True)

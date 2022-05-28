@@ -2,11 +2,10 @@ import React from 'react'
 import Table from 'react-bootstrap/Table'
 
 
-
 function BootstrapTable({columns, data}) {
     return (
         <div className={"col-auto mx-auto my-auto"}>
-            <Table responsive  className={"border-dark avoid-break-inside border-2 border"}>
+            <Table responsive className={"border-dark avoid-break-inside border-2 border"}>
                 <thead className={"bg-darkpurple"}>
                 <tr>
                     {/*<th>#</th>*/}

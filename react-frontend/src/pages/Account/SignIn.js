@@ -1,33 +1,20 @@
 import "../../index.css"
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import {Link, useHistory} from "react-router-dom";
-import {useContext} from "react";
 import {UserContext} from "../../utils/UserContext";
 
 
-function POST(path, data) {
-    return fetch(`${path}`, {
-        method: 'POST', headers: {
-            'Content-Type': 'application/json'
-        }, body: JSON.stringify(data)
-    })
-}
-
-
 function SignIn({...props}) {
-    // console.log(props);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [passwordShown, setPasswordShown] = useState(false);
-    // const [rememberMe, setRememberMe] = useState(false);
     const [isPending, setIsPending] = useState(false);
-    const [error, setError] = useState(null);
     const history = useHistory();
     const {updateUser} = useContext(UserContext);
 
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = (event) => {
+        event.preventDefault();
         const login_try = {username, password};
 
         setIsPending(true);
@@ -45,26 +32,19 @@ function SignIn({...props}) {
             }
             return res.json()
         }).then((data) => {
+            setIsPending(false);
             if (data.error) {
                 throw Error(data.error);
             }
-            //   } else if (res.status == 200) {
-            // history.go(-1);
-            setIsPending(false);
-            setError(null);
-            console.log(data)
             updateUser(data)
             if (props.location.state !== undefined)
                 history.push(props.location.state.from);
             else
                 history.push("/dashboard")
-            //   }
+        }).catch((err) => {
+            setIsPending(false);
+            console.log(err);
         })
-            .catch((err) => {
-                setIsPending(false);
-                setError(err.message);
-                console.log(err);
-            })
     }
 
     return (

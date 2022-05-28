@@ -1,10 +1,5 @@
-import ItemDatatable from "../../components/datatable/ItemDatatable";
-import Sidebar from "../../components/sidebar/Sidebar";
 import React, {useEffect, useState} from "react";
 import "./list.css"
-import {fetchData} from "../../utils/fetchAndExecuteWithData";
-import InputSelector from "../../components/InputSelector";
-import AlgorithmPicker from "../../components/Algorithmpicker";
 import {useParams} from "react-router-dom";
 import LineChart from "../../components/chart/LineChart";
 
