@@ -80,7 +80,7 @@ function App() {
                                                     exact path="/dataset"/>
                                     <ProtectedRoute component={DatasetStatistics} isLoading={isLoading}
                                                     exact path="/dataset/:dataset_name"/>
-                                    <ProtectedRoute component={DatasetUpload} isLoading={isLoading}
+                                    <ProtectedRoute component={DatasetUpload} adminLevel={true} isLoading={isLoading}
                                                     exact path="/dataset-upload"/>
 
                                     {/*simulation*/}

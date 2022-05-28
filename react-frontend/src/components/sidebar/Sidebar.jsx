@@ -23,7 +23,6 @@ const Sidebar = () => {
 //     console.log(path)
     let {abtest_id} = useParams()
     const {user, updateUser} = useContext(UserContext);
-    console.log(user)
     // console.log(id); // 55 test null
 
     return (<div
@@ -97,10 +96,10 @@ const Sidebar = () => {
                 </li>
                 <ul className="collapse nav flex-column ms-1" id="dataset_menu"
                     data-bs-parent="#menu">
-                    <li className="w-100">
+                    {user.admin && <li className="w-100">
                         <Link to="/dataset-upload" className="nav-link px-3"> <FileUploadIcon/> <span
-                            className="d-none d-sm-inline">Upload</span></Link>
-                    </li>
+                            className="d-none d-sm-inline"> Upload</span></Link>
+                    </li>}
                     <li className="w-100">
                         <Link to="/dataset" className="nav-link px-3"> <PreviewIcon/> <span
                             className="d-none d-sm-inline">View</span></Link>

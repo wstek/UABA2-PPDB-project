@@ -1,6 +1,7 @@
 import "../../index.css"
 import {Link, useHistory} from "react-router-dom"
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
+import {UserContext} from "../../utils/UserContext";
 
 function POST(path, data) {
     return fetch(`${path}`, {
@@ -10,7 +11,7 @@ function POST(path, data) {
     })
 }
 
-function SignUp({setAdmin, setAuthed}) {
+function SignUp() {
     const [passwordShown, setPasswordShown] = useState(false);
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastname] = useState('');
@@ -22,6 +23,7 @@ function SignUp({setAdmin, setAuthed}) {
     const [error, setError] = useState(null);
     const [isPending, setIsPending] = useState(false);
     const history = useHistory();
+    const {updateUser} = useContext(UserContext);
 
     useEffect(() => { //maak beter een loginnotrequired route ipv dit
         setIsPending(true);
@@ -66,8 +68,7 @@ function SignUp({setAdmin, setAuthed}) {
                     // history.go(-1);
                     setIsPending(false);
                     setError(null);
-                    setAuthed(true)
-                    setAdmin(false)
+                    updateUser(data)
                     history.push('/dashboard');
                 })
                 .catch((err) => {

@@ -3,8 +3,9 @@ import {Redirect, Route} from 'react-router-dom';
 import {UserContext} from "./UserContext.js";
 
 
-const ProtectedRoute = ({Component: component, isLoading, ...restOfProps}) => {
+const ProtectedRoute = ({Component: component, isLoading, adminLevel = false,...restOfProps }) => {
     const {user} = useContext(UserContext);
+    const condition = user && (!adminLevel || user.admin)
 
     if (isLoading) {
         return (
@@ -16,7 +17,7 @@ const ProtectedRoute = ({Component: component, isLoading, ...restOfProps}) => {
         <Route
             path={restOfProps.path}
             render={(props) =>
-                user ?
+                condition ?
                     <restOfProps.component path={restOfProps.path} {...props} /> :
                     <Redirect to={{pathname: '/sign_in', state: {from: restOfProps.path}}}/>
             }

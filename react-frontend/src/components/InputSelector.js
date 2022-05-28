@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {PurpleSpinner} from "./PurpleSpinner"
 
 export default function InputSelector({
@@ -6,14 +6,16 @@ export default function InputSelector({
     }, selected_input = 0
                                       }) {
     const [personal_idtests_id_components, setPersonalABTestsElements] = useState([])
-
-
+    const _selected_input = useMemo(() => {
+        if (inputs && inputs.includes(selected_input)){
+            return selected_input
+        }
+        return 0
+    }, [inputs]);
     function personalABTests() {
         let temp_personal_idtests_id_components = []
         if (inputs) {
-            if (!inputs.includes(selected_input)) {
-                onChange(0)
-            }
+
             let id
             for (let ab_test_id in inputs) {
                 id = inputs[ab_test_id]
@@ -35,7 +37,7 @@ export default function InputSelector({
     return (
         <div className={"col-auto mx-auto "}>
             {header && <h1>{header}</h1>}
-            <select id="ids" value={selected_input} name="ids" onClick={onClick}
+            <select id="ids" value={_selected_input} name="ids" onClick={onClick}
                     className="custom-select bg-purple form-select-lg"
                     onChange={handleChange}>
                 <option disabled value={0}> -- select an option --</option>
