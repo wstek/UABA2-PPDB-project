@@ -53,7 +53,7 @@ function TaskProgress() {
 
         socketRef.current.on(event, (data) => {
             // print task progress
-            console.log("task", task.id, "progress: ", data);
+            // console.log("task", task.id, "progress: ", data);
 
             setTasks(oldTasks => oldTasks.map(list_task => list_task.id === task.id ?
                 {...list_task, progress: data} : list_task))
