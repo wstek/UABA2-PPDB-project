@@ -52,9 +52,6 @@ function TaskProgress() {
         const event = "task:" + task.id + ":progress";
 
         socketRef.current.on(event, (data) => {
-            // print task progress
-            // console.log("task", task.id, "progress: ", data);
-
             setTasks(oldTasks => oldTasks.map(list_task => list_task.id === task.id ?
                 {...list_task, progress: data} : list_task))
 
@@ -80,12 +77,26 @@ function TaskProgress() {
         });
     }
 
+    const handleAbortTask = (task) => {
+        axios.post("/api/abort_task", {task_id: task.id}).then((response) => {
+        });
+        removeTask(task);
+    }
+
     const renderTasks = () => {
         return (
             <div>
                 {tasks.slice(0).reverse().map((task) => {
                     return (
-                        <p key={task.id}>{task.name + "\t" + task.time_start + "\t" + Math.round(task.progress) + "%"}</p>
+                        <div>
+                            <p key={task.id}>
+                                {task.name + "\t" + task.time_start + "\t" + Math.round(task.progress) + "%"}
+                            </p>
+                            <button style={{display: "block", margin: "10px auto"}}
+                                    onClick={() => handleAbortTask(task)}>
+                                abort task
+                            </button>
+                        </div>
                     )
                 })}
             </div>

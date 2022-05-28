@@ -1,5 +1,4 @@
 from src.extensions import socketio_extension, redis_extension
-from src.utils.Logger import Logger
 from time import sleep
 
 # todo: case when progress close to 100
@@ -17,8 +16,6 @@ def report_progress_percentage(task_id: str, percentage):
 
     socketio_extension.emit(channel, percentage)
     redis_extension.set(task_id, percentage, ex=10800)    # expires in 3 hours
-
-    # Logger.log(channel + " " + str(percentage))
 
     # buffer to let the client know that task has finished (e.g. page reload)
     if percentage == 100:
