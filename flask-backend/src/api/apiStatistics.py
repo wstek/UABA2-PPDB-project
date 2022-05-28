@@ -141,7 +141,7 @@ def get_item_purchases_over_time(abtest_id, article_id):
     amount_of_purchases = database_connection.session_execute_and_fetch(
         f'''
         select distinct date_of from statistics natural join ab_test natural join algorithm
-        where date_of >= start_date and date_of <= end_date and abtest_id = 18 order by date_of
+        where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id} order by date_of
        '''
     )
 
@@ -178,13 +178,13 @@ def get_item_recommendations_over_time(abtest_id, article_id):
     amount_of_recommendations = database_connection.session_execute_and_fetch(
         f'''
          select distinct date_of from statistics natural join ab_test natural join algorithm
-         where date_of >= start_date and date_of <= end_date and abtest_id = 18 order by date_of
+         where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id} order by date_of
         '''
     )
 
     algorithms = database_connection.session_execute_and_fetch(
         f'''
-            select algorithm_id from algorithm where abtest_id = 18;
+            select algorithm_id from algorithm where abtest_id = {abtest_id};
         '''
     )
     dates = []
@@ -236,13 +236,13 @@ def get_item_recommendations_and_purchases_over_time(abtest_id, article_id):
     amount_of_recommendations = database_connection.session_execute_and_fetch(
         f'''
          select distinct date_of from statistics natural join ab_test natural join algorithm
-         where date_of >= start_date and date_of <= end_date and abtest_id = 18 order by date_of
+         where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id} order by date_of
         '''
     )
 
     algorithms = database_connection.session_execute_and_fetch(
         f'''
-            select algorithm_id from algorithm where abtest_id = 18;
+            select algorithm_id from algorithm where abtest_id = {abtest_id};
         '''
     )
     dates = []
