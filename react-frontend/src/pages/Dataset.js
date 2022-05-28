@@ -4,6 +4,8 @@ import {fetchData} from "../utils/fetchAndExecuteWithData";
 import {PurpleSpinner} from "../components/PurpleSpinner";
 import {useHistory, useParams} from "react-router-dom";
 import HistogramChart from "../components/chart/HistogramChart";
+import ProtectedRoute from "../utils/ProtectedRoute";
+import React from "react";
 
 export function DatasetStatistics() {
     let {dataset_name} = useParams();
@@ -27,7 +29,6 @@ export function DatasetStatistics() {
                         <div className="card-body">
                             <h4 className="card-title">#Customers: {dataset_information.user_count}</h4>
                             <p className="card-text">Unique customers present in this dataset.</p>
-                            <a href="/users" className="orange-hover button-purple">View all customers</a>
                         </div>
                     </div>
                 </div>
@@ -44,12 +45,11 @@ export function DatasetStatistics() {
                         <div className="card-body">
                             <h4 className="card-title">#Articles: {dataset_information.purchase_count}</h4>
                             <p className="card-text">Unique articles present in this dataset.</p>
-                            <a href="/items" className="orange-hover button-purple">View all articles</a>
                         </div>
                     </div>
                 </div>
             </div>
-            <div className="row text-center align-items-center pt-4 mb-3">
+            <div className="row text-center align-items-center mb-3">
                 <HistogramChart data={dataset_information.prices}/>
             </div>
         </>
@@ -58,7 +58,6 @@ export function DatasetStatistics() {
 
 export default function DatasetPage() {
     const history = useHistory();
-
     const [dataset_names, setDataSetNames] = useState(null)
 
     const fetchDatasets = () => {
@@ -77,15 +76,16 @@ export default function DatasetPage() {
             <div className="row text-center align-items-center pt-4 mb-3">
 
                 <InputSelector inputs={dataset_names && dataset_names.all_datasets}
-                               onChange={(selected_dataset) => history.push('dataset/' + selected_dataset)}
+                               onChange={(selected_dataset) => history.push('/dataset/' + selected_dataset)}
                     // setSelectedInput={setSelectedDataset}
-                    // selected_input={selected_dataset}
+                    selected_input={useParams().dataset_name}
                                header={"Select Dataset"}
                 />
             </div>
             {/*{selected_dataset && <Redirect to={'dataset/'+selected_dataset}></Redirect> }*/}
             {/*{selected_dataset && <DatasetStatistics selected_dataset={selected_dataset}></DatasetStatistics>}*/}
-
+            <ProtectedRoute component={DatasetStatistics}
+                            exact path="/dataset/:dataset_name"/>
         </div>
     );
 }

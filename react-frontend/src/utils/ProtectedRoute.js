@@ -3,8 +3,8 @@ import {Redirect, Route} from 'react-router-dom';
 import {UserContext} from "./UserContext.js";
 
 
-const ProtectedRoute = ({Component: component, isLoading, adminLevel = false,...restOfProps }) => {
-    const {user} = useContext(UserContext);
+const ProtectedRoute = ({Component: component, adminLevel = false,...restOfProps }) => {
+    const {user, isLoading} = useContext(UserContext);
     const condition = user && (!adminLevel || user.admin)
 
     if (isLoading) {
