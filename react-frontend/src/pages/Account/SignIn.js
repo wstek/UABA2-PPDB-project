@@ -12,7 +12,6 @@ function SignIn({...props}) {
     const history = useHistory();
     const {updateUser} = useContext(UserContext);
 
-
     const handleSubmit = (event) => {
         event.preventDefault();
         const login_try = {username, password};
@@ -37,10 +36,8 @@ function SignIn({...props}) {
                 throw Error(data.error);
             }
             updateUser(data)
-            if (props.location.state !== undefined)
-                history.push(props.location.state.from);
-            else
-                history.push("/dashboard")
+            console.log("Logging In")
+            history.push("/dashboard")
         }).catch((err) => {
             setIsPending(false);
             console.log(err);

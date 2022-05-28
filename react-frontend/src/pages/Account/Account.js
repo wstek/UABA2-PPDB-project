@@ -5,7 +5,7 @@ import logOut from '../../utils/logOut'
 import {UserContext} from "../../utils/UserContext";
 
 function Account() {
-    const {user} = useContext(UserContext);
+    const {user, updateUser} = useContext(UserContext);
     return (
         <div className="row h-100 ">
             <div className="col text-center mt-2">
@@ -26,8 +26,7 @@ function Account() {
                 </div>
                 <div className="row mt-4">
                     <div className={"col"}>
-                        <Link to="/sign_in" onClick={logOut} className="button-purple red-hover">Log out</Link>
-                        <button disabled className="button-purple red-hover">Logging out...</button>
+                        <Link to="/sign_in" onClick={() => logOut(updateUser)} className="button-purple red-hover">Log out</Link>
                     </div>
                 </div>
             </div>

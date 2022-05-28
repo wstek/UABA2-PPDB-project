@@ -6,7 +6,6 @@ export default function logOut(updateUser) {
             alert('session has expired')
         }
         updateUser(null)
-        window.history.location.href = "/sign_in/"
     }).catch((err) => {
         console.log(err);
     })
