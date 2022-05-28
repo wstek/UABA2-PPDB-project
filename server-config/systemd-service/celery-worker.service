@@ -9,7 +9,7 @@ Group=www-data
 
 WorkingDirectory=/home/app/Programming-project-databases/flask-backend
 Environment="PATH=/home/app/Programming-project-databases/env/bin"
-ExecStart=/home/app/Programming-project-databases/env/bin/celery -A src.worker worker -l INFO
+ExecStart=/home/app/Programming-project-databases/env/bin/celery -A src.worker worker -l INFO --autoscale=1,1000
 Restart=on-failure
 
 [Install]
