@@ -41,3 +41,12 @@ def get_tasks():
     sorted_user_tasks = sorted(user_tasks, key=lambda d: d["time_start"])
 
     return jsonify(sorted_user_tasks), 200
+
+
+@api_task.route("/api/abort_task", methods=["POST"])
+def abort_task():
+    data = json.loads(request.data)
+
+    celery_extension.control.revoke(data["task_id"], terminate=True, signal='SIGUSR1')
+
+    return "aborted task" + data["task_id"], 200

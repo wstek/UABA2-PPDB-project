@@ -22,11 +22,13 @@ def dummy_task_func(duration, task_id=None):
 
 @celery_extension.task(name="dummy_task", bind=True)
 def dummy_task(self, duration: int, user_id: str = ""):
-    dummy_task_func(duration, self.request.id)
 
-    message = f"slept {duration} seconds"
-    Logger.log(message)
-    return message
+    try:
+        dummy_task_func(duration, self.request.id)
+    except SoftTimeLimitExceeded:
+        return "aborted"
+
+    return f"slept {duration} seconds"
 
 
 @celery_extension.task(name="insert_dataset")
@@ -63,6 +65,7 @@ def insert_dataset(filenames: Dict[str, str], column_select_data: dict, user_id:
 
     except SoftTimeLimitExceeded:
         insert_dataset_obj.abort()
+        Logger.log("aborted task")
 
     except ValueError as err:
         insert_dataset_obj.abort()
