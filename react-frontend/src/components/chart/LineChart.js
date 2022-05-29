@@ -2,9 +2,19 @@ import {Chart} from "react-google-charts";
 import {PurpleSpinner} from "../PurpleSpinner"
 import {useEffect, useState} from "react";
 
-function LineChart({XFnY, title, xMin = 0, xMax = 10}) {
+function LineChart({XFnY, title, xMin = 0, xMax = 10, ex_options ={}}) {
     const [options, setOptions] = useState(null);
-
+        // if (data) {
+        //     for (let ent in data.graphdata) {
+        //         let d = new Date(data.graphdata[ent][0])
+        //         if ( !isNaN(d) ) {
+        //
+        //             data.graphdata[ent][0] = d
+        //         }   else data.graphdata[ent][0] = 'datetime'
+        //         console.log(data.graphdata[ent][0].getTime())
+        //
+        //     }
+        // }
     useEffect(() => {
         setOptions({
                 title: title,
@@ -16,6 +26,8 @@ function LineChart({XFnY, title, xMin = 0, xMax = 10}) {
                         max: xMax
                     },
                 },
+
+            ...ex_options
 
             }
         );

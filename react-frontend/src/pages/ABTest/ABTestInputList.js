@@ -61,14 +61,13 @@ const ABTestInputList = ({abs_algorithms}) => {
             <div className="algorithms">
                 {con_algorithms.map((algorithm) => (
                     <div key={"algorithm" + algorithm.id}>
-                        <div className="row text-center justify-content-center align-items-center mt-5 mb-2"
-                        >
+                        <div className="row text-center justify-content-center align-items-center mt-5 mb-2">
 
-                            {<ColoredLine color="purple"/>}
-                            {<h4>{algorithm.name} - Algorithm {algorithm.id} </h4>}
-                            {algorithm.fields.map((field) => (
-                                field(algorithm.id)
-                            ))}
+                            <ColoredLine color="purple"/>
+                            <h4>{algorithm.name} - Algorithm {algorithm.id} </h4>
+                            {algorithm.fields.map((field) => {
+                                return field(algorithm.id)
+                            })}
                         </div>
 
                         <div className="row text-center justify-content-center align-items-center mt-2 mb-2">
@@ -90,6 +89,7 @@ const ABTestInputList = ({abs_algorithms}) => {
         for (let i = 0; i < con_algorithms.length; i++) {
             const algorithmParams = {name: con_algorithms[i].name, parameters: {}};
             for (let k = 0; k < con_algorithms[i].parameters.length; k++) {
+                console.log(con_algorithms[i].parameters[k] + con_algorithms[i].id)
                 const val = document.getElementById(con_algorithms[i].parameters[k] + con_algorithms[i].id).value;
                 if (!val) {
                     window.alert("Please fill in all the fields");
@@ -113,7 +113,7 @@ const ABTestInputList = ({abs_algorithms}) => {
         } else {
             const abtest_setup = {start, end, topk, stepsize, dataset_name, algorithms};
             const jdata = JSON.stringify(abtest_setup);
-
+            console.log(algorithms)
             console.log(jdata)
             console.log("trying to fetch...")
 

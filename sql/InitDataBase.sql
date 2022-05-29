@@ -120,7 +120,8 @@ CREATE TABLE IF NOT EXISTS "algorithm"
     "abtest_id"      nat_int       not null,
     foreign key (abtest_id) references ab_test (abtest_id) on update cascade on delete cascade,
 
-    "algorithm_name" algorithmname NOT NULL,
+    "algorithm_name" varchar,
+    "algorithm_type" algorithmname not null,
 
     PRIMARY KEY ("algorithm_id")
 );

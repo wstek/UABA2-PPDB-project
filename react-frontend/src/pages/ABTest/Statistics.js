@@ -87,10 +87,19 @@ function ABTestCharts({graphdata}) {
             <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
                 <LineChart chart_id={3} title="Click Through Rate" xMin={start_date_index}
                            xMax={end_date_index}
-                           XFnY={click_through_rate_over_time}/>
+                           XFnY={click_through_rate_over_time} ex_options={{
+                    vAxis: {
+                        format: 'percent'
+
+                    }
+                }}/>
             </div>
             <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
-                <LineChart chart_id={2} title={"Attribution Rate"} xMin={start_date_index}
+                <LineChart chart_id={2} title={"Attribution Rate"} ex_options={{
+                    vAxis: {
+                        format: 'percent'
+                    }
+                }} xMin={start_date_index}
                            xMax={end_date_index}
                            XFnY={attribution_rate_over_time}/>
             </div>
@@ -131,7 +140,24 @@ function StatisticsInformation() {
             field: 'abtest_data', value: data
         })
     }
-    const setAttributionRate = (data) => setState({field: 'attribution_rate_over_time', value: data})
+    const setAttributionRate = (data) => {
+
+        // if (data) {
+        //     console.log(data)
+        //     data.graphdata[0][0]= { type:'date' , Date: data.graphdata[0][0]}
+        //     // for (let ent in data.graphdata) {
+        //     //
+        //     //     let d = new Date(data.graphdata[ent][0])
+        //     //     if ( !isNaN(d) ) {
+        //     //
+        //     //         data.graphdata[ent][0] = d
+        //     //     }
+        //     //     data.graphdata[ent].type = 'date'
+        //     // }
+        // }
+        // console.log(data)
+        setState({field: 'attribution_rate_over_time', value: data})
+    }
     const setSelectedStart = (data) => {
         if (state.selected_start_date !== data) {
             setState({field: 'selected_start_date', value: data})
@@ -219,32 +245,15 @@ function StatisticsInformation() {
                        children={<GeneralABTestInformation abtest_data={state.abtest_data}
                                                            input_algorithms={state.input_algorithms}/>}/>
                 <Route exact path="/Statistics/ABTest/:abtest_id/Graphs"
-                       children={
-                           <ABTestCharts graphdata={state}/>
-                       }/>
+                       children={<ABTestCharts graphdata={state}/>}/>
                 <Route exact path="/Statistics/ABTest/:abtest_id/TopK"
-                       children={
-                           <TopK/>
-                       }/>
+                       children={<TopK/>}/>
                 <Route exact path="/Statistics/ABTest/:abtest_id/Customers"
-                       children={
-                           <CustomerOverview/>
-                       }/>
+                       children={<CustomerOverview/>}/>
 
             </Switch>
         </div>
     </ ABTestContext.Provider>
-    return <>
-        <div className="row text-center align-content-center justify-content-center mx-auto">
-
-        </div>
-        <div className="row text-center align-content-center justify-content-center mx-auto">
-
-        </div>
-        <ColoredLine color={"purple"}/>
-    </>;
-
-
 }
 
 function DeleteABTestButton() {
