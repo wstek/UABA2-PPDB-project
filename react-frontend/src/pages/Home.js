@@ -44,9 +44,6 @@ function Home() {
                     </div>
                     <br/>
                     <div>
-                        <Link to="/abtest/setup" className="orange-hover button-purple ">Start</Link>
-                        <Link to="/Statistics/ABTest" className="button-purple orange-hover">Statistics</Link>
-
                     </div>
 
                     <div className="row text-center align-items-center mt-4">
