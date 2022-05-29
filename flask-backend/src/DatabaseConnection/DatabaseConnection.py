@@ -174,7 +174,7 @@ class DatabaseConnection:
 
     def getAlgorithmsInformation(self, abtest_id):
         query = f'''
-            select algorithm_id, algorithm_name, parameter_name, value
+            select algorithm_id, parameter_name, value, algorithm_type
             from algorithm natural join parameter 
             where abtest_id = {abtest_id};
             '''
@@ -192,7 +192,7 @@ class DatabaseConnection:
         query = f'''
             SELECT bought_on,COUNT(DISTINCT(unique_customer_id))
             FROM purchase natural join customer
-            WHERE '{start}' <= bought_on and bought_on <= '{end}' and dataset_name = '{dataset_name}' 
+            WHERE bought_on between '{start}' and '{end}' and dataset_name = '{dataset_name}' 
             group by bought_on;
         '''
         return self.session_execute_and_fetch(query)
@@ -201,7 +201,7 @@ class DatabaseConnection:
         query = f'''
             SELECT bought_on,COUNT(unique_article_id)
             FROM purchase natural join article
-            WHERE '{start}' <= bought_on and bought_on <= '{end}' and dataset_name = '{dataset_name}' 
+            WHERE bought_on between '{start}' and '{end}' and dataset_name = '{dataset_name}' 
             group by bought_on;
         '''
         return self.session_execute_and_fetch(query)
@@ -232,8 +232,8 @@ class DatabaseConnection:
 
     def getDynamicStepsizeVar(self, abtest_id, parameter_name):
         query = f'''
-            SELECT date_of, algorithm_id,parameter_value
-            FROM statistics NATURAL JOIN dynamic_stepsize_var NATURAL JOIN  algorithm NATURAL JOIN ab_test
+            SELECT date_of, algorithm_id,parameter_value, algorithm_name
+            FROM statistics NATURAL JOIN dynamic_stepsize_var NATURAL JOIN named_algorithm NATURAL JOIN ab_test 
             WHERE abtest_id = {abtest_id} AND parameter_name = '{parameter_name}' ORDER BY date_of;
         '''
         return self.session_execute_and_fetch(query)

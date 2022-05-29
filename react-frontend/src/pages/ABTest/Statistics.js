@@ -70,34 +70,34 @@ function ABTestCharts({graphdata}) {
     const {
         active_user_over_time, purchases_over_time, click_through_rate_over_time, attribution_rate_over_time
     } = graphdata
+
     const {end_date_index, start_date_index} = useContext(ABTestContext);
     return (<>
-        <div className="row text-center align-content-center justify-content-center">
-            <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
+        <div className="row text-center align-content-center justify-content-center g-0">
+            <div className="col-12 col-lg-12 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
                 <LineChart chart_id={1} title="Active Users" xMin={start_date_index}
                            xMax={end_date_index}
                            XFnY={active_user_over_time}/>
             </div>
-            <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
+            <div className="col-12 col-lg-12 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
                 <LineChart chart_id={2} title={"Purchases"} xMin={start_date_index}
                            xMax={end_date_index} XFnY={purchases_over_time}/>
             </div>
         </div>
-        <div className="row text-center align-content-center justify-content-center">
-            <div className="col-12 col-lg-6 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
+        <div className="row text-center align-content-center justify-content-center g-0">
+            <div className="col-12 col-lg-12 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
                 <LineChart chart_id={3} title="Click Through Rate" xMin={start_date_index}
                            xMax={end_date_index}
                            XFnY={click_through_rate_over_time} ex_options={{
                     vAxis: {
-                        format: 'percent'
-
+                        format:'#.###%'
                     }
                 }}/>
             </div>
-            <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
+            <div className="col-12 col-lg-12 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
                 <LineChart chart_id={2} title={"Attribution Rate"} ex_options={{
                     vAxis: {
-                        format: 'percent'
+                        format:'#.###%'
                     }
                 }} xMin={start_date_index}
                            xMax={end_date_index}
@@ -108,7 +108,7 @@ function ABTestCharts({graphdata}) {
 }
 
 
-function TopK({}) {
+function TopK() {
     const {abtest_id, start_date, end_date, start_date_index, end_date_index} = useContext(ABTestContext);
     console.log(start_date, end_date)
     return (<>
@@ -317,7 +317,7 @@ function Statistics() {
         history.push(link);
     }
 
-    return (<div className="container-fluid">
+    return (<div className="container-fluid g-0">
         <div className="row text-center align-items-center">
             <div className="col">
 

@@ -64,6 +64,8 @@ const ItemList = () => {
                 let map = {graphdata: []}
                 let l = ["Date"]
                 let alg_ids = Object.keys(data.resp).length > 0 && Object.keys(data.resp[Object.keys(data.resp)[0]])
+
+                if (! alg_ids) return setAmountOfReccommendations(map)
                 alg_ids.forEach((alg_id) => l.push(alg_id))
                 map["graphdata"].push(l)
 

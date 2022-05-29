@@ -12,7 +12,11 @@ function computeColumns(input_algorithms) {
             Header: 'ID', accessor: 'algorithm-id',
         },
         {
-            Header: 'Type', accessor: 'name',
+            Header: 'Name', accessor: 'AlgorithmName',
+
+        },
+        {
+            Header: 'Type', accessor: 'Type',
 
         }, {
             Header: 'RetrainInterval', accessor: 'RetrainInterval',
@@ -20,6 +24,7 @@ function computeColumns(input_algorithms) {
         }
     ]
     let entry
+    console.log(input_algorithms)
     for (const [input_algorithm_key, input_algorithm_object] of Object.entries(input_algorithms)) {
         entry = {"algorithm-id": input_algorithm_key}
         for (const [field_key, field_value] of Object.entries(input_algorithm_object)) {
