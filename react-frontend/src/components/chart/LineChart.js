@@ -8,14 +8,15 @@ function LineChart({XFnY, title, xMin = 0, xMax = 10}) {
     useEffect(() => {
         setOptions({
                 title: title,
-                curveType: 'function',
+                curveType: '',
                 legend: {position: 'bottom'},
                 hAxis: {
                     viewWindow: {
                         min: xMin,
                         max: xMax
                     },
-                }
+                },
+
             }
         );
     }, [setOptions, xMin, xMax, title])
