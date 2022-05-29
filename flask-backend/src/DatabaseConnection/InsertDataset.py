@@ -133,7 +133,7 @@ class InsertDataset:
 
     def cleanup(self):
         for original_filename in self.filenames:
-            filepath = self.filenames[original_filename][0]
+            filepath = self.filenames[original_filename]
             os.remove(filepath)
 
     def abort(self):

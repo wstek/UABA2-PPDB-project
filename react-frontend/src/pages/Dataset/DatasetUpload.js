@@ -1,145 +1,169 @@
-import React, {useState} from 'react';
-import Papa from "papaparse";
-import {PurpleSpinner} from "../../components/PurpleSpinner"
+import PurchaseSelect from "./PurchaseSelect";
+import MetaSelect from "./MetaSelect";
+import React, {useRef, useState} from "react";
 import axios from "axios";
 
-// todo: limit selection to not selected columns and columns from the same csv file
-// todo: don't upload and process csv files that are not used
-
 export default function DatasetUpload() {
-    // dataset files
-    const [files, setFiles] = useState([]);
+    const datasetNameRef = useRef("")
 
-    // dictionary that maps dataset file to columnnames
-    const [datasetColumnNames, setDatasetColumnNames] = useState({});
-    // dictionary that maps "dataset file + columname" to [dataset file, columname]
-    const [datasetColumnNames2, setDatasetColumnNames2] = useState({});
+    const [purchaseFiles, setPurchaseFiles] = useState([]);
 
-    // dataset files parsing progress
-    const [parseProgress, setParseProgress] = useState(false);
+    const [purchaseTimeColumnName, setpurchaseTimeColumnName] = useState("");
+    const [purchasePriceColumnName, setpurchasePriceColumnName] = useState("");
+    const [purchaseArticleIdColumnName, setpurchaseArticleIdColumnName] = useState("");
+    const [purchaseCustomerIdColumnName, setpurchaseCustomerIdColumnName] = useState("");
 
-    // checkboxes for generating metadata
-    const [generateArticleMetadata, setGenerateArticleMetadata] = useState(false);
-    const [generateCustomerMetadata, setGenerateCustomerMetadata] = useState(false);
+    const [purchaseArticleAttributes, setPurchaseArticleAttributes] = useState({});
+    const [purchaseCustomerAttributes, setPurchaseCustomerAttributes] = useState({});
 
-    const parseDatasets = (datasets) => {
-        // todo: rework this, so that it uses javascript filereader
-        const newDatasetColumnNames = {};
-        const newDatasetColumnNames2 = {};
-        setParseProgress(true);
+    const [addArticleMetaDataFile, setAddArticleMetaDataFile] = useState(false);
+    const [addCustomerMetaDataFile, setAddCustomerMetaDataFile] = useState(false);
 
-        Promise.all([...datasets].map((dataset) => new Promise((resolve, reject) => Papa.parse(dataset, {
-            // multithreaded
-            worker: true, // includes header in the data
-            header: true, skipEmptyLines: true, // reads only the 5 first rows from the data stream
-            preview: 5, complete: resolve,
-        }))),).then((results) => {
-            results.forEach((result, index) => {
-                const column_names = result.meta['fields'];
-                const dataset_name = datasets[index].name;
-                newDatasetColumnNames[dataset_name] = column_names;
 
-                for (let i = 0; i < column_names.length; i++) {
-                    const column_name = column_names[i];
-                    newDatasetColumnNames2[dataset_name + column_name] = [dataset_name, column_name];
-                }
+    const [articleMetaFiles, setArticleMetaFiles] = useState([]);
+    const [articleMetaIdColumnName, setArticleMetaIdColumnName] = useState([])
+    const [articleMetaAttributes, setArticleMetaAttributes] = useState({});
+
+    const [customerMetaFiles, setCustomerMetaFiles] = useState([]);
+    const [customerMetaIdColumnName, setCustomerMetaIdColumnName] = useState([])
+    const [customerMetaAttributes, setCustomerMetaAttributes] = useState({});
+
+    const getFileSeperatorsData = () => {
+        let fileSeperatorData = {};
+
+        [purchaseFiles, articleMetaFiles, customerMetaFiles].forEach((fileState) => {
+            fileState.forEach(fileInfo => {
+                fileSeperatorData[fileInfo.file.name] = fileInfo.seperator;
             })
+        })
 
-            // set states
-            setDatasetColumnNames(newDatasetColumnNames);
-            setDatasetColumnNames2(newDatasetColumnNames2);
-
-            setParseProgress(false);
-        }).catch((err) => console.log('Something went wrong:', err))
+        return fileSeperatorData;
     }
 
-    function getColumnSelectData() {
-        let column_select_data = {};
+    const getFileColumnDataTypesData = () => {
+        let fileColumnDataTypesData = {};
 
-        // get dataset name
-        const datasetName = document.getElementById('datasetName').value;
+        purchaseFiles.forEach((fileInfo) => {
+            let column_data_types = {};
 
-        // get selected columndata
-        const purchaseTime = document.getElementById('timeSelect').value;
-        const purchasePrice = document.getElementById('priceSelect').value;
-        const purchaseArticleId = document.getElementById('article idSelect').value;
-        const purchaseCustomerId = document.getElementById('customer idSelect').value;
+            column_data_types[purchaseTimeColumnName] = "date";
+            column_data_types[purchasePriceColumnName] = "float";
+            column_data_types[purchaseArticleIdColumnName] = "Int64";
+            column_data_types[purchaseCustomerIdColumnName] = "Int64";
 
-        // todo check if all fields were selected
-        if (!datasetName || !purchaseTime || !purchasePrice || !purchaseArticleId || !purchaseCustomerId) {
-            alert("Please fill in all input fields.");
-            return {};
-        }
+            fileColumnDataTypesData[fileInfo.file.name] = column_data_types;
+        });
 
-        // insert dataset name
-        // todo check if dataset name already exists in database
-        column_select_data["datasetName"] = datasetName;
+        articleMetaFiles.forEach((fileInfo) => {
+            let column_data_types = {};
+            column_data_types[articleMetaIdColumnName] = "Int64"
+            fileColumnDataTypesData[fileInfo.file.name] = column_data_types;
+        })
 
-        // insert selected purchase data columns
-        column_select_data["purchaseData"] = {
-            "bought_on": datasetColumnNames2[purchaseTime],
-            "price": datasetColumnNames2[purchasePrice],
-            "article_id": datasetColumnNames2[purchaseArticleId],
-            "customer_id": datasetColumnNames2[purchaseCustomerId],
-        }
+        customerMetaFiles.forEach((fileInfo) => {
+            let column_data_types = {};
+            column_data_types[customerMetaIdColumnName] = "Int64"
+            fileColumnDataTypesData[fileInfo.file.name] = column_data_types;
+        })
 
-        // get selected article metadata columns
-        column_select_data["generate_article_metadata"] = generateArticleMetadata;
-        if (!generateArticleMetadata) {
-            const metadataArticleId = document.getElementById('metadata article idSelect').value;
-
-            if (!metadataArticleId) return {};
-
-            column_select_data["articleMetadata"] = {
-                "article_id": datasetColumnNames2[metadataArticleId]
-            }
-        }
-
-        // get selected customer metadata columns
-        column_select_data["generate_customer_metadata"] = generateCustomerMetadata;
-        if (!generateCustomerMetadata) {
-            const metadataCustomerId = document.getElementById('metadata customer idSelect').value;
-
-            if (!metadataCustomerId) return {};
-
-            column_select_data["customerMetadata"] = {
-                "customer_id": datasetColumnNames2[metadataCustomerId]
-            }
-        }
-
-        // debug
-        console.log(JSON.stringify(column_select_data));
-
-        return column_select_data;
+        return fileColumnDataTypesData;
     }
 
-    function handleFileselect(event) {
-        let datasets = event.target.files;
-        setFiles(datasets);
-        parseDatasets(datasets);
+    const getFilenamesData = (files) => {
+        let filenames = [];
+        files.forEach(fileInfo => filenames.push(fileInfo.file.name));
+        return filenames;
+    }
+
+    const getAttributesData = (attributes) => {
+        let attributesData = [];
+
+        for (let attributeId in attributes) {
+            attributesData.push(attributes[attributeId]);
+        }
+
+        return attributesData;
+    }
+
+    const getPurchaseData = () => {
+        let purchaseData = {};
+
+        purchaseData.filenames = getFilenamesData(purchaseFiles);
+
+        purchaseData.column_name_bought_on = purchaseTimeColumnName;
+        purchaseData.column_name_price = purchasePriceColumnName;
+        purchaseData.column_name_article_id = purchaseArticleIdColumnName;
+        purchaseData.column_name_customer_id = purchaseCustomerIdColumnName;
+
+        purchaseData.article_metadata_attributes = getAttributesData(purchaseArticleAttributes);
+        purchaseData.customer_metadata_attributes = getAttributesData(purchaseCustomerAttributes);
+
+        return purchaseData;
+    }
+
+    const getArticleMetaData = () => {
+        let articleMetaData = {};
+
+        articleMetaData.filenames = getFilenamesData(articleMetaFiles);
+        articleMetaData.column_name_id = articleMetaIdColumnName;
+        articleMetaData.attributes = getAttributesData(articleMetaAttributes);
+
+        return articleMetaData;
+    }
+
+    const getCustomerMetaData = () => {
+        let customerMetaData = {};
+
+        customerMetaData.filenames = getFilenamesData(customerMetaFiles);
+        customerMetaData.column_name_id = customerMetaIdColumnName;
+        customerMetaData.attributes = getAttributesData(customerMetaAttributes);
+
+        return customerMetaData;
+    }
+
+    const getSelectData = () => {
+        let selectData = {};
+
+        // name
+        selectData.dataset_name = datasetNameRef.current;
+
+        // file seperators
+        selectData.file_seperators = getFileSeperatorsData();
+
+        // file column data types
+        selectData.file_column_data_types = getFileColumnDataTypesData();
+
+        // purchase data
+        selectData.purchase_data = getPurchaseData();
+
+        // article meta data
+        selectData.article_metadata = [];
+        if (addArticleMetaDataFile) {
+            selectData.article_metadata.push(getArticleMetaData());
+        }
+
+        // customer mata data
+        selectData.customer_metadata = [];
+        if (addArticleMetaDataFile) {
+            selectData.customer_metadata.push(getCustomerMetaData());
+        }
+
+        return selectData;
     }
 
 
-    function handleUpload(event) {
-        event.preventDefault();
-
-        const url = '/api/upload_dataset';
-
-        let column_select_data = getColumnSelectData();
-
-        if (Object.keys(column_select_data).length === 0) {
-            return;
-        }
-
-        // return;
-
+    const handleUpload = () => {
         const formData = new FormData();
-        for (let i = 0; i < files.length; i++) {
-            formData.append('files', files[i]);
-        }
 
-        column_select_data["delimiter"] = ","
-        formData.append('data', JSON.stringify(column_select_data))
+        [purchaseFiles, articleMetaFiles, customerMetaFiles].forEach((fileState) => {
+            fileState.forEach(fileInfo => {
+                formData.append('files', fileInfo.file);
+                console.log(fileInfo.file.name);
+            })
+        })
+
+        console.log(JSON.stringify(getSelectData()))
+        formData.append('data', JSON.stringify(getSelectData()))
 
         const config = {
             headers: {
@@ -147,142 +171,122 @@ export default function DatasetUpload() {
             },
         };
 
-        axios.post(url, formData, config).then((response) => {
+        axios.post("/api/upload_dataset", formData, config).then((response) => {
             console.log(response.data);
         });
     }
 
-    function handleReset() {
-        setFiles([])
-        setDatasetColumnNames([])
-        setParseProgress(false)
-        document.getElementById("DatasetUploadForm").reset();
+    const handleReset = () => {
+        // todo reset everything
+        setPurchaseFiles([]);
+
+        setpurchaseTimeColumnName("");
+        setpurchasePriceColumnName("");
+        setpurchaseArticleIdColumnName("");
+        setpurchaseCustomerIdColumnName("");
+
+        setPurchaseArticleAttributes({});
+        setPurchaseCustomerAttributes({});
+
+        setAddArticleMetaDataFile(false);
+        setAddCustomerMetaDataFile(false);
+
+        setArticleMetaFiles([])
+        setArticleMetaIdColumnName([])
+        setArticleMetaAttributes({})
+
+        setCustomerMetaFiles([])
+        setCustomerMetaIdColumnName([])
+        setCustomerMetaAttributes({})
     }
 
-    const handleAddArticleMetadataAttribute = () => {
-        // todo
-    }
+    return (
+        <div style={{textAlign: "center"}}>
+            <div>
+                <h1>Upload dataset</h1>
 
-    const handleAddCustomerMetadataAttribute = () => {
-        // todo
-    }
+                <input onChange={event => {
+                    datasetNameRef.current = event.target.value;
+                }} placeholder={"Dataset name"} style={{width: "150px"}}/>
 
-    const displayColumnSelect = (name) => {
-        return (<div>
-            <label>
-                {name}
-                <br></br>
-                <select id={name + "Select"} className={"bg-purple"} defaultValue={'DEFAULT'} form={'DatasetUploadForm'}
-                        style={{width: "150px"}}>
-                    <option value="DEFAULT" className={"bg-purple"} disabled hidden>Select a column</option>
-                    {Object.keys(datasetColumnNames).map((datasetName, datasetNameIndex) => {
-                        return (<optgroup label={datasetName} key={datasetNameIndex}>
-                            {datasetColumnNames[datasetName].map((columnName, columnNameIndex) => {
-                                return (<option value={datasetName + columnName} key={columnNameIndex}>
-                                    {columnName}
-                                </option>)
-                            })}
-                        </optgroup>)
-                    })}
-                </select>
-            </label>
-        </div>)
-    }
+                <button onClick={handleUpload}>
+                    Upload
+                </button>
 
-    const displayGenerateMetadataCheckbox = (label, id, setCheckboxState) => {
-        return (<div>
-            <label>
-                <input id={id} type="checkbox" onChange={(e) => {
-                    setCheckboxState(e.target.checked)
-                }}/>
-                {label}
-            </label>
-        </div>)
-    }
+                <button onClick={handleReset}>
+                    Reset
+                </button>
+            </div>
 
-    const displayArticleMetadataSelections = () => {
-        // todo
-    }
+            <br/>
 
-    const displayCustomerMetadataSelections = () => {
-        // todo
-    }
+            <PurchaseSelect
+                files={purchaseFiles}
+                onChangeFiles={setPurchaseFiles}
 
-    return (<>
-        <div className="row text-center justify-content-center align-items-center align-content-center">
+                onChangeTimeColumn={setpurchaseTimeColumnName}
+                onChangePriceColumn={setpurchasePriceColumnName}
+                onChangeArticleIdColumn={setpurchaseArticleIdColumnName}
+                onChangeCustomerIdColumn={setpurchaseCustomerIdColumnName}
 
-            <h1>Dataset Upload</h1>
+                articleAttributes={purchaseArticleAttributes}
+                onChangeArticleAttributes={setPurchaseArticleAttributes}
+
+                customerAttributes={purchaseCustomerAttributes}
+                onChangeCustomerAttributes={setPurchaseCustomerAttributes}
+            />
+
+            <br/>
+
+            <div>
+                <button onClick={() => {
+                    setAddArticleMetaDataFile(!addArticleMetaDataFile)
+                }}>
+                    {addArticleMetaDataFile ? "Remove article metadata file" : "Add article metadata file"}
+                </button>
+
+                {
+                    addArticleMetaDataFile &&
+                    <MetaSelect
+                        type={"article"}
+
+                        files={articleMetaFiles}
+                        onChangeFiles={setArticleMetaFiles}
+
+                        onChangeIdColumn={setArticleMetaIdColumnName}
+
+                        attributes={articleMetaAttributes}
+                        onChangeAttributes={setArticleMetaAttributes}
+                    />
+                }
+            </div>
+
+            <br/>
+
+            <div>
+                <button onClick={() => {
+                    setAddCustomerMetaDataFile(!addCustomerMetaDataFile)
+                }}>
+                    {addCustomerMetaDataFile ? "Remove customer metadata file" : "Add customer metadata file"}
+                </button>
+
+                {
+                    addCustomerMetaDataFile &&
+                    <MetaSelect
+                        type={"customer"}
+
+                        files={customerMetaFiles}
+                        onChangeFiles={setCustomerMetaFiles}
+
+                        onChangeIdColumn={setCustomerMetaIdColumnName}
+
+                        attributes={customerMetaAttributes}
+                        onChangeAttributes={setCustomerMetaAttributes}
+                    />
+                }
+            </div>
+
+
         </div>
-        <div className="row text-center justify-content-center align-items-center align-content-center">
-            {/*file select*/}
-            <div className={"col-auto"}>
-                <input type="file" name="csv_file" className={"bg-purple"} form={'DatasetUploadForm'} multiple
-                       onChange={handleFileselect}
-                       accept=".csv"/>
-            </div>
-        </div>
-        <div className="row text-center justify-content-center align-items-center align-content-center mt-3">
-            <div className={"col-auto"}>
-                {/*reset button*/}
-                <button className={"button-purple red-hover"} onClick={handleReset}>Reset</button>
-            </div>
-            {/*dataset name textbox*/}
-            <div className={"col-auto"}>
-                <input type="text" id="datasetName" name="datasetName" className={"bg-purple"}
-                       placeholder={"Dataset Name"}/>
-            </div>
-            <div className={"col-auto"}>
-
-                {/*upload to the server*/}
-                <form id="DatasetUploadForm" onSubmit={handleUpload}>
-                    <button type="submit" className={"button-purple green-hover"}>Upload</button>
-                </form>
-            </div>
-        </div>
-
-        {/*parse progress*/}
-        {parseProgress && (
-            <div className="row text-center justify-content-center align-items-center align-content-center">
-                <PurpleSpinner/>
-            </div>)}
-
-        <div className="row text-center align-content-center mt-4">
-            <div className={"col-4"}>
-
-                {/*purchase data*/}
-                <h2>Purchase data columns</h2>
-                {displayColumnSelect("Time")}
-                {displayColumnSelect("Price")}
-                {displayColumnSelect("Article ID")}
-                {displayColumnSelect("Customer ID")}
-            </div>
-            <div className={"col-4"}>
-                {/*article metadata*/}
-                <h2>Article metadata columns</h2>
-                {displayGenerateMetadataCheckbox("Generate Metadata?", "GenerateArticleMetadata", setGenerateArticleMetadata)}
-                {generateArticleMetadata && displayColumnSelect("metadata article id")}
-                {generateArticleMetadata && <button className={"button-purple green-hover mt-3"}
-                                                    onClick={handleAddArticleMetadataAttribute}>Add
-                    article attribute
-                </button>}
-                {/*{displayArticleMetadataSelections}*/}
-            </div>
-
-            <div className={"col-4"}>
-                {/*customer metadata*/}
-                <h2>Customer metadata columns</h2>
-                {displayGenerateMetadataCheckbox("Generate Metadata?", "GenerateCustomerMetadata", setGenerateCustomerMetadata)}
-                {generateCustomerMetadata && displayColumnSelect("metadata customer id")}
-                {generateCustomerMetadata && <button className={"button-purple green-hover mt-3"}
-                                                     onClick={handleAddCustomerMetadataAttribute}>Add
-                    customer attribute
-                </button>}
-                {/*{displayCustomerMetadataSelections}*/}
-            </div>
-        </div>
-    </>);
+    );
 }
-
-
-
-

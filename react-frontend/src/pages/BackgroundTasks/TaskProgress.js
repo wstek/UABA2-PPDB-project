@@ -106,7 +106,7 @@ function TaskProgress() {
     return (
         <div className="TaskTest" style={{textAlign: "center"}}>
             <h4>seconds:</h4>
-            <input type="text" id="duration" name="duration" defaultValue={10}/>
+            <input type="number" id="duration" name="duration" defaultValue={10}/>
             <button style={{display: "block", margin: "10px auto"}} onClick={handleStartDummyTask}>
                 run dummy task
             </button>

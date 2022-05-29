@@ -43,7 +43,7 @@ def upload_dataset():
         uploaded_file.save(new_filepath)
 
         # insert into filenames object
-        filenames[original_filename] = [new_filepath, column_select_data["delimiter"]]
+        filenames[original_filename] = str(new_filepath)
 
     # start the dataset insert background process
     print(json.dumps(filenames))
