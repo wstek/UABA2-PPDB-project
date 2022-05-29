@@ -29,8 +29,8 @@ def start_simulation():
     print(algorithms)
     for i in range(len(algorithms)):
         database_connection.session.execute(
-            "INSERT INTO algorithm(abtest_id, algorithm_type,algorithm_name) VALUES(:abtest_id, :algorithm_type,:algorithm_name)",
-            {"abtest_id": abtest_id, "algorithm_type": algorithms[i]["name"], "algorithm_name":algorithms[i]['parameters']['AlgorithmName']})
+            "INSERT INTO algorithm(abtest_id, algorithm_type) VALUES(:abtest_id, :algorithm_type)",
+            {"abtest_id": abtest_id, "algorithm_type": algorithms[i]["name"]})
         database_connection.session.commit()
 
         algorithm_id = database_connection.session.execute(

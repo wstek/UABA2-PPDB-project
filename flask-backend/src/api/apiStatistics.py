@@ -178,34 +178,26 @@ def get_item_recommendations_over_time(abtest_id, article_id):
 
     rows = database_connection.session_execute_and_fetch(
         f'''
-                select date_of, algorithm_id, count(*)
+                select date_of, statistics.algorithm_id, count(recommendation_id)
                 from ab_test
                          natural join algorithm
-                         natural join  statistics
-                         natural join recommendation
+                         right join  statistics on algorithm.algorithm_id = statistics.algorithm_id
+                         left join (select * from recommendation where unique_article_id = {article_id}) recommendation on statistics.statistics_id = recommendation.statistics_id
                 where abtest_id = {abtest_id}
                   and date_of between start_date and end_date
-                  and unique_article_id = {article_id}
-                group by algorithm_id, date_of
-                order by algorithm_id, date_of;
+                group by statistics.algorithm_id, date_of
+                order by statistics.algorithm_id, date_of;
             '''
-    )
-    algorithm_ids = database_connection.session_execute_and_fetch(
-        f'''
-            select algorithm_id
-            from algorithm 
-            where abtest_id = {abtest_id}
-        '''
     )
 
     # response[date][algorithm_id] += 1
     response = {}
     for row in rows:
+        print(row)
         _date = row.date_of.strftime("%d-%b-%Y")
         if not _date in response.keys():
-            response[_date] = { algorithm.algorithm_id: 0 for algorithm in algorithm_ids }
+            response[_date] = {  }
         response[_date][row.algorithm_id] = row.count
-
     return {"resp": response}
 
 
@@ -382,10 +374,11 @@ def get_abtest_algorithm_information(abtest_id):
     algorithms_information = database_connection.getAlgorithmsInformation(abtest_id=abtest_id)
     # for every parameter
     for algo_row in algorithms_information:
+
         # if algorithm id was not present in the dictionary
         if algo_row.algorithm_id not in algorithms.keys():
             # add the algorithm in the dictionarry and initialize name
-            algorithms[algo_row.algorithm_id] = {'name': algo_row.algorithm_name}
+            algorithms[algo_row.algorithm_id] = {'Type':algo_row.algorithm_type}
         algorithms[algo_row.algorithm_id][algo_row.parameter_name] = algo_row.value
     return algorithms
 
@@ -434,12 +427,18 @@ def attr_rows_to_XFnY(rows):
     XFnY = []
     datetime = None
     Y = []
+
     legend = ["Date"]
     for index in range(len(rows)):
         entry = rows[index]
-        algorithm_id = entry.algorithm_id
-        if str(algorithm_id) not in legend:
-            legend.append(str(algorithm_id))
+
+        if entry["algorithm_name"]:
+            algorithm_key = entry["algorithm_name"]
+        else:
+            algorithm_key = str(entry.algorithm_id)
+        print (algorithm_key)
+        if algorithm_key not in legend:
+            legend.append(algorithm_key)
         else:
             XFnY.append(legend)
             break
