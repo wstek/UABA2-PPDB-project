@@ -22,6 +22,21 @@ const BoolField = (id, label) => {
     );
 };
 
+const TextField = (id, label,defaultname) => {
+    console.log(id)
+    return (
+        <div key={id} className="row text-center justify-content-center align-items-center mb-1">
+            <div className="col-7 text-center">
+                <label htmlFor={id}>{label}</label>
+                <input type="text" className="form-control" key={id} defaultValue={defaultname} id={id}/>
+            </div>
+        </div>
+    );
+};
+export const NameField = (id) => {
+    return TextField("AlgorithmName"+id, "Algorithm Custom Name","Algorithm_"+id )
+};
+
 export const LookBackWindow = (id) => {
     return RealNumberField("LookBackWindow" + id, "Look Back X-days Window:", "Enter X");
 };

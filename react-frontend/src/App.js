@@ -20,7 +20,7 @@ import Single from './pages/single/Single';
 import Stats from './pages/stats/Stats';
 import TaskTest from "./pages/BackgroundTasks/TaskTest";
 import TaskProgress from "./pages/BackgroundTasks/TaskProgress";
-import DatasetPage, {DatasetStatistics} from "./pages/Dataset";
+import DatasetPage from "./pages/Dataset";
 
 
 import ItemList from "./pages/list/ItemList";
@@ -57,6 +57,7 @@ function App() {
                                         <TaskProgress/>
                                     </Route>
 
+                                    {/*home*/}
                                     <Route exact path="/">
                                         <Home/>
                                     </Route>
@@ -78,6 +79,7 @@ function App() {
                                     {/*dataset*/}
                                     <ProtectedRoute component={DatasetPage}
                                                     path={["/dataset/:dataset_name", "/dataset"]}/>
+
                                     <ProtectedRoute component={DatasetUpload} adminLevel={true}
                                                     exact path="/dataset-upload"/>
 

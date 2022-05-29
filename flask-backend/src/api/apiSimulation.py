@@ -17,7 +17,7 @@ def start_simulation():
 
     database_connection.session.execute(
         f'''
-            INSERT INTO "ab_test"(start_date, "end_date", top_k, stepsize, dataset_name, created_by)
+            INSERT INTO ab_test(start_date, "end_date", top_k, stepsize, dataset_name, created_by)
             VALUES('{start}', '{end}', {topk}, {int(stepsize)}, '{dataset_name}', '{session["user_id"]}');
         '''
     )
@@ -26,11 +26,11 @@ def start_simulation():
     abtest_id = database_connection.session.execute(
         'SELECT max(abtest_id) FROM "ab_test"').fetchone()[0]
     database_connection.session.commit()
-
+    print(algorithms)
     for i in range(len(algorithms)):
         database_connection.session.execute(
-            "INSERT INTO algorithm(abtest_id, algorithm_name) VALUES(:abtest_id, :algorithm_name)",
-            {"abtest_id": abtest_id, "algorithm_name": algorithms[i]["name"]})
+            "INSERT INTO algorithm(abtest_id, algorithm_type,algorithm_name) VALUES(:abtest_id, :algorithm_type,:algorithm_name)",
+            {"abtest_id": abtest_id, "algorithm_type": algorithms[i]["name"], "algorithm_name":algorithms[i]['parameters']['AlgorithmName']})
         database_connection.session.commit()
 
         algorithm_id = database_connection.session.execute(

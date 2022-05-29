@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from flask import Blueprint, session
-
+from datetime import datetime as dt
 from src.extensions import database_connection
 
 api_statistics = Blueprint("api_statistics", __name__)
@@ -141,7 +141,7 @@ def get_item_purchases_over_time(abtest_id, article_id):
     amount_of_purchases = database_connection.session_execute_and_fetch(
         f'''
         select distinct date_of from statistics natural join ab_test natural join algorithm
-        where date_of >= start_date and date_of <= end_date and abtest_id = 18 order by date_of
+        where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id} order by date_of
        '''
     )
 
@@ -155,7 +155,7 @@ def get_item_purchases_over_time(abtest_id, article_id):
         f'''
             SELECT bought_on,COUNT(unique_article_id)
             FROM purchase natural join article natural join ab_test
-            WHERE start_date <= bought_on and bought_on <= end_date 
+            WHERE bought_on between  start_date and end_date 
             and abtest_id = '{abtest_id}' and unique_article_id = '{article_id}'
             group by bought_on ;        
         '''
@@ -164,8 +164,8 @@ def get_item_purchases_over_time(abtest_id, article_id):
     if not amount_of_purchases:
         return response
 
-    date = None
-    d = None
+    date: dt.date
+    d: object
     for purchase in amount_of_purchases:
         date = purchase.bought_on
         date = date.strftime("%d-%b-%Y")
@@ -175,59 +175,38 @@ def get_item_purchases_over_time(abtest_id, article_id):
 
 @api_statistics.route("/api/items/recommendations/<int:abtest_id>/<int:article_id>", methods=['GET'])
 def get_item_recommendations_over_time(abtest_id, article_id):
-    amount_of_recommendations = database_connection.session_execute_and_fetch(
+
+    rows = database_connection.session_execute_and_fetch(
         f'''
-         select distinct date_of from statistics natural join ab_test natural join algorithm
-         where date_of >= start_date and date_of <= end_date and abtest_id = 18 order by date_of
+                select date_of, algorithm_id, count(*)
+                from ab_test
+                         natural join algorithm
+                         natural join  statistics
+                         natural join recommendation
+                where abtest_id = {abtest_id}
+                  and date_of between start_date and end_date
+                  and unique_article_id = {article_id}
+                group by algorithm_id, date_of
+                order by algorithm_id, date_of;
+            '''
+    )
+    algorithm_ids = database_connection.session_execute_and_fetch(
+        f'''
+            select algorithm_id
+            from algorithm 
+            where abtest_id = {abtest_id}
         '''
     )
 
-    algorithms = database_connection.session_execute_and_fetch(
-        f'''
-            select algorithm_id from algorithm where abtest_id = 18;
-        '''
-    )
-    dates = []
-    aids = []
-    response = dict()
-    for key in amount_of_recommendations:
-        date = key[0]
-        date = date.strftime("%d-%b-%Y")
-        dates.append(date)
-        response[date] = {}
-        for i in algorithms:
-            algorithm = i[0]
-            if algorithm not in aids:
-                aids.append(algorithm)
-            response[date][algorithm] = 0
+    # response[date][algorithm_id] += 1
+    response = {}
+    for row in rows:
+        _date = row.date_of.strftime("%d-%b-%Y")
+        if not _date in response.keys():
+            response[_date] = { algorithm.algorithm_id: 0 for algorithm in algorithm_ids }
+        response[_date][row.algorithm_id] = row.count
 
-    amount_of_recommendations = database_connection.session_execute_and_fetch(
-        f'''
-            select date_of, algorithm_id, recommendation_id
-            from algorithm natural join statistics
-            natural join recommendation natural join ab_test
-            where abtest_id = '{abtest_id}' and date_of between start_date and end_date and  unique_article_id = '{article_id}'
-            group by date_of, algorithm_id, recommendation_id;
-        '''
-    )
-
-    if not amount_of_recommendations:
-        return {"resp": response, "aids": aids}
-
-    date = None
-    d = None
-    algorithm_id = None
-    for article in amount_of_recommendations:
-        if not date or d != article[0]:
-            date = article[0]
-            d = article[0]
-            date = date.strftime("%d-%b-%Y")
-
-        if not algorithm_id or algorithm_id != article[1]:
-            algorithm_id = article[1]
-
-        response[date][algorithm_id] += 1
-    return {"resp": response, "aids": aids}
+    return {"resp": response}
 
 
 @api_statistics.route("/api/items/recommendations/purchases/<int:abtest_id>/<int:article_id>",
@@ -236,13 +215,13 @@ def get_item_recommendations_and_purchases_over_time(abtest_id, article_id):
     amount_of_recommendations = database_connection.session_execute_and_fetch(
         f'''
          select distinct date_of from statistics natural join ab_test natural join algorithm
-         where date_of >= start_date and date_of <= end_date and abtest_id = 18 order by date_of
+         where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id} order by date_of
         '''
     )
 
     algorithms = database_connection.session_execute_and_fetch(
         f'''
-            select algorithm_id from algorithm where abtest_id = 18;
+            select algorithm_id from algorithm where abtest_id = {abtest_id};
         '''
     )
     dates = []

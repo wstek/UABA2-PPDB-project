@@ -11,7 +11,7 @@ export default function InputSelector({
             return selected_input
         }
         return 0
-    }, [inputs]);
+    }, [inputs,selected_input]);
     function personalABTests() {
         let temp_personal_idtests_id_components = []
         if (inputs) {
