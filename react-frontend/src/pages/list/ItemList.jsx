@@ -133,6 +133,8 @@ const ItemList = () => {
                 }
                 setImage(data.image)
                 setLoadedImage(true)
+
+
             }).catch((err) => {
             console.log(err);
         })

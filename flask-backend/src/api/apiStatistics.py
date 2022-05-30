@@ -290,13 +290,13 @@ def get_item_attribute(abtest_id, article_id):
 def get_item_image(abtest_id, article_id):
     image_url = database_connection.session_execute_and_fetch(
         f"select distinct(attribute_value) from article natural join ab_test natural join article_attribute "
-        f"where unique_article_id = {article_id} and attribute_name = 'image_url' and abtest_id = '{abtest_id}'"
+        f"where unique_article_id = {article_id} and type = 'image' and abtest_id = '{abtest_id}'"
     )
-
-    if not image_url:
-        return {"error": "Page does not exist"}, 404
-
     response = dict()
+    if not image_url:
+        response["image"] = ""
+        return response
+
     response["image"] = image_url[0][0]
     return response
 
