@@ -21,11 +21,11 @@ export default function DatasetUpload() {
 
 
     const [articleMetaFiles, setArticleMetaFiles] = useState([]);
-    const [articleMetaIdColumnName, setArticleMetaIdColumnName] = useState([])
+    const [articleMetaIdColumnName, setArticleMetaIdColumnName] = useState("")
     const [articleMetaAttributes, setArticleMetaAttributes] = useState({});
 
     const [customerMetaFiles, setCustomerMetaFiles] = useState([]);
-    const [customerMetaIdColumnName, setCustomerMetaIdColumnName] = useState([])
+    const [customerMetaIdColumnName, setCustomerMetaIdColumnName] = useState("")
     const [customerMetaAttributes, setCustomerMetaAttributes] = useState({});
 
     const getFileSeperatorsData = () => {
@@ -121,6 +121,85 @@ export default function DatasetUpload() {
         return customerMetaData;
     }
 
+    const checkAttributeData = (attributeData) => {
+        for (let attributeId in attributeData) {
+            if (
+                attributeData[attributeId].name === "" ||
+                attributeData[attributeId].column_name === "" ||
+                attributeData[attributeId].type === ""
+            ) {
+                alert("Please fill in all the attribute fields")
+                return false;
+            }
+        }
+        return true;
+    }
+
+    const checkSelectData = () => {
+        // check dataset name
+        if (datasetNameRef.current === "") {
+            alert("Please provide a dataset name");
+            return false;
+        }
+
+        // check files
+        if (purchaseFiles.length === 0) {
+            alert("Please select purchase csv files");
+            return false;
+        }
+
+        if (addArticleMetaDataFile && articleMetaFiles.length === 0) {
+            alert("Please select article meta data csv files");
+            return false;
+        }
+
+        if (addCustomerMetaDataFile && customerMetaFiles.length === 0) {
+            alert("Please select customer meta data csv files");
+            return false;
+        }
+
+        // check purchase data
+        if (
+            purchaseTimeColumnName === "" ||
+            purchasePriceColumnName === "" ||
+            purchaseArticleIdColumnName === "" ||
+            purchaseCustomerIdColumnName === ""
+        ) {
+            alert("Please select a column for every purchase data field");
+            return false;
+        }
+
+        // check purchase article attributes
+        if (!checkAttributeData(purchaseArticleAttributes)) return false;
+
+        // check purchase customer attributes
+        if (!checkAttributeData(purchaseCustomerAttributes)) return false;
+
+        // check article meta id data
+        if (addArticleMetaDataFile) {
+            if (articleMetaIdColumnName === "") {
+                alert("Please select a column for article meta data id")
+                return false;
+            }
+
+            // check article meta attributes
+            if (!checkAttributeData(articleMetaAttributes)) return;
+        }
+
+        if (addCustomerMetaDataFile) {
+            // check customer meta id data
+            if (customerMetaIdColumnName === "") {
+                alert("Please select a column for customer meta data id")
+                return false;
+            }
+
+            // check customer meta attributes
+            if (!checkAttributeData(customerMetaAttributes)) return;
+        }
+
+        return true;
+    }
+
     const getSelectData = () => {
         let selectData = {};
 
@@ -154,6 +233,8 @@ export default function DatasetUpload() {
 
     const handleUpload = () => {
         const formData = new FormData();
+
+        if (!checkSelectData()) return;
 
         [purchaseFiles, articleMetaFiles, customerMetaFiles].forEach((fileState) => {
             fileState.forEach(fileInfo => {

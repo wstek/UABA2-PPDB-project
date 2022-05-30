@@ -1,11 +1,14 @@
-import React from "react";
+import React, {useState} from "react";
 import FileSeperatorEditor from "./FileSeperatorEditor";
 import Papa from "papaparse";
+import {PurpleSpinner} from "../../components/PurpleSpinner";
 
 export default function FileSelectList(props) {
+    const [parseProgress, setParseProgress] = useState(false);
+
     function parseDatasetColumnNames(datasetFiles) {
         // todo: rework this, so that it uses javascript filereader
-        // setParseProgress(true);
+        setParseProgress(true);
 
         console.log(datasetFiles);
 
@@ -38,7 +41,7 @@ export default function FileSelectList(props) {
             // set states
             props.onChangeColumnNames(previous_column_names);
 
-            // setParseProgress(false);
+            setParseProgress(false);
         }).catch((err) => console.log('Something went wrong:', err))
     }
 
@@ -62,11 +65,17 @@ export default function FileSelectList(props) {
 
             {props.files.map((file, index) => (
                 <div>
-                    <FileSeperatorEditor
-                        key={index}
-                        fileName={file.file.name}
-                        onChange={handleFileChange}
-                    />
+                    {parseProgress &&
+                        <PurpleSpinner/>
+                    }
+
+                    {!parseProgress &&
+                        <FileSeperatorEditor
+                            key={index}
+                            fileName={file.file.name}
+                            onChange={handleFileChange}
+                        />
+                    }
                 </div>
             ))}
         </div>

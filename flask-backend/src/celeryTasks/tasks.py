@@ -32,10 +32,10 @@ def dummy_task(self, duration: int, user_id: str = ""):
     return f"slept {duration} seconds"
 
 
-@celery_extension.task(name="insert_dataset")
-def insert_dataset(filenames: Dict[str, str], column_select_data: dict, user_id: str = ""):
+@celery_extension.task(name="insert_dataset", bind=True)
+def insert_dataset(self, filenames: Dict[str, str], column_select_data: dict, user_id: str = ""):
     print(user_id, filenames, column_select_data)
-    insert_dataset_obj = InsertDataset(database_connection, user_id, filenames, column_select_data)
+    insert_dataset_obj = InsertDataset(database_connection, user_id, filenames, column_select_data, self.request.id)
 
     try:
         insert_dataset_obj.start_insert()
