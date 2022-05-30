@@ -8,7 +8,6 @@ import SignUp from './pages/Account/SignUp';
 import Account from './pages/Account/Account';
 import SignIn from './pages/Account/SignIn';
 import ABTestInput from "./pages/ABTest/ABTestInput";
-import Dashboard from './pages/dashboard/Dashboard';
 import ProtectedRoute from './utils/ProtectedRoute';
 import Statistics from "./pages/ABTest/Statistics";
 import {handleLoggedIn} from './utils/handleLoggedIn'
@@ -61,8 +60,8 @@ function App() {
                                     <Route exact path="/">
                                         <Home/>
                                     </Route>
-                                    <ProtectedRoute component={Dashboard}
-                                                    exact path="/dashboard"/>
+                                    {/*<ProtectedRoute component={Dashboard}*/}
+                                    {/*                exact path="/dashboard"/>*/}
 
                                     {/*account*/}
                                     <Route exact path="/sign_in">
