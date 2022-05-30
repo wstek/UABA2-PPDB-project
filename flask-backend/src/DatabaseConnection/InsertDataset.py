@@ -116,11 +116,15 @@ class InsertDataset:
         self.__create_metadata_df("customer", self.df_customer_id_table_list, self.df_customer_attribute_table_list)
 
         # insert all data into database
+        self.database_connection.session_disable_all_trigger()
+
         self.__insert_metadata("article", self.df_article_id_table_list, self.df_article_attribute_table_list)
 
         self.__insert_metadata("customer", self.df_customer_id_table_list, self.df_customer_attribute_table_list)
 
         self.__insert_purchase_data()
+
+        self.database_connection.session_enable_all_trigger()
 
         # commit transaction to database
         self.database_connection.session.commit()
@@ -314,7 +318,7 @@ if __name__ == "__main__":
     }
 
     dataset_selection_data_HM = {
-        "dataset_name": "H&M",
+        "dataset_name": "H&M5",
         "file_seperators": {
             "purchases.csv": ",",
             "articles.csv": ",",
