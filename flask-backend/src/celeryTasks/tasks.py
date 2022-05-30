@@ -10,7 +10,7 @@ from src.socketioEvents.reportProgress import report_progress_steps
 from src.utils.Logger import Logger
 
 
-def dummy_task_func(duration, task_id=None):
+def dummy_task_func(duration, task_id=""):
     report_progress_steps(task_id, 0, duration)
 
     for i in range(duration):
@@ -21,6 +21,8 @@ def dummy_task_func(duration, task_id=None):
 
 @celery_extension.task(name="dummy_task", bind=True)
 def dummy_task(self, duration: int, user_id: str = ""):
+
+    print(type(self.request.id))
 
     try:
         dummy_task_func(duration, self.request.id)
