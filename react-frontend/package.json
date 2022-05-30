@@ -9,6 +9,7 @@
     "@mui/icons-material": "^5.8.0",
     "@mui/material": "^5.8.1",
     "@mui/x-data-grid": "^5.10.0",
+    "@ramonak/react-progress-bar": "^4.4.0",
     "@types/react": "^18.0.0",
     "axios": "^0.26.1",
     "bootstrap": "^5.1.3",

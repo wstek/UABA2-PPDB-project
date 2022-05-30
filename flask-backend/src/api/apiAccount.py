@@ -90,7 +90,7 @@ def logout_user():
     return "200"
 
 
-@api_account.route("/account/changeinfo/<stat>/<username>", methods=["POST", "OPTIONS"])
+@api_account.route("/api/account/changeinfo/<stat>/<username>", methods=["POST", "OPTIONS"])
 def change_info(stat, username):
     if stat == "first_name":
         firstname = request.json["changedFirstName"]

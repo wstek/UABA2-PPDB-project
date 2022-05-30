@@ -1,7 +1,7 @@
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import React, {useEffect, useState} from "react";
 import Navbar from './components/Navbar';
-import DatasetUpload from './pages/Dataset/DatasetUpload';
+import DatasetUploadPage from "./pages/Dataset/DatasetUploadPage";
 import Footer from './components/Footer';
 import NotFound from './pages/NotFound';
 import SignUp from './pages/Account/SignUp';
@@ -79,7 +79,7 @@ function App() {
                                     <ProtectedRoute component={DatasetPage}
                                                     path={["/dataset/:dataset_name", "/dataset"]}/>
 
-                                    <ProtectedRoute component={DatasetUpload} adminLevel={true}
+                                    <ProtectedRoute component={DatasetUploadPage} adminLevel={true}
                                                     exact path="/dataset-upload"/>
 
                                     {/*simulation*/}
