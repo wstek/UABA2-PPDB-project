@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState,useContext} from 'react'
 import styled from 'styled-components'
 import {useTable} from 'react-table'
 
@@ -6,6 +6,7 @@ import {fetchData} from "../../utils/fetchAndExecuteWithData";
 import Table from 'react-bootstrap/Table'
 import {PurpleSpinner} from "../PurpleSpinner";
 import {Link} from "react-router-dom";
+import {ABTestContext} from "../../utils/Contexts";
 
 const Styles = styled.div`
 
@@ -66,11 +67,12 @@ function ReactTable({columns, data}) {
     </div>)
 }
 
-export function TopKPurchasedTable({abtest_id, start_date, end_date}) {
+export function TopKPurchasedTable() {
+    const {abtest_id, start_date,end_date} = useContext(ABTestContext)
+
     const [top_k_purchased, setTopKPurchased] = useState()
     const fetchTopKPerAlgorithm = () => {
         const abortCont = new AbortController();
-        console.log(abtest_id, start_date, end_date)
         let api = `/api/statistics/abtest/${abtest_id}/get_top_k_purchased/${start_date}/${end_date}`
         if (abtest_id != null && start_date != null && end_date != null) fetchData(api, (data) => setTopKPurchased(data.returnvalue), abortCont)
 

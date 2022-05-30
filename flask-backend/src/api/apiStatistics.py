@@ -193,7 +193,6 @@ def get_item_recommendations_over_time(abtest_id, article_id):
     # response[date][algorithm_id] += 1
     response = {}
     for row in rows:
-        print(row)
         _date = row.date_of.strftime("%d-%b-%Y")
         if not _date in response.keys():
             response[_date] = {  }
@@ -436,7 +435,6 @@ def attr_rows_to_XFnY(rows):
             algorithm_key = entry["algorithm_name"]
         else:
             algorithm_key = str(entry.algorithm_id)
-        print (algorithm_key)
         if algorithm_key not in legend:
             legend.append(algorithm_key)
         else:
@@ -458,13 +456,72 @@ def attr_rows_to_XFnY(rows):
 def get_attr_rate_over_time(abtest_id):
     # ['Date', 'AttributionRate']
     attr_rate_rows = database_connection.getAttributionRateOverTime(abtest_id)
-    return attr_rows_to_XFnY(attr_rate_rows)
+    algorithms = database_connection.getAlgorithms(abtest_id)
+    dates = database_connection.getAllDates(abtest_id)
+    database_connection.getABTestInfo(abtest_id)
+
+    # date_of, algorithm_id, parameter_value
+    XFnY = [["Date"]]
+
+    date_to_index = {}
+    algorithm_to_index = {}
+    if not len(algorithms):
+        return {'graphdata': []}
+    for algorithm in algorithms:
+        if algorithm.algorithm_name:
+            algorithm_key = algorithm.algorithm_name
+        else:
+            algorithm_key = str(algorithm.algorithm_id)
+
+        algorithm_to_index[algorithm_key] = len(XFnY[0])
+        XFnY[0].append(algorithm_key)
+    for index in range(len(dates)):
+        date_to_index[dates[index].date] = index +1
+        XFnY.append([str(dates[index].date)] + [ 0 for i in range(len(XFnY[0])-1)])
+
+    for attr_row in attr_rate_rows:
+        if attr_row.algorithm_name:
+            algorithm_key = attr_row.algorithm_name
+        else:
+            algorithm_key = str(attr_row.algorithm_id)
+        XFnY[date_to_index[attr_row.bought_on]][algorithm_to_index[algorithm_key]] = float(attr_row.atr)
+    return {'graphdata': XFnY}
 
 
 def get_CRT_over_time(abtest_id):
     # ['Date', 'ClickThroughRate']
-    attr_rate_rows = database_connection.getCRTOverTime(abtest_id)
-    return attr_rows_to_XFnY(attr_rate_rows)
+    crt_rows = database_connection.getCRTOverTime(abtest_id)
+
+    algorithms = database_connection.getAlgorithms(abtest_id)
+    dates = database_connection.getAllDates(abtest_id)
+    database_connection.getCRTOverTime(abtest_id)
+
+    # date_of, algorithm_id, parameter_value
+    XFnY = [["Date"]]
+
+    date_to_index = {}
+    algorithm_to_index = {}
+    if not len(algorithms):
+        return {'graphdata': []}
+    for algorithm in algorithms:
+        if algorithm.algorithm_name:
+            algorithm_key = algorithm.algorithm_name
+        else:
+            algorithm_key = str(algorithm.algorithm_id)
+
+        algorithm_to_index[algorithm_key] = len(XFnY[0])
+        XFnY[0].append(algorithm_key)
+    for index in range(len(dates)):
+        date_to_index[dates[index].date] = index + 1
+        XFnY.append([str(dates[index].date)] + [0 for i in range(len(XFnY[0]) - 1)])
+
+    for crt_row in crt_rows:
+        if crt_row.algorithm_name:
+            algorithm_key = crt_row.algorithm_name
+        else:
+            algorithm_key = str(crt_row.algorithm_id)
+        XFnY[date_to_index[crt_row.date_of]][algorithm_to_index[algorithm_key]] = float(crt_row.ctr)
+    return {'graphdata': XFnY}
 
 
 @api_statistics.route(
@@ -479,9 +536,18 @@ def getUniqueCustomerStatsRelativeDates(abtest_id, start_date_index, end_date_in
     "/api/statistics/abtest/<int:abtest_id>/get_unique_customer_stats/<string:start_date>/<string:end_date>")
 def getUniqueCustomerStats(abtest_id, start_date, end_date):
     query_result = database_connection.getUniqueCustomerStats(abtest_id, start_date, end_date)
-    return_array = [{'Customer': row.unique_customer_id, 'Purchases': row.purchases, 'Revenue': float(row.revenue),
-                     'Days Active': row.days_active} for row in query_result]
-    return {'returnvalue': return_array}
+    ctr_per_user = database_connection.CTR_PerUser(abtest_id, start_date, end_date)
+
+    return_array = { row.unique_customer_id : {'Customer': row.unique_customer_id, 'Purchases': row.purchases, 'Revenue': float(row.revenue),
+                     'Days Active': row.days_active} for row in query_result}
+    algorithm_key:str
+    for ctr_row in ctr_per_user:
+        if ctr_row.algorithm_name:
+            algorithm_key = ctr_row.algorithm_name
+        else:
+            algorithm_key = str(ctr_row.algorithm_id)
+        return_array[ctr_row.unique_customer_id][f"{algorithm_key}-CTR"] = ctr_row.ctr
+    return {'returnvalue': list(return_array.values())}
 
 
 @api_statistics.route("/api/statistics/abtest/<int:abtest_id>/get_top_k_per_algorithm/<start_date>/<end_date>")
@@ -513,7 +579,7 @@ def getTopKPurchased(abtest_id, start_date, end_date):
 
 
 @api_statistics.route(
-    "/api/statistics/abtest/<int:abtest_id>/get_active_usercount/<string:start_date>/<string:end_date>")
+    "/api/statistics/abtest/<int:abtest_id>/get_active_usercount/<start_date>/<end_date>")
 def get_active_usercount(abtest_id, start_date, end_date):
     query_result = database_connection.getActiveUsersBetween(abtest_id, start_date, end_date)
     return {'returnvalue': query_result.count}
@@ -530,7 +596,7 @@ def relative_date_active_usercount(abtest_id, start_date_index, end_date_index):
 def get_total_revenue_over_time(abtest_id):
     query_result = database_connection.getRevenueOverTime(abtest_id)
     returnvalue = [(str(r.revenue_on), r.revenue) for r in query_result]
-
+    print(returnvalue)
     return {'returnvalue': returnvalue}
 
 

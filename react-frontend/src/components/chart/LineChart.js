@@ -2,13 +2,16 @@ import {Chart} from "react-google-charts";
 import {PurpleSpinner} from "../PurpleSpinner"
 import {useEffect, useState} from "react";
 
-function LineChart({XFnY, title, xMin = 0, xMax = 10, ex_options ={}}) {
+function LineChart({XFnY, title, xMin = 0, xMax = 10, ex_options ={}, formatters = []}) {
+
     const [options, setOptions] = useState(null);
     useEffect(() => {
         setOptions({
                 title: title,
                 // chartArea: {'min-width': '80%', 'height': 'auto'},
                 curveType: '',
+            pointSize:5,
+
                 legend: {position: 'bottom'},
                 hAxis: {
                     viewWindow: {
@@ -26,7 +29,7 @@ function LineChart({XFnY, title, xMin = 0, xMax = 10, ex_options ={}}) {
     if (!XFnY) return <> <h3>{title}</h3><PurpleSpinner/></>
     else if (XFnY.graphdata.length <= 1) return <><h3>{title}</h3><h5>No Data Points Provided</h5></>
 
-
+    console.log(formatters)
     return (
         <>
             {XFnY && XFnY.graphdata.length > 1 && <Chart
@@ -35,6 +38,7 @@ function LineChart({XFnY, title, xMin = 0, xMax = 10, ex_options ={}}) {
                 height="100%"
                 data={XFnY.graphdata}
                 options={options}
+                formatters={formatters}
             />
             }
         </>
