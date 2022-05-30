@@ -89,6 +89,30 @@ class DatabaseConnection:
     def session_query_table(self, table, query_data: dict):
         return self.session.query(table).filter_by(**query_data)
 
+    def session_disable_trigger(self, table):
+        query = f"""
+            ALTER TABLE {table} DISABLE TRIGGER ALL
+            """
+        self.session_execute(query)
+
+    def session_enable_trigger(self, table):
+        query = f"""
+            ALTER TABLE {table} ENABLE TRIGGER ALL
+            """
+        self.session_execute(query)
+
+    def session_disable_all_trigger(self):
+        query = f"""
+            SET session_replication_role = replica;
+            """
+        self.session_execute(query)
+
+    def session_enable_all_trigger(self):
+        query = f"""
+            SET session_replication_role = DEFAULT;
+            """
+        self.session_execute(query)
+
     def remove_dataset(self, dataset_name: str):
         query = f"""
             DELETE FROM dataset 
