@@ -4,9 +4,9 @@ import os
 import sys
 import time
 from typing import Dict
+import pandas as pd
 from src.socketioEvents.reportProgress import report_progress_steps
 
-import pandas as pd
 
 # appends parent directory to the python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -14,6 +14,22 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from src.DatabaseConnection.DatabaseConnection import DatabaseConnection
 from src.utils.Logger import Logger
 from src.utils.pathParser import getAbsPathFromProjectRoot
+
+
+def split_dataframe(df, size):
+    # size of each row
+    row_size = df.memory_usage().sum() / len(df)
+
+    # maximum number of rows of each segment
+    row_limit = int(size // row_size)
+
+    # number of segments
+    seg_num = int((len(df) + row_limit - 1) // row_limit)
+
+    # split df
+    segments = [df.iloc[i * row_limit: (i + 1) * row_limit] for i in range(seg_num)]
+
+    return segments
 
 
 def shallow_copy_df_column(df_input, column_name_input, df_output, column_name_output, delete_empty=False,
@@ -79,14 +95,20 @@ class InsertDataset:
     def start_stopwatch(self):
         self.start_time = time.time()
         self.stopwatch = self.start_time
+
+    def increment_step(self):
         self.steps += 1
 
     def get_stopwatch_time(self):
         passed_time = math.floor(time.time() - self.stopwatch)
         self.stopwatch = time.time()
+
+        self.increment_step()
+
         return passed_time
 
     def get_total_time(self):
+        Logger.log(str(self.steps))
         return self.stopwatch - self.start_time
 
     def start_insert(self):
@@ -269,6 +291,17 @@ class InsertDataset:
 
         Logger.log(f"created {metadata_type} dfs from metadata files in {self.get_stopwatch_time()} seconds")
 
+    def __insert_pandas_dataframe(self, df, table_name):
+        df_segments = split_dataframe(df, 0.25 * pow(10, 8))
+
+        total_segments = len(df_segments)
+        current_segment_count = 0
+
+        for df_segment in df_segments:
+            current_segment_count += 1
+            self.database_connection.session_insert_pd_dataframe(df_segment, table_name)
+            Logger.log(f"inserted {table_name} segment {current_segment_count} of {total_segments}")
+
     def __insert_dataset_name(self):
         query = f"""
         INSERT INTO dataset (name, uploaded_by) 
@@ -281,7 +314,8 @@ class InsertDataset:
         Logger.log(
             "purchase dataframe memory usage: " + str(
                 round(self.df_purchase_data.memory_usage(index=True, deep=True).sum() * 0.000001)) + "mb")
-        self.database_connection.session_insert_pd_dataframe(self.df_purchase_data, "purchase")
+
+        self.__insert_pandas_dataframe(self.df_purchase_data, "purchase")
 
         Logger.log(f"inserted purchase data in {self.get_stopwatch_time()} seconds")
 
@@ -293,7 +327,7 @@ class InsertDataset:
             Logger.log(metadata_type + " dataframe memory usage: " + str(
                 round(df_meta_ids.memory_usage(index=True, deep=True).sum() * 0.000001)) + "mb")
 
-            self.database_connection.session_insert_pd_dataframe(df_meta_ids, metadata_type)
+            self.__insert_pandas_dataframe(df_meta_ids, metadata_type)
 
             Logger.log(f"inserted {metadata_type} id data in {self.get_stopwatch_time()} seconds")
 
@@ -304,7 +338,7 @@ class InsertDataset:
             Logger.log(metadata_type + " attributes dataframe memory usage: " + str(
                 round(df_meta_attributes.memory_usage(index=True, deep=True).sum() * 0.000001)) + "mb")
 
-            self.database_connection.session_insert_pd_dataframe(df_meta_attributes, metadata_type + "_attribute")
+            self.__insert_pandas_dataframe(df_meta_attributes, metadata_type + "_attribute")
 
             Logger.log(f"inserted {metadata_type} attribute data in {self.get_stopwatch_time()} seconds")
 
@@ -318,7 +352,7 @@ if __name__ == "__main__":
     }
 
     dataset_selection_data_HM = {
-        "dataset_name": "H&M5",
+        "dataset_name": "H&M11",
         "file_seperators": {
             "purchases.csv": ",",
             "articles.csv": ",",
@@ -406,7 +440,7 @@ if __name__ == "__main__":
     db_con.connect(filename=getAbsPathFromProjectRoot("config-files/database.ini"))
     db_con.log_version()
 
-    insert_dataset_obj = InsertDataset(db_con, "mosh", filenames_HM, dataset_selection_data_HM)
+    insert_dataset_obj = InsertDataset(db_con, "mosh", filenames_HM, dataset_selection_data_HM, "dummy_task")
 
     try:
         insert_dataset_obj.start_insert()
