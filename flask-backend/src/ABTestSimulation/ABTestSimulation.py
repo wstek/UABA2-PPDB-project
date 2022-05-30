@@ -99,7 +99,7 @@ class ABTestSimulation(threading.Thread):
         top_k_over_time_statistics = {'time': []}
         active_users_over_time_statistics = {'time': [], 'n_users': []}
         data_per_user_over_time_statistics = {'time': [],
-                                              'customer_id': {customer_id[0]: [] for customer_id in all_customer_ids}}
+                                              'customer_id': {customer_id.unique_customer_id: [] for customer_id in all_customer_ids}}
 
         for i in range(len(self.abtest["algorithms"])):
             idx = int(self.abtest["algorithms"][i]["id"]) - \
@@ -140,12 +140,12 @@ class ABTestSimulation(threading.Thread):
             # dan is er n customer_specific_statistics rows) k recommendations per active user
             active_users = self.database_connection.session.execute(f"SELECT DISTINCT SUBQUERY.unique_customer_id FROM "
                                                                     f"(SELECT * FROM \
-                    purchase natural join customer WHERE bought_on = '{current_date}') AS SUBQUERY").fetchall()
+                    purchase natural join customer WHERE bought_on = '{current_date}' AND dataset_name = '{dataset_name}') AS SUBQUERY").fetchall()
             self.database_connection.session.commit()
 
             purchases = self.database_connection.session.execute(
                 f"SELECT customer_id, article_id, unique_customer_id, unique_article_id  FROM purchase natural join "
-                f"customer natural join article WHERE bought_on = '{current_date}'").fetchall()
+                f"customer natural join article WHERE bought_on = '{current_date}' AND dataset_name = '{dataset_name}'").fetchall()
 
             user2purchasedItems = dict()
 
@@ -213,7 +213,7 @@ class ABTestSimulation(threading.Thread):
                         retrain = (
                                 dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         interactions = self.database_connection.session.execute(f"SELECT unique_customer_id, unique_article_id from purchase natural join article natural join customer WHERE \
-                            bought_on BETWEEN '{start_date}' AND '{prev_day}'").fetchall()
+                            bought_on BETWEEN '{start_date}' AND '{prev_day}' AND dataset_name = '{dataset_name}'").fetchall()
                         self.database_connection.session.commit()
 
                         for i in range(len(interactions)):
@@ -356,7 +356,7 @@ class ABTestSimulation(threading.Thread):
                         # train KNN algoritme to initialize it:
                         interactions = self.database_connection.session.execute(
                             f"SELECT SUBQUERY.unique_customer_id, SUBQUERY.unique_article_id FROM (SELECT * FROM \
-                    purchase natural join article natural join customer WHERE bought_on = '{start_date}') AS SUBQUERY").fetchall()  # BETWEEN zetten
+                    purchase natural join article natural join customer WHERE bought_on = '{start_date}' AND dataset_name = '{dataset_name}') AS SUBQUERY").fetchall()  # BETWEEN zetten
                         for i in range(len(interactions)):
                             interactions[i] = (
                                 interactions[i][0], interactions[i][1])
@@ -379,7 +379,7 @@ class ABTestSimulation(threading.Thread):
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme
                             top_k = self.database_connection.session.execute(f"SELECT a.unique_article_id, t.bought_on FROM(SELECT article_id,MIN(bought_on) AS bought_on \
-                                FROM purchase WHERE bought_on BETWEEN '{start_date}' AND '{prev_day}' GROUP BY article_id) x natural JOIN purchase t natural join article a ORDER BY bought_on DESC LIMIT {k}").fetchall()
+                                FROM purchase WHERE bought_on BETWEEN '{start_date}'   AND '{prev_day}' AND dataset_name = '{dataset_name}' GROUP BY article_id) x natural JOIN purchase t natural join article a ORDER BY bought_on DESC LIMIT {k}").fetchall()
 
                             top_k_items = []
                             for i in range(len(top_k)):
@@ -494,8 +494,9 @@ class ABTestSimulation(threading.Thread):
                             f"current_day: {current_date}, algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k random: {top_k_random}")
 
                         # train Recency algoritme to initialize it:
+
                         top_k = self.database_connection.session.execute(f"SELECT a.unique_article_id, t.bought_on FROM(SELECT article_id,MIN(bought_on) AS bought_on \
-                                FROM purchase WHERE bought_on = '{start_date}' GROUP BY article_id) x natural JOIN purchase t natural join article a ORDER BY bought_on DESC LIMIT {k}").fetchall()
+                                FROM purchase WHERE bought_on = '{start_date}'  AND dataset_name = '{dataset_name}' GROUP BY article_id) x natural JOIN purchase t natural join article a ORDER BY bought_on DESC LIMIT {k}").fetchall()
                         top_k_items = []
                         for i in range(len(top_k)):
                             top_k_items.append(top_k[i][0])
@@ -520,7 +521,7 @@ class ABTestSimulation(threading.Thread):
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme
                             top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.unique_article_id, count(*) AS popular_items FROM \
-                                (SELECT * FROM purchase natural join article WHERE bought_on BETWEEN '{start_date}' AND '{prev_day}') AS SUBQUERY GROUP \
+                                (SELECT * FROM purchase natural join article WHERE bought_on BETWEEN '{start_date}' AND '{prev_day}' AND dataset_name = '{dataset_name}') AS SUBQUERY GROUP \
                                     BY SUBQUERY.unique_article_id ORDER BY popular_items DESC LIMIT {k}").fetchall()
 
                             top_k_items = []
@@ -633,7 +634,7 @@ class ABTestSimulation(threading.Thread):
 
                         # train Popularity algorithm to initialize it:
                         top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.unique_article_id, count(*) AS popular_items FROM \
-                                (SELECT * FROM purchase natural join article WHERE bought_on = '{start_date}') AS SUBQUERY GROUP \
+                                (SELECT * FROM purchase natural join article WHERE bought_on = '{start_date}' AND dataset_name = '{dataset_name}') AS SUBQUERY GROUP \
                                     BY SUBQUERY.unique_article_id ORDER BY popular_items DESC LIMIT {k}").fetchall()
 
                         top_k_items = []
