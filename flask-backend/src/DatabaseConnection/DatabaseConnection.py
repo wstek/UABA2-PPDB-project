@@ -23,22 +23,6 @@ register_adapter(numpy.float64, addapt_numpy_float64)
 register_adapter(numpy.int64, addapt_numpy_int64)
 
 
-def split_dataframe(df, size):
-    # size of each row
-    row_size = df.memory_usage().sum() / len(df)
-
-    # maximum number of rows of each segment
-    row_limit = int(size // row_size)
-
-    # number of segments
-    seg_num = int((len(df) + row_limit - 1) // row_limit)
-
-    # split df
-    segments = [df.iloc[i * row_limit: (i + 1) * row_limit] for i in range(seg_num)]
-
-    return segments
-
-
 class DatabaseConnection:
     def __init__(self):
         self.engine = None
