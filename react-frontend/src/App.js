@@ -8,7 +8,7 @@ import SignUp from './pages/Account/SignUp';
 import Account from './pages/Account/Account';
 import SignIn from './pages/Account/SignIn';
 import ABTestInput from "./pages/ABTest/ABTestInput";
-import Dashboard from './pages/dashboard/Dashboard';
+import Dashboard from './pages/Dashboard/Dashboard';
 import ProtectedRoute from './utils/ProtectedRoute';
 import Statistics from "./pages/ABTest/Statistics";
 import {handleLoggedIn} from './utils/handleLoggedIn'

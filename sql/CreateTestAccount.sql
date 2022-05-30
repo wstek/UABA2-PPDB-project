@@ -1,0 +1,2 @@
+insert into datascientist(username, datascientist_id, first_name, last_name, created_on, birthdate, password, email_address)
+values ('mosh', 1, 'mosh', 'mosh', '2022-05-30 13:34:40.407489', '2000-01-01', '$2b$12$KE6hSVmif9kZ9jnbU4t5ZOxcja/iOOUd8yjk1SBsP3K6M7b1jrOS.', 'mosh@mosh.mosh');

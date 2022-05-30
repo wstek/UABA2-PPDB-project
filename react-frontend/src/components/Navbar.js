@@ -53,40 +53,12 @@ function SignUpButton() {
     )
 }
 
-function UploadDataSetButton() {
-    return (
-        <li className="nav-item">
-            <Link to="/dataset-upload" className="flexible orange-hover button-purple">Upload Dataset
-            </Link>
-        </li>
-    )
-}
-
 function CollapseButton() {
     return (
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#collapsenavbar">
             <span className="navbar-toggler-icon"/>
         </button>
-    )
-}
-
-
-function DashboardButton() {
-    return (
-        <li className="nav-item">
-            <Link to="/dashboard" className="flexible orange-hover button-purple">Dashboard
-            </Link>
-        </li>
-    )
-}
-
-function ViewDataSetButton() {
-    return (
-        <li className="nav-item">
-            <Link to="/dataset" className="flexible orange-hover button-purple">Datasets
-            </Link>
-        </li>
     )
 }
 
@@ -102,13 +74,6 @@ function Navbar() {
                     </ul>
 
                     <ul className="navbar-nav w-100 justify-content-center ">
-                        {user && <ViewDataSetButton/>}
-
-                        {(user && user.admin) && <UploadDataSetButton/>}
-                    </ul>
-                    <ul className="navbar-nav w-100 justify-content-center ">
-                        {user && <SetupButton/>}
-                        {user && <DashboardButton/>}
                         {user && <AccountButton/>}
                         {!user && <LoginButton/>}
                         {!user && <SignUpButton/>}

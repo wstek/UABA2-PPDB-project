@@ -23,6 +23,22 @@ register_adapter(numpy.float64, addapt_numpy_float64)
 register_adapter(numpy.int64, addapt_numpy_int64)
 
 
+def split_dataframe(df, size):
+    # size of each row
+    row_size = df.memory_usage().sum() / len(df)
+
+    # maximum number of rows of each segment
+    row_limit = int(size // row_size)
+
+    # number of segments
+    seg_num = int((len(df) + row_limit - 1) // row_limit)
+
+    # split df
+    segments = [df.iloc[i * row_limit: (i + 1) * row_limit] for i in range(seg_num)]
+
+    return segments
+
+
 class DatabaseConnection:
     def __init__(self):
         self.engine = None
@@ -35,8 +51,7 @@ class DatabaseConnection:
 
         # core
         self.engine = sqlalchemy.create_engine(
-            f"postgresql://{params['user']}@localHost:5432/{params['dbname']}",
-            executemany_mode='batch')
+            f"postgresql://{params['user']}@localHost:5432/{params['dbname']}")
 
         # ORM
         self.session = scoped_session(sessionmaker(bind=self.engine))
@@ -81,14 +96,31 @@ class DatabaseConnection:
             """
         self.engine_execute(query)
 
-    def insert_pd_dataframe(self, df, table_name):
+    def session_insert_pd_dataframe(self, df, table_name):
         output = StringIO()
         df.to_csv(output, sep='\t', header=False, encoding="utf8", index=False)
         output.seek(0)
 
-        # connection = self.engine.raw_connection()
         cursor = self.session.connection().connection.cursor()
         cursor.copy_from(output, table_name, sep='\t', null='', columns=list(df))
+
+    def engine_insert_pd_dataframe(self, df, table_name):
+        output = StringIO()
+        df.to_csv(output, sep='\t', header=False, encoding="utf8", index=False)
+        output.seek(0)
+
+        connection = self.engine.raw_connection()
+        cursor = connection.cursor()
+        cursor.copy_from(output, table_name, sep='\t', null='', columns=list(df))
+        connection.commit()
+
+    def batch_insert_pd_dataframe(self, df, table_name, size):
+        row_size = df.memory_usage().sum() / len(df)
+        row_limit = int(size // row_size)
+        seg_num = int((len(df) + row_limit - 1) // row_limit)
+
+        for i in range(seg_num):
+            self.session_insert_pd_dataframe(df.iloc[i * row_limit: (i + 1) * row_limit], table_name)
 
     def getABTests(self, username):
         query = f'''

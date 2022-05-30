@@ -8,7 +8,6 @@ from src.DatabaseConnection.InsertDataset import InsertDataset
 from src.extensions import celery_extension, database_connection
 from src.socketioEvents.reportProgress import report_progress_steps
 from src.utils.Logger import Logger
-from src.utils.pathParser import getAbsPathFromProjectRoot
 
 
 def dummy_task_func(duration, task_id=None):

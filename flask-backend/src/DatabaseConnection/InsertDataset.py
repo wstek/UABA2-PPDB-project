@@ -48,6 +48,9 @@ class InsertDataset:
         :param filenames: dict with key: original dataset name, value: dataset filepath
         :param dataset_selection_data: dict that contains information about the selected columns
         """
+        self.start_time = 0
+        self.stopwatch = 0
+
         self.database_connection = database_connection
         self.uploader_name = uploader_name
         self.filenames = filenames
@@ -68,68 +71,56 @@ class InsertDataset:
         self.df_customer_id_table_list = []
         self.df_customer_attribute_table_list = []
 
+    def start_stopwatch(self):
+        self.start_time = time.time()
+        self.stopwatch = self.start_time
+
+    def get_stopwatch_time(self):
+        passed_time = math.floor(time.time() - self.stopwatch)
+        self.stopwatch = time.time()
+        return passed_time
+
+    def get_total_time(self):
+        return self.stopwatch - self.start_time
+
     def start_insert(self):
         self.__insert_dataset_name()
 
         Logger.log(f"Inserting dataset {self.dataset_name}")
 
         # execution time measurement
-        start_time = time.time()
-        stopwatch = start_time
+        self.start_stopwatch()
 
         self.__parse_csv_files()
-
-        Logger.log(f"parsed {len(self.filenames)} files in {math.floor(time.time() - stopwatch)} seconds")
-        stopwatch = time.time()
 
         # create purchase df from purchase files
         self.__concatenate_purchase_files()
         self.__create_purchasedata_df()
 
-        Logger.log(f"created purchase df from purchase files in {math.floor(time.time() - stopwatch)} seconds")
-        stopwatch = time.time()
-
         # create meta id dfs from purchase files
         self.__create_meta_id_df_purchase("article", self.df_article_id, self.df_article_id_table_list)
         self.__create_meta_id_df_purchase("customer", self.df_customer_id, self.df_customer_id_table_list)
-
-        Logger.log(f"created meta id dfs from purchase files in {math.floor(time.time() - stopwatch)} seconds")
-        stopwatch = time.time()
 
         # create meta dfs from purchase files
         self.__create_purchase_metadata_df("article", self.df_article_id, self.df_article_attribute_table_list)
         self.__create_purchase_metadata_df("customer", self.df_customer_id, self.df_customer_attribute_table_list)
 
-        Logger.log(f"created meta dfs from purchase files in {math.floor(time.time() - stopwatch)} seconds")
-        stopwatch = time.time()
-
         # create meta dfs from metadata files
         self.__create_metadata_df("article", self.df_article_id_table_list, self.df_article_attribute_table_list)
         self.__create_metadata_df("customer", self.df_customer_id_table_list, self.df_customer_attribute_table_list)
 
-        Logger.log(f"created meta dfs from metadata files in {math.floor(time.time() - stopwatch)} seconds")
-        stopwatch = time.time()
-
         # insert all data into database
         self.__insert_metadata("article", self.df_article_id_table_list, self.df_article_attribute_table_list)
 
-        Logger.log(f"inserted article metadata in {math.floor(time.time() - stopwatch)} seconds")
-        stopwatch = time.time()
-
         self.__insert_metadata("customer", self.df_customer_id_table_list, self.df_customer_attribute_table_list)
-
-        Logger.log(f"inserted customer metadata in {math.floor(time.time() - stopwatch)} seconds")
-        stopwatch = time.time()
 
         self.__insert_purchase_data()
 
-        Logger.log(f"inserted purchase data in {math.floor(time.time() - stopwatch)} seconds")
-        stopwatch = time.time()
-
         # commit transaction to database
         self.database_connection.session.commit()
+        Logger.log(f"commited transaction to database in {self.get_stopwatch_time()} seconds")
 
-        Logger.log(f"added dataset \"{self.dataset_name}\" in {math.floor(time.time() - start_time)} seconds")
+        Logger.log(f"added dataset \"{self.dataset_name}\" in {self.get_total_time()} seconds")
 
     def cleanup(self):
         for original_filename in self.filenames:
@@ -185,6 +176,8 @@ class InsertDataset:
 
                         self.df_files[original_filename].drop_duplicates(inplace=True)
 
+        Logger.log(f"parsed {len(self.filenames)} files in {self.get_stopwatch_time()} seconds")
+
     def __concatenate_file_df(self, filenames: list):
         df_file_list = []
 
@@ -227,6 +220,8 @@ class InsertDataset:
 
         self.df_purchase_data["dataset_name"] = self.dataset_name
 
+        Logger.log(f"created purchase df from purchase files in {self.get_stopwatch_time()} seconds")
+
     def __create_meta_id_df_purchase(self, metadata_type: str, df_meta_id, df_meta_id_tables):
         metadata_id_name = metadata_type + "_id"
 
@@ -235,11 +230,15 @@ class InsertDataset:
 
         df_meta_id_tables.append(df_meta_id)
 
+        Logger.log(f"created {metadata_type} id dfs from purchase files in {self.get_stopwatch_time()} seconds")
+
     def __create_purchase_metadata_df(self, metadata_type: str, df_meta_id_table, df_meta_attribute_tables):
         purchase_select_data = self.dataset_selection_data["purchase_data"]
 
         for attribute in purchase_select_data[metadata_type + "_metadata_attributes"]:
             add_attribute_df(attribute, self.df_purchase_files, df_meta_id_table, df_meta_attribute_tables)
+
+        Logger.log(f"created {metadata_type} dfs from purchase files in {self.get_stopwatch_time()} seconds")
 
     def __create_metadata_df(self, metadata_type: str, df_meta_id_tables, df_meta_attribute_tables):
         metadata_id_name = metadata_type + "_id"
@@ -258,6 +257,8 @@ class InsertDataset:
             for attribute in metadata["attributes"]:
                 add_attribute_df(attribute, df_file, df_meta_id_table, df_meta_attribute_tables)
 
+        Logger.log(f"created {metadata_type} dfs from metadata files in {self.get_stopwatch_time()} seconds")
+
     def __insert_dataset_name(self):
         query = f"""
         INSERT INTO dataset (name, uploaded_by) 
@@ -267,18 +268,33 @@ class InsertDataset:
         self.database_connection.session_execute(query)
 
     def __insert_purchase_data(self):
-        self.database_connection.insert_pd_dataframe(self.df_purchase_data, "purchase")
+        Logger.log(
+            "purchase dataframe memory usage: " + str(
+                round(self.df_purchase_data.memory_usage(index=True, deep=True).sum() * 0.000001)) + "mb")
+        self.database_connection.session_insert_pd_dataframe(self.df_purchase_data, "purchase")
+
+        Logger.log(f"inserted purchase data in {self.get_stopwatch_time()} seconds")
 
     def __insert_metadata(self, metadata_type: str, df_meta_id_tables, df_meta_attribute_tables):
         df_meta_ids = pd.concat(df_meta_id_tables, ignore_index=True, sort=False, copy=False)
         df_meta_ids.drop_duplicates(inplace=True)
 
-        self.database_connection.insert_pd_dataframe(df_meta_ids, metadata_type)
+        Logger.log(metadata_type + " dataframe memory usage: " + str(
+            round(df_meta_ids.memory_usage(index=True, deep=True).sum() * 0.000001)) + "mb")
+
+        self.database_connection.session_insert_pd_dataframe(df_meta_ids, metadata_type)
+
+        Logger.log(f"inserted {metadata_type} id data in {self.get_stopwatch_time()} seconds")
 
         df_meta_attributes = pd.concat(df_meta_attribute_tables, ignore_index=True, sort=False, copy=False)
         df_meta_attributes.drop_duplicates(subset=["attribute_name", metadata_type + "_id"], inplace=True)
 
-        self.database_connection.insert_pd_dataframe(df_meta_attributes, metadata_type + "_attribute")
+        Logger.log(metadata_type + " attributes dataframe memory usage: " + str(
+            round(df_meta_attributes.memory_usage(index=True, deep=True).sum() * 0.000001)) + "mb")
+
+        self.database_connection.session_insert_pd_dataframe(df_meta_attributes, metadata_type + "_attribute")
+
+        Logger.log(f"inserted {metadata_type} attribute data in {self.get_stopwatch_time()} seconds")
 
 
 if __name__ == "__main__":
