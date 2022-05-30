@@ -98,6 +98,7 @@ class InsertDataset:
 
     def increment_step(self):
         self.steps += 1
+        report_progress_steps(self.task_id, self.steps, 14)
 
     def get_stopwatch_time(self):
         passed_time = math.floor(time.time() - self.stopwatch)
@@ -112,9 +113,13 @@ class InsertDataset:
         return self.stopwatch - self.start_time
 
     def start_insert(self):
-        self.__insert_dataset_name()
-
         Logger.log(f"Inserting dataset {self.dataset_name}")
+        report_progress_steps(self.task_id, self.steps, 13)
+
+        self.database_connection.session_execute("SET LOCAL synchronous_commit = 'off'")
+        self.database_connection.session_execute("SET session_replication_role = replica;")
+
+        self.__insert_dataset_name()
 
         # execution time measurement
         self.start_stopwatch()
@@ -138,15 +143,11 @@ class InsertDataset:
         self.__create_metadata_df("customer", self.df_customer_id_table_list, self.df_customer_attribute_table_list)
 
         # insert all data into database
-        self.database_connection.session_disable_all_trigger()
-
         self.__insert_metadata("article", self.df_article_id_table_list, self.df_article_attribute_table_list)
 
         self.__insert_metadata("customer", self.df_customer_id_table_list, self.df_customer_attribute_table_list)
 
         self.__insert_purchase_data()
-
-        self.database_connection.session_enable_all_trigger()
 
         # commit transaction to database
         self.database_connection.session.commit()
@@ -235,6 +236,8 @@ class InsertDataset:
 
     def __create_purchasedata_df(self):
         purchase_select_data = self.dataset_selection_data["purchase_data"]
+
+        print(self.df_purchase_files.head(100))
 
         shallow_copy_df_column(self.df_purchase_files, purchase_select_data["column_name_bought_on"],
                                self.df_purchase_data, "bought_on", ignore_empty=True)
@@ -352,7 +355,7 @@ if __name__ == "__main__":
     }
 
     dataset_selection_data_HM = {
-        "dataset_name": "H&M11",
+        "dataset_name": "H&M14",
         "file_seperators": {
             "purchases.csv": ",",
             "articles.csv": ",",

@@ -85,18 +85,6 @@ class DatabaseConnection:
             """
         self.session_execute(query)
 
-    def session_disable_all_trigger(self):
-        query = f"""
-            SET session_replication_role = replica;
-            """
-        self.session_execute(query)
-
-    def session_enable_all_trigger(self):
-        query = f"""
-            SET session_replication_role = DEFAULT;
-            """
-        self.session_execute(query)
-
     def remove_dataset(self, dataset_name: str):
         query = f"""
             DELETE FROM dataset 
