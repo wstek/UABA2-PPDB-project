@@ -26,8 +26,8 @@ function ChangeInfo({...props}) {
         })
     }
 
-    function submitFirstName() {
-        fetch('/account/changeinfo' + '/first_name' + '/' + username, {
+    function submitFirstName(event) {
+        fetch('/api/account/changeinfo' + '/first_name' + '/' + username, {
             method: 'POST',
             headers: {"Content-Type": "application/json"},
             credentials: 'include',
@@ -38,13 +38,14 @@ function ChangeInfo({...props}) {
                 if (data.error) {
                     throw Error(data.error);
                 }
+                event.preventDefault()
             })
             .catch((err) => {
                 console.log(err.message);
             })
     }
 
-    function submitLastName() {
+    function submitLastName(event) {
         fetch('/account/changeinfo' + '/last_name' + '/' + username, {
             method: 'POST',
             headers: {"Content-Type": "application/json"},
@@ -56,13 +57,14 @@ function ChangeInfo({...props}) {
                 if (data.error) {
                     throw Error(data.error);
                 }
+                event.preventDefault()
             })
             .catch((err) => {
                 console.log(err.message);
             })
     }
 
-    function submitEmail() {
+    function submitEmail(event) {
         fetch('/account/changeinfo' + '/email' + '/' + username, {
             method: 'POST',
             headers: {"Content-Type": "application/json"},
@@ -74,6 +76,7 @@ function ChangeInfo({...props}) {
                 if (data.error) {
                     throw Error(data.error);
                 }
+                event.preventDefault()
             })
             .catch((err) => {
                 console.log(err.message);
