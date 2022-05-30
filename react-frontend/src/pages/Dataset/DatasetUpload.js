@@ -144,7 +144,7 @@ export default function DatasetUpload() {
 
         // customer mata data
         selectData.customer_metadata = [];
-        if (addArticleMetaDataFile) {
+        if (addCustomerMetaDataFile) {
             selectData.customer_metadata.push(getCustomerMetaData());
         }
 

@@ -4,6 +4,7 @@ import os
 import sys
 import time
 from typing import Dict
+from src.socketioEvents.reportProgress import report_progress_steps
 
 import pandas as pd
 
@@ -40,7 +41,7 @@ def add_attribute_df(attribute, df_file, df_meta_id_table, df_meta_attribute_tab
 
 class InsertDataset:
     def __init__(self, database_connection: DatabaseConnection, uploader_name: str, filenames: Dict[str, str],
-                 dataset_selection_data: dict):
+                 dataset_selection_data: dict, task_id=""):
         """
         Inserts a new dataset in the database
         :param database_connection: database connection
@@ -48,6 +49,10 @@ class InsertDataset:
         :param filenames: dict with key: original dataset name, value: dataset filepath
         :param dataset_selection_data: dict that contains information about the selected columns
         """
+        self.task_id = task_id
+
+        self.steps = 0
+
         self.start_time = 0
         self.stopwatch = 0
 
@@ -74,6 +79,7 @@ class InsertDataset:
     def start_stopwatch(self):
         self.start_time = time.time()
         self.stopwatch = self.start_time
+        self.steps += 1
 
     def get_stopwatch_time(self):
         passed_time = math.floor(time.time() - self.stopwatch)
@@ -276,25 +282,27 @@ class InsertDataset:
         Logger.log(f"inserted purchase data in {self.get_stopwatch_time()} seconds")
 
     def __insert_metadata(self, metadata_type: str, df_meta_id_tables, df_meta_attribute_tables):
-        df_meta_ids = pd.concat(df_meta_id_tables, ignore_index=True, sort=False, copy=False)
-        df_meta_ids.drop_duplicates(inplace=True)
+        if len(df_meta_id_tables) > 0:
+            df_meta_ids = pd.concat(df_meta_id_tables, ignore_index=True, sort=False, copy=False)
+            df_meta_ids.drop_duplicates(inplace=True)
 
-        Logger.log(metadata_type + " dataframe memory usage: " + str(
-            round(df_meta_ids.memory_usage(index=True, deep=True).sum() * 0.000001)) + "mb")
+            Logger.log(metadata_type + " dataframe memory usage: " + str(
+                round(df_meta_ids.memory_usage(index=True, deep=True).sum() * 0.000001)) + "mb")
 
-        self.database_connection.session_insert_pd_dataframe(df_meta_ids, metadata_type)
+            self.database_connection.session_insert_pd_dataframe(df_meta_ids, metadata_type)
 
-        Logger.log(f"inserted {metadata_type} id data in {self.get_stopwatch_time()} seconds")
+            Logger.log(f"inserted {metadata_type} id data in {self.get_stopwatch_time()} seconds")
 
-        df_meta_attributes = pd.concat(df_meta_attribute_tables, ignore_index=True, sort=False, copy=False)
-        df_meta_attributes.drop_duplicates(subset=["attribute_name", metadata_type + "_id"], inplace=True)
+        if len(df_meta_attribute_tables) > 0:
+            df_meta_attributes = pd.concat(df_meta_attribute_tables, ignore_index=True, sort=False, copy=False)
+            df_meta_attributes.drop_duplicates(subset=["attribute_name", metadata_type + "_id"], inplace=True)
 
-        Logger.log(metadata_type + " attributes dataframe memory usage: " + str(
-            round(df_meta_attributes.memory_usage(index=True, deep=True).sum() * 0.000001)) + "mb")
+            Logger.log(metadata_type + " attributes dataframe memory usage: " + str(
+                round(df_meta_attributes.memory_usage(index=True, deep=True).sum() * 0.000001)) + "mb")
 
-        self.database_connection.session_insert_pd_dataframe(df_meta_attributes, metadata_type + "_attribute")
+            self.database_connection.session_insert_pd_dataframe(df_meta_attributes, metadata_type + "_attribute")
 
-        Logger.log(f"inserted {metadata_type} attribute data in {self.get_stopwatch_time()} seconds")
+            Logger.log(f"inserted {metadata_type} attribute data in {self.get_stopwatch_time()} seconds")
 
 
 if __name__ == "__main__":
