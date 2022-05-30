@@ -154,6 +154,7 @@ class InsertDataset:
         Logger.log(f"commited transaction to database in {self.get_stopwatch_time()} seconds")
 
         Logger.log(f"added dataset \"{self.dataset_name}\" in {self.get_total_time()} seconds")
+        report_progress_steps(self.task_id, 13, 13)
 
     def cleanup(self):
         for original_filename in self.filenames:
@@ -311,7 +312,7 @@ class InsertDataset:
         VALUES ('{self.dataset_name}', '{self.uploader_name}')
         """
 
-        self.database_connection.session_execute(query)
+        self.database_connection.engine_execute(query)
 
     def __insert_purchase_data(self):
         Logger.log(

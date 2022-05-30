@@ -2,8 +2,9 @@ import PurchaseSelect from "./PurchaseSelect";
 import MetaSelect from "./MetaSelect";
 import React, {useRef, useState} from "react";
 import axios from "axios";
+import ProgressBar from "@ramonak/react-progress-bar";
 
-export default function DatasetUpload() {
+export default function DatasetUpload(props) {
     const datasetNameRef = useRef("")
 
     const [purchaseFiles, setPurchaseFiles] = useState([]);
@@ -239,21 +240,31 @@ export default function DatasetUpload() {
         [purchaseFiles, articleMetaFiles, customerMetaFiles].forEach((fileState) => {
             fileState.forEach(fileInfo => {
                 formData.append('files', fileInfo.file);
-                console.log(fileInfo.file.name);
+                // console.log(fileInfo.file.name);
             })
         })
 
-        console.log(JSON.stringify(getSelectData()))
+        // console.log(JSON.stringify(getSelectData()))
         formData.append('data', JSON.stringify(getSelectData()))
 
-        const config = {
+        props.handleShowUploadProgress(true);
+
+        axios.post("/api/upload_dataset", formData, {
             headers: {
                 'content-type': 'multipart/form-data',
             },
-        };
+            onUploadProgress: (progressEvent) => {
+                let progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
 
-        axios.post("/api/upload_dataset", formData, config).then((response) => {
-            console.log(response.data);
+                props.handleUploadProgress(progress)
+
+                if (progress === 100) {
+                    props.handleUploadProgress(0);
+                    props.handleShowUploadProgress(false);
+                }
+            }
+        }).then((response) => {
+            // console.log(response.data);
         });
     }
 
@@ -273,11 +284,11 @@ export default function DatasetUpload() {
         setAddCustomerMetaDataFile(false);
 
         setArticleMetaFiles([])
-        setArticleMetaIdColumnName([])
+        setArticleMetaIdColumnName("")
         setArticleMetaAttributes({})
 
         setCustomerMetaFiles([])
-        setCustomerMetaIdColumnName([])
+        setCustomerMetaIdColumnName("")
         setCustomerMetaAttributes({})
     }
 

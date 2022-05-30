@@ -10,8 +10,6 @@ export default function FileSelectList(props) {
         // todo: rework this, so that it uses javascript filereader
         setParseProgress(true);
 
-        console.log(datasetFiles);
-
         Promise.all([...datasetFiles].map((datasetFile) => new Promise((resolve, reject) => Papa.parse(datasetFile, {
             // multithreaded
             worker: true, // includes header in the data
@@ -35,7 +33,6 @@ export default function FileSelectList(props) {
                 }
                 previous_column_names = column_names;
 
-                console.log(column_names);
             })
 
             // set states
@@ -63,19 +60,17 @@ export default function FileSelectList(props) {
             <input type="file" name="csv_file" className={"bg-purple"} multiple
                    onChange={handleFileselect} accept=".csv"/>
 
-            {props.files.map((file, index) => (
-                <div>
-                    {parseProgress &&
-                        <PurpleSpinner/>
-                    }
+            {parseProgress &&
+                <PurpleSpinner/>
+            }
 
-                    {!parseProgress &&
-                        <FileSeperatorEditor
-                            key={index}
-                            fileName={file.file.name}
-                            onChange={handleFileChange}
-                        />
-                    }
+            {!parseProgress && props.files.map((file, index) => (
+                <div>
+                    <FileSeperatorEditor
+                        key={index}
+                        fileName={file.file.name}
+                        onChange={handleFileChange}
+                    />
                 </div>
             ))}
         </div>
