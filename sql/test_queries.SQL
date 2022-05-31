@@ -191,7 +191,7 @@ group by algorithm_id, unique_customer_id;
 
 
 select algorithm_id, unique_customer_id, to_char(sum(attributions * revenue_per_attr )::float8, 'FM999999990.9999' ) as "ARPU@30"
-from attr_abtest_18_7d
+from attr_abtest_22_30d
 where bought_on between '2020-01-01' and '2020-01-9'
 group by algorithm_id, unique_customer_id;
 

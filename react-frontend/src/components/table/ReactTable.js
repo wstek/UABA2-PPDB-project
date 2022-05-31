@@ -104,7 +104,9 @@ export function TopKPurchasedTable() {
     )
 }
 
-export function TopKPerAlgorithmTable({abtest_id, start_date, end_date}) {
+export function TopKPerAlgorithmTable() {
+    const {abtest_id, start_date, end_date} = useContext(ABTestContext);
+
     const [top_k_per_algorithm, setTopKPerAlgorithm] = useState()
     const fetchTopKPerAlgorithm = () => {
         const abortCont = new AbortController();

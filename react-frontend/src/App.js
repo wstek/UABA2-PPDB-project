@@ -18,7 +18,7 @@ import Home from "./pages/Home";
 import Single from './pages/single/Single';
 import TaskTest from "./pages/BackgroundTasks/TaskTest";
 import TaskProgress from "./pages/BackgroundTasks/TaskProgress";
-import DatasetPage from "./pages/Dataset";
+import DatasetPage from "./pages/DatasetView/Dataset";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Sidebar from "./components/sidebar/Sidebar";
 import {UserContext} from "./utils/UserContext.js";

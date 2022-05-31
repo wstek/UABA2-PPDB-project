@@ -1,10 +1,10 @@
-import InputSelector from "../components/InputSelector";
+import InputSelector from "../../components/InputSelector";
 import React, {useEffect, useState} from "react";
-import {fetchData} from "../utils/fetchAndExecuteWithData";
-import {PurpleSpinner} from "../components/PurpleSpinner";
+import {fetchData} from "../../utils/fetchAndExecuteWithData";
+import {PurpleSpinner} from "../../components/PurpleSpinner";
 import {useHistory, useParams} from "react-router-dom";
-import HistogramChart from "../components/chart/HistogramChart";
-import ProtectedRoute from "../utils/ProtectedRoute";
+import HistogramChart from "../../components/chart/HistogramChart";
+import ProtectedRoute from "../../utils/ProtectedRoute";
 
 export function DatasetStatistics() {
     let {dataset_name} = useParams();

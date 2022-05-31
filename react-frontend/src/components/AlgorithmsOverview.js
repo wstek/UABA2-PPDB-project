@@ -1,4 +1,3 @@
-// import {useEffect} from "react";
 import React, {useMemo} from 'react'
 import {PurpleSpinner} from "./PurpleSpinner"
 import BootstrapTable from "./table/BootstrapTable";

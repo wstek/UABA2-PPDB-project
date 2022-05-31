@@ -1,20 +1,17 @@
-import AlgorithmsOverview from "../../components/AlgorithmsOverview";
-import LineChart from "../../components/chart/LineChart";
-import React, {useContext, useEffect, useReducer, useState} from "react";
+import React, {useEffect, useReducer, useState} from "react";
 import InputSelector from "../../components/InputSelector";
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
 import DateSlider from "../../components/DateSlider";
 import {Link, Route, Switch, useHistory, useParams} from "react-router-dom";
-import * as PropTypes from "prop-types";
 import NotFound from "../NotFound";
-import BootstrapTable from "../../components/table/BootstrapTable";
 import {PurpleSpinner} from "../../components/PurpleSpinner";
 import CustomerOverview from "../../components/table/StatisticsCustomerTable";
 import {ABTestContext} from "../../utils/Contexts.js";
-import {TopKPerAlgorithmTable, TopKPurchasedTable} from "../../components/table/ReactTable";
-import ProtectedRoute from "../../utils/ProtectedRoute";
 import CustomerList from "../list/CustomerList";
 import ItemList from "../list/ItemList";
+import TopK from './TopK'
+import GeneralABTestInformation from "./GeneralABTestOverview";
+import ABTestCharts from "./ABTestCharts";
 
 const reducer = (state, action) => {
     return {...state, [action.field]: action.value};
@@ -32,114 +29,6 @@ const initialValue = {
 }
 
 
-function ABTestOverview({abtest_information}) {
-    const columns = React.useMemo(() => [{
-        Header: 'ABTest-ID', accessor: 'abtest-id',
-    }, {
-        Header: 'Dataset', accessor: 'dataset-name',
-    }, {
-        Header: 'Created on', accessor: 'created-on',
-    }, {
-        Header: 'Start', accessor: 'start_date',
-    }, {
-        Header: 'End', accessor: 'end_date',
-    }, {
-        Header: 'StepSize', accessor: 'stepsize',
-    }, {
-        Header: 'Top-K', accessor: 'top-k',
-    }], [])
-
-    if (!abtest_information) return <PurpleSpinner/>
-    return (<BootstrapTable columns={columns} data={[abtest_information]}/>)
-}
-
-ABTestOverview.propTypes = {input_algorithms: PropTypes.any};
-
-function GeneralABTestInformation({abtest_data, input_algorithms}) {
-    return <>
-        <div className={"col-auto"}>
-            <h1>ABTest Parameters</h1>
-            <ABTestOverview abtest_information={abtest_data}/>
-        </div>
-        <div className={"col-auto"}>
-            <h1>Used algorithms information</h1>
-            <AlgorithmsOverview input_algorithms={input_algorithms}/>
-        </div>
-    </>;
-}
-
-function ABTestCharts({graphdata}) {
-    const {
-        active_user_over_time, purchases_over_time, click_through_rate_over_time, attribution_rate_over_time
-    } = graphdata
-
-    const {end_date, start_date} = useContext(ABTestContext);
-    return (<>
-        <div className="row text-center align-content-center justify-content-center g-0 ">
-            <div className="col-12 col-lg-12 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
-                <LineChart chart_id={1} title="Active Users" xMin={start_date}
-                           xMax={end_date}
-                           XFnY={active_user_over_time}/>
-            </div>
-            <div className="col-12 col-lg-12 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
-                <LineChart chart_id={2} title={"Purchases"} xMin={start_date}
-                           xMax={end_date} XFnY={purchases_over_time}/>
-            </div>
-        </div>
-        <div className="row text-center align-content-center justify-content-center g-0">
-            <div className="col-12 col-lg-12 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
-                <LineChart chart_id={3} title="Click Through Rate" xMin={start_date}
-                           xMax={end_date}
-                           XFnY={click_through_rate_over_time} ex_options={{
-                    vAxis: {
-                        format: '   ##.######%'
-                    }
-
-                }}
-                           formatters={[{
-                               type: "NumberFormat", column: 1, options: {
-                                   pattern: '  ##.######%',
-                               }
-                           }]}
-                />
-            </div>
-            <div className="col-12 col-lg-12 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
-                <LineChart chart_id={2} title={"Attribution Rate"} ex_options={{
-                    vAxis: {
-                        format: '#.######%'
-                    }
-                }} xMin={start_date}
-                           xMax={end_date}
-                           XFnY={attribution_rate_over_time}
-                           formatters={[{
-                               type: "NumberFormat", column: 1, options: {
-                                   pattern: '#.######%',
-                               }
-                           }]}
-                />
-            </div>
-        </div>
-    </>);
-}
-
-
-function TopK() {
-    const {abtest_id, start_date, end_date, start_date_index, end_date_index} = useContext(ABTestContext);
-    return (<>
-        <div className="col-auto " style={{minHeight: "400px"}}>
-            <TopKPerAlgorithmTable abtest_id={abtest_id}
-                                   start_date={start_date}
-                                   end_date={end_date}/> :
-
-        </div>
-        <div className="col-auto my-auto" style={{minHeight: "400px"}}>
-            <TopKPurchasedTable start_date={start_date_index} end_date={end_date_index}
-                                abtest_id={abtest_id}/>
-        </div>
-    </>);
-}
-
-
 function StatisticsInformation() {
     const [state, setState] = useReducer(reducer, initialValue);
 
@@ -147,8 +36,8 @@ function StatisticsInformation() {
     const setInputAlgorithms = (data) => setState({field: 'input_algorithms', value: data})
     // const setSelectedABTest = (data) => setState({field: 'selected_abtest', value: data})
     const setActiveUsersOverTime = (data) => setState({field: 'active_user_over_time', value: data})
-    const setPurchasesOverTime = (data) =>{
-      setState({field: 'purchases_over_time', value: data})
+    const setPurchasesOverTime = (data) => {
+        setState({field: 'purchases_over_time', value: data})
     }
     const setClickThroughRate = (data) => setState({field: 'click_through_rate_over_time', value: data})
     const setABTestData = (data) => {
@@ -248,9 +137,9 @@ function StatisticsInformation() {
                 <Route exact path="/Statistics/ABTest/:abtest_id/Customers"
                        children={<CustomerOverview/>}/>
                 <Route children={<CustomerList/>}
-                                exact path={"/Statistics/ABTest/:abtest_id/Customer/:customer_id"}/>
+                       exact path={"/Statistics/ABTest/:abtest_id/Customer/:customer_id"}/>
                 <Route children={<ItemList/>}
-                                exact path={"/Statistics/ABTest/:abtest_id/Item/:item_id"}/>
+                       exact path={"/Statistics/ABTest/:abtest_id/Item/:item_id"}/>
 
             </Switch>
         </div>
