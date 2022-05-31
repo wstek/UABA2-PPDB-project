@@ -7,7 +7,7 @@ export default function MetaSelect(props) {
     const [fileColumnNames, setFileColumnNames] = useState([]);
 
     return (
-        <div>
+        <>
             <h3>{props.type.charAt(0).toUpperCase() + props.type.slice(1)} meta data</h3>
 
             <FileSelectList
@@ -32,6 +32,6 @@ export default function MetaSelect(props) {
                 onChangeAttributes={props.onChangeAttributes}
                 columnNames={fileColumnNames}
             />
-        </div>
+        </>
     )
 }

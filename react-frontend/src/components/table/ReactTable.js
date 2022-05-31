@@ -87,7 +87,7 @@ export function TopKPurchasedTable() {
                 {
                     Header: 'Article', accessor: 'article', Cell: (params) => {
                         return <Link style={{textDecoration: 'inherit'}}
-                                     to={`/ABTest/${abtest_id}/Item/${params.row.values.article}`}>{params.row.values.article}</Link>
+                                     to={`/Statistics/ABTest/${abtest_id}/Item/${params.row.values.article}`}>{params.row.values.article}</Link>
                     }
                 }, {Header: 'Times Purchased', accessor: 'count'}
             ]
@@ -130,7 +130,7 @@ export function TopKPerAlgorithmTable({abtest_id, start_date, end_date}) {
                         Cell: (params) => {
                             let article_id = params.row.original[algorithm_id.toString()].article
                             return <Link style={{textDecoration: 'inherit'}}
-                                         to={`/ABTest/${abtest_id}/Item/${article_id}`}>{article_id}</Link>
+                                         to={`/Statistics/ABTest/${abtest_id}/Item/${article_id}`}>{article_id}</Link>
 
                         },
                         Header: 'Article ID', accessor: algorithm_id.toString() + '.article'

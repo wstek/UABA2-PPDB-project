@@ -126,11 +126,7 @@ export default function DatasetUpload(props) {
 
     const checkAttributeData = (attributeData) => {
         for (let attributeId in attributeData) {
-            if (
-                attributeData[attributeId].name === "" ||
-                attributeData[attributeId].column_name === "" ||
-                attributeData[attributeId].type === ""
-            ) {
+            if (attributeData[attributeId].name === "" || attributeData[attributeId].column_name === "" || attributeData[attributeId].type === "") {
                 alert("Please fill in all the attribute fields")
                 return false;
             }
@@ -162,12 +158,7 @@ export default function DatasetUpload(props) {
         }
 
         // check purchase data
-        if (
-            purchaseTimeColumnName === "" ||
-            purchasePriceColumnName === "" ||
-            purchaseArticleIdColumnName === "" ||
-            purchaseCustomerIdColumnName === ""
-        ) {
+        if (purchaseTimeColumnName === "" || purchasePriceColumnName === "" || purchaseArticleIdColumnName === "" || purchaseCustomerIdColumnName === "") {
             alert("Please select a column for every purchase data field");
             return false;
         }
@@ -254,8 +245,7 @@ export default function DatasetUpload(props) {
         axios.post("/api/upload_dataset", formData, {
             headers: {
                 'content-type': 'multipart/form-data',
-            },
-            onUploadProgress: (progressEvent) => {
+            }, onUploadProgress: (progressEvent) => {
                 let progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
 
                 props.handleUploadProgress(progress)
@@ -294,93 +284,96 @@ export default function DatasetUpload(props) {
         setCustomerMetaAttributes({})
     }
 
-    return (
-        <div style={{textAlign: "center"}}>
-            <div>
-                <h1>Upload dataset</h1>
+    return (<>
+        <div className={"row justify-content-center mb-5 needs-validation"}>
+            <div className={"col-12"}>
+                <div className={"row-cols mt-2  justify-content-center "}>
+                    <h1>Upload dataset</h1>
+                </div>
+                <div className={"row-cols  mt-1 justify-content-center "}>
 
-                <input onChange={event => {
-                    datasetNameRef.current = event.target.value;
-                }} placeholder={"Dataset name"} style={{width: "150px"}}/>
+                    <input onChange={event => {
+                        datasetNameRef.current = event.target.value;
+                    }} required placeholder={"Dataset name"} className={"bg-purple "}/>
+                </div>
+                <div className={"row   justify-content-center align-items-center  center text-center align-content-center "}>
+                <div className={"col-auto p-2  "}>
+                    <button onClick={handleUpload} className={"button-purple green-hover"}>
+                        Upload
+                    </button>
+                </div>
+                <div className={"col-auto  p-2 "}>
 
-                <button onClick={handleUpload} className={"button-purple"}>
-                    Upload
-                </button>
-
-                <button onClick={handleReset} className={"button-purple"}>
-                    Reset
-                </button>
+                    <button onClick={handleReset} className={"button-purple red-hover"}>
+                        Reset
+                    </button>
+                </div>
+                </div>
+            </div>
             </div>
 
-            <br/>
+            <div className={"row justify-content-center"}>
+                <div className={"col-12 col-md-4 mb-3 justify-content-center "}>
+                        <button onClick={() => {
+                            setAddArticleMetaDataFile(!addArticleMetaDataFile)
+                        }} className={addArticleMetaDataFile ? "button-purple red-hover":"button-purple green-hover"}>
+                            {addArticleMetaDataFile ? "Remove article metadata file" : "Add article metadata file"}
+                        </button>
 
-            <PurchaseSelect
-                files={purchaseFiles}
-                onChangeFiles={setPurchaseFiles}
+                        {addArticleMetaDataFile && <MetaSelect
+                            type={"article"}
 
-                onChangeTimeColumn={setpurchaseTimeColumnName}
-                onChangePriceColumn={setpurchasePriceColumnName}
-                onChangeArticleIdColumn={setpurchaseArticleIdColumnName}
-                onChangeCustomerIdColumn={setpurchaseCustomerIdColumnName}
+                            files={articleMetaFiles}
+                            onChangeFiles={setArticleMetaFiles}
 
-                articleAttributes={purchaseArticleAttributes}
-                onChangeArticleAttributes={setPurchaseArticleAttributes}
+                            onChangeIdColumn={setArticleMetaIdColumnName}
 
-                customerAttributes={purchaseCustomerAttributes}
-                onChangeCustomerAttributes={setPurchaseCustomerAttributes}
-            />
+                            attributes={articleMetaAttributes}
+                            onChangeAttributes={setArticleMetaAttributes}
+                        />}
 
-            <br/>
+                </div>
+                <div className={"col-12 col-md-4 mt-3 justify-content-center "}>
 
-            <div>
-                <button onClick={() => {
-                    setAddArticleMetaDataFile(!addArticleMetaDataFile)
-                }} className={"button-purple"}>
-                    {addArticleMetaDataFile ? "Remove article metadata file" : "Add article metadata file"}
-                </button>
+                    <PurchaseSelect
+                        files={purchaseFiles}
+                        onChangeFiles={setPurchaseFiles}
 
-                {
-                    addArticleMetaDataFile &&
-                    <MetaSelect
-                        type={"article"}
+                        onChangeTimeColumn={setpurchaseTimeColumnName}
+                        onChangePriceColumn={setpurchasePriceColumnName}
+                        onChangeArticleIdColumn={setpurchaseArticleIdColumnName}
+                        onChangeCustomerIdColumn={setpurchaseCustomerIdColumnName}
 
-                        files={articleMetaFiles}
-                        onChangeFiles={setArticleMetaFiles}
+                        articleAttributes={purchaseArticleAttributes}
+                        onChangeArticleAttributes={setPurchaseArticleAttributes}
 
-                        onChangeIdColumn={setArticleMetaIdColumnName}
-
-                        attributes={articleMetaAttributes}
-                        onChangeAttributes={setArticleMetaAttributes}
+                        customerAttributes={purchaseCustomerAttributes}
+                        onChangeCustomerAttributes={setPurchaseCustomerAttributes}
                     />
-                }
-            </div>
 
-            <br/>
+                </div>
 
-            <div>
-                <button onClick={() => {
-                    setAddCustomerMetaDataFile(!addCustomerMetaDataFile)
-                }} className={"button-purple"}>
-                    {addCustomerMetaDataFile ? "Remove customer metadata file" : "Add customer metadata file"}
-                </button>
+                <div className={"col-12 col-md-4  justify-content-center "}>
+                        <button onClick={() => {
+                            setAddCustomerMetaDataFile(!addCustomerMetaDataFile)
+                        }} className={addCustomerMetaDataFile? "button-purple red-hover": "button-purple green-hover" }>
+                            {addCustomerMetaDataFile ? "Remove customer metadata file" : "Add customer metadata file"}
+                        </button>
 
-                {
-                    addCustomerMetaDataFile &&
-                    <MetaSelect
-                        type={"customer"}
+                        {addCustomerMetaDataFile && <MetaSelect
+                            type={"customer"}
 
-                        files={customerMetaFiles}
-                        onChangeFiles={setCustomerMetaFiles}
+                            files={customerMetaFiles}
+                            onChangeFiles={setCustomerMetaFiles}
 
-                        onChangeIdColumn={setCustomerMetaIdColumnName}
+                            onChangeIdColumn={setCustomerMetaIdColumnName}
 
-                        attributes={customerMetaAttributes}
-                        onChangeAttributes={setCustomerMetaAttributes}
-                    />
-                }
-            </div>
+                            attributes={customerMetaAttributes}
+                            onChangeAttributes={setCustomerMetaAttributes}
+                        />}
+                </div>
 
 
         </div>
-    );
+    </>);
 }

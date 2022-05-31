@@ -8,7 +8,7 @@ export default function PurchaseSelect(props) {
     const [fileColumnNames, setFileColumnNames] = useState([]);
 
     return (
-        <div>
+        <>
             <h3>Purchase data</h3>
 
             <FileSelectList
@@ -63,6 +63,6 @@ export default function PurchaseSelect(props) {
                 onChangeAttributes={props.onChangeCustomerAttributes}
                 columnNames={fileColumnNames}
             />
-        </div>
+        </>
     )
 }

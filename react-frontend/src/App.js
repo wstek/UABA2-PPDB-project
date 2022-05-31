@@ -15,7 +15,7 @@ import {handleLoggedIn} from './utils/handleLoggedIn'
 import Simulation from "./pages/Account/Simulation";
 import ChangeInfo from "./pages/Account/ChangeInfo";
 import Home from "./pages/Home";
-import UserList from "./pages/list/List"
+import CustomerList from "./pages/list/CustomerList"
 import Single from './pages/single/Single';
 import TaskTest from "./pages/BackgroundTasks/TaskTest";
 import TaskProgress from "./pages/BackgroundTasks/TaskProgress";
@@ -199,11 +199,8 @@ function App() {
 
                                         {/*statistics / information*/}
                                         <ProtectedRoute component={Statistics}
-                                                        exact path={"/Statistics/(ABTest)?/:abtest_id?/:statistics?"}/>
-                                        <ProtectedRoute component={UserList}
-                                                        exact path={"/ABTest/:abtest_id/Customer/:customer_id"}/>
-                                        <ProtectedRoute component={ItemList}
-                                                        exact path={"/ABTest/:abtest_id/Item/:item_id"}/>
+                                                        path={"/Statistics/(ABTest)?/:abtest_id?/:statistics?"}/>
+
                                         <ProtectedRoute component={Single}
                                                         exact path={"/users/:userId"}/>
                                         <ProtectedRoute component={Single}
