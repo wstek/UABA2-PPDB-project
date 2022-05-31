@@ -28,12 +28,18 @@ export default function AttributeList(props) {
     }
 
     return (
-        <div>
-            <button onClick={handleAddAttribute} className={"button-purple"}>
+        <>
+                            <div className={"row justify-content-center align-items-center"}>
+                <div className={"col-auto  p-1"}>
+
+            <button onClick={handleAddAttribute} className={"button-purple green-hover"}>
                 add attribute
             </button>
+                            </div>
+                            </div>
             {Object.keys(props.attributes).map((attributeId) => (
-                <div>
+                <div className={"row justify-content-center align-items-center pb-2"}>
+                <div className={"col-auto p-1"}>
                     <Attribute
                         key={attributeId}
                         id={attributeId}
@@ -41,15 +47,18 @@ export default function AttributeList(props) {
                         onChange={handleAttributeChange}
                         columnNames={props.columnNames ? props.columnNames : []}
                     />
+                </div>
+                <div className={"col-auto  p-1"}>
 
                     <button onClick={() => {
                         removeAttribute(attributeId)
-                    }} className={"button-purple"}>
+                    }} className={"button-purple red-hover"}>
                         remove
                     </button>
                 </div>
+                </div>
                 ))}
 
-        </div>
+        </>
     )
 }

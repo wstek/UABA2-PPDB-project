@@ -20,7 +20,7 @@ export default function DatasetUploadPage(props) {
 
             <button onClick={() => {
                 setShowDatasetUpload(!showDatasetUpload)
-            }} className={"button-purple"}>
+            }} className={showDatasetUpload ? "red-hover button-purple":"button-purple green-hover "}>
                 {showDatasetUpload ? "Cancel dataset upload" : "Upload dataset"}
             </button>
 

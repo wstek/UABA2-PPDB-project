@@ -56,8 +56,8 @@ export default function FileSelectList(props) {
     }
 
     return (
-        <div>
-            <input type="file" name="csv_file" className={"bg-purple"} multiple
+        <>
+            <input type="file" name="csv_file" className={"bg-purple green-hover w-100"} multiple
                    onChange={handleFileselect} accept=".csv"/>
 
             {parseProgress &&
@@ -73,6 +73,6 @@ export default function FileSelectList(props) {
                     />
                 </div>
             ))}
-        </div>
+        </>
     )
 }
