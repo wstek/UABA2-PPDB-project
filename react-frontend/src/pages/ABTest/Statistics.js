@@ -21,11 +21,14 @@ const initialValue = {
     active_user_over_time: null,
     purchases_over_time: null,
     click_through_rate_over_time: null,
-    attribution_rate_over_time: null,
+    attribution_rate7_over_time: null,
+    attribution_rate30_over_time: null,
     selected_start_date: null,
     selected_end_date: null,
     not_found: null,
-    abtest_data: null
+    abtest_data: null,
+    arpu_7: null,
+    arpu_30: null
 }
 
 
@@ -45,8 +48,17 @@ function StatisticsInformation() {
             field: 'abtest_data', value: data
         })
     }
-    const setAttributionRate = (data) => {
-        setState({field: 'attribution_rate_over_time', value: data})
+    const setAttributionRate30 = (data) => {
+        setState({field: 'attribution_rate30_over_time', value: data})
+    }
+    const setARPU30 = (data) => {
+        setState({field: 'arpu_30', value: data})
+    }
+    const setARPU7 = (data) => {
+        setState({field: 'arpu_7', value: data})
+    }
+    const setAttributionRate7 = (data) => {
+        setState({field: 'attribution_rate7_over_time', value: data})
     }
     const setSelectedStart = (data) => {
         if (state.selected_start_date !== data) {
@@ -92,8 +104,17 @@ function StatisticsInformation() {
         fetchData(`/api/statistics/abtest/${abtest_id}/CTR_over_time`, setClickThroughRate, abortCont, {}, onNotFound)
     }
 
-    function fetchAttRateOverTime(abortCont) {
-        fetchData(`/api/statistics/abtest/${abtest_id}/AttrRate_over_time`, setAttributionRate, abortCont, {}, onNotFound)
+    function fetchAttRate7OverTime(abortCont) {
+        fetchData(`/api/statistics/abtest/${abtest_id}/AttrRate7_over_time`, setAttributionRate7, abortCont, {}, onNotFound)
+    }
+    function fetchARPU7OverTime(abortCont) {
+        fetchData(`/api/statistics/abtest/${abtest_id}/ARPU7_over_time`, setARPU7, abortCont, {}, onNotFound)
+    }
+    function fetchARPU30OverTime(abortCont) {
+        fetchData(`/api/statistics/abtest/${abtest_id}/ARPU30_over_time`, setARPU30, abortCont, {}, onNotFound)
+    }
+    function fetchAttRate30OverTime(abortCont) {
+        fetchData(`/api/statistics/abtest/${abtest_id}/AttrRate30_over_time`, setAttributionRate30, abortCont, {}, onNotFound)
     }
 
     useEffect(() => {
@@ -105,7 +126,10 @@ function StatisticsInformation() {
             fetchInputActiveUsersOverTime(abortCont);
             fetchInputPurchasesOverTime(abortCont)
             fetchCTROverTime(abortCont)
-            fetchAttRateOverTime(abortCont)
+            fetchAttRate7OverTime(abortCont)
+            fetchAttRate30OverTime(abortCont)
+            fetchARPU7OverTime(abortCont)
+            fetchARPU30OverTime(abortCont)
         }
         return () => abortCont.abort();
     }, [abtest_id],);

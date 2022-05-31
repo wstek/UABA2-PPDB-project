@@ -266,7 +266,13 @@ class DatabaseConnection:
             '''
         return self.engine_execute_and_fetch(query)
 
-    def getAttributionRateOverTime(self, abtest_id: int):
+    def getATR7(self, abtest_id: int):
+        return self.getAttributionRateOverTime(abtest_id, 7)
+
+    def getATR30(self, abtest_id: int):
+        return self.getAttributionRateOverTime(abtest_id, 30)
+
+    def getAttributionRateOverTime(self, abtest_id: int,days):
         query = f'''
         select * from
                 (select algorithm_id, bought_on, to_char(sum(attributions) / (
@@ -274,7 +280,22 @@ class DatabaseConnection:
                                     from purchase natural join customer natural join ab_test
                                     where bought_on between start_date and end_date and abtest_id = {abtest_id}
                                     )::float8,'FM999999999.0000' ) ATR
-                from "attr_abtest_{abtest_id}_30d" natural join algorithm natural join ab_test 
+                from "attr_abtest_{abtest_id}_{days}d" natural join algorithm natural join ab_test 
+                where bought_on between start_date and end_date and abtest_id = {abtest_id}
+                group by algorithm_id, bought_on
+                order by algorithm_id, bought_on) result natural join named_algorithm;
+            '''
+        return self.engine_execute_and_fetch(query)
+
+    def getARPUOverTime(self, abtest_id: int,days):
+        query = f'''
+        select * from
+                (select algorithm_id, bought_on, to_char(sum(attributions*revenue_per_attr) / (
+                                    select count(distinct unique_customer_id)
+                                    from purchase p natural join customer natural join ab_test
+                                    where p.bought_on = bought_on and abtest_id = {abtest_id}
+                                    )::float8,'FM999999999999.99999999999' ) ARPU
+                from "attr_abtest_{abtest_id}_{days}d" natural join algorithm natural join ab_test 
                 where bought_on between start_date and end_date and abtest_id = {abtest_id}
                 group by algorithm_id, bought_on
                 order by algorithm_id, bought_on) result natural join named_algorithm;

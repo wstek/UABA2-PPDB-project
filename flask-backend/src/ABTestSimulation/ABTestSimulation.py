@@ -52,9 +52,10 @@ class ABTestSimulation():
         self.test_id = task_id
 
     def calculateAttributions(self, days: int):
-        print(f'Calculating attributions @{days}D {self.start_time} Time since start:{time.time() - self.start_time}')
+        name = f'attr_abtest_{self.abtest["abtest_id"]}_{days}d'
+        print(f'Calculating attributions @{days}D Time since start:{time.time() - self.start_time}')
         query = f'''
-            create materialized view attr_abtest_{self.abtest["abtest_id"]}_{days}d as (
+            create materialized view {name} as (
             select algorithm_id, bought_on, unique_customer_id, 
                 count(distinct (unique_article_id)) as attributions, 
                 sum(price)/count(distinct (unique_article_id)) revenue_per_attr    
@@ -73,6 +74,8 @@ class ABTestSimulation():
             group by algorithm_id, bought_on, unique_customer_id
                 );
             '''
+        self.database_connection.engine_execute(query)
+        query = f'create index {name}_on_bought_on on {name}(bought_on)'
         self.database_connection.engine_execute(query)
 
     def calculateClickedThrough(self):

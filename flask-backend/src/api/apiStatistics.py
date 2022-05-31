@@ -453,9 +453,14 @@ def attr_rows_to_XFnY(rows):
     return {'graphdata': XFnY}
 
 
-def get_attr_rate_over_time(abtest_id):
+def get_attr_rate_over_time(abtest_id,days):
     # ['Date', 'AttributionRate']
-    attr_rate_rows = database_connection.getAttributionRateOverTime(abtest_id)
+    attr_rate_rows:list
+    if days == 7 or days == 30:
+        attr_rate_rows = database_connection.getAttributionRateOverTime(abtest_id,days=days)
+    else:
+        return {'graphdata': []}
+
     algorithms = database_connection.getAlgorithms(abtest_id)
     dates = database_connection.getAllDates(abtest_id)
     database_connection.getABTestInfo(abtest_id)
@@ -485,6 +490,46 @@ def get_attr_rate_over_time(abtest_id):
         else:
             algorithm_key = str(attr_row.algorithm_id)
         XFnY[date_to_index[attr_row.bought_on]][algorithm_to_index[algorithm_key]] = float(attr_row.atr)
+    return {'graphdata': XFnY}
+
+
+def get_ARPU_over_time(abtest_id, days):
+    # ['Date', 'AttributionRate']
+    arpu_rate_rows:list
+    if days == 7 or days == 30:
+        arpu_rate_rows = database_connection.getARPUOverTime(abtest_id,days=days)
+    else:
+        return {'graphdata': []}
+
+    algorithms = database_connection.getAlgorithms(abtest_id)
+    dates = database_connection.getAllDates(abtest_id)
+    database_connection.getABTestInfo(abtest_id)
+
+    # date_of, algorithm_id, parameter_value
+    XFnY = [["Date"]]
+
+    date_to_index = {}
+    algorithm_to_index = {}
+    if not len(algorithms):
+        return {'graphdata': []}
+    for algorithm in algorithms:
+        if algorithm.algorithm_name:
+            algorithm_key = algorithm.algorithm_name
+        else:
+            algorithm_key = str(algorithm.algorithm_id)
+
+        algorithm_to_index[algorithm_key] = len(XFnY[0])
+        XFnY[0].append(algorithm_key)
+    for index in range(len(dates)):
+        date_to_index[dates[index].date] = index +1
+        XFnY.append([str(dates[index].date)] + [ 0 for i in range(len(XFnY[0])-1)])
+
+    for arpu_row in arpu_rate_rows:
+        if arpu_row.algorithm_name:
+            algorithm_key = arpu_row.algorithm_name
+        else:
+            algorithm_key = str(arpu_row.algorithm_id)
+        XFnY[date_to_index[arpu_row.bought_on]][algorithm_to_index[algorithm_key]] = float(arpu_row.arpu)
     return {'graphdata': XFnY}
 
 
@@ -603,27 +648,26 @@ def get_total_revenue_over_time(abtest_id):
 @api_statistics.route("/api/statistics/abtest/<int:abtest_id>/<stat>")
 def get_stat(abtest_id, stat):
     username = session.get("user_id")
-
     abtest_info = database_connection.getABTestInfo(abtest_id)
     if not abtest_info:
         return {"error": "PageNotFound"}, 404
     if not username or abtest_info.created_by != username:
         return {"error": "unauthorized"}, 401
-
     if stat == "ABTest_information":
         return get_abtest_information(abtest_id)
-
     elif stat == "algorithm_information":
         return get_abtest_algorithm_information(abtest_id)
-
     elif stat == "active_users_over_time":
         return get_active_users_over_time(abtest_id)
-
     elif stat == "purchases_over_time":
         return get_purchases_over_time(abtest_id)
-
-    elif stat == "AttrRate_over_time":
-        return get_attr_rate_over_time(abtest_id)
-
+    elif stat == "AttrRate7_over_time":
+        return get_attr_rate_over_time(abtest_id,7)
+    elif stat == "AttrRate30_over_time":
+        return get_attr_rate_over_time(abtest_id,30)
+    elif stat == "ARPU7_over_time":
+        return get_ARPU_over_time(abtest_id, 7)
+    elif stat == "ARPU30_over_time":
+        return get_ARPU_over_time(abtest_id, 30)
     elif stat == "CTR_over_time":
         return get_CRT_over_time(abtest_id)

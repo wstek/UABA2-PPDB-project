@@ -5,13 +5,13 @@ import {useEffect, useState} from "react";
 function LineChart({XFnY, title, xMin = null, xMax = null, ex_options = {}, formatters = []}) {
     const [options, setOptions] = useState(null);
     const [chartData, setChartData] = useState(null)
-    console.log(xMin,xMax)
     const setDates = () => {
         let a = null;
         if (XFnY && XFnY.graphdata) {
             let sum = 0;
             let total_sum = 0;
             a = structuredClone(XFnY.graphdata)
+            let algorithm_count = a[0].length-1
             let daily_average = a[0].length>=3;
             a[0][0] = {label: a[0][0], type: 'date'}
             if (daily_average){
@@ -30,11 +30,11 @@ function LineChart({XFnY, title, xMin = null, xMax = null, ex_options = {}, form
                 total_sum+=sum
             }
             for (let index = 1; index < a.length; index++) {
-                a[index].push(total_sum/(a.length-1))
+                a[index].push(total_sum/((a.length-1)*(algorithm_count)))
             }
 
         }
-        console.log(a)
+
         setChartData(a)
     };
 
