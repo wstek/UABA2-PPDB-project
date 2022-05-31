@@ -21,3 +21,7 @@ def report_progress_percentage(task_id: str, percentage):
     if percentage == 100:
         sleep(3)
         socketio_extension.emit(channel, percentage)
+
+
+def report_progress_message(task_id: str, message: str):
+    socketio_extension.emit(f"task:{task_id}:progress_message", message)

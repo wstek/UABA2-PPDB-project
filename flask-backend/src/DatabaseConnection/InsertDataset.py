@@ -4,9 +4,10 @@ import os
 import sys
 import time
 from typing import Dict
-import pandas as pd
-from src.socketioEvents.reportProgress import report_progress_steps
 
+import pandas as pd
+
+from src.socketioEvents.reportProgress import report_progress_steps, report_progress_message
 
 # appends parent directory to the python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -119,18 +120,22 @@ class InsertDataset:
         self.database_connection.session_execute("SET LOCAL synchronous_commit = 'off'")
         self.database_connection.session_execute("SET session_replication_role = replica;")
 
+        report_progress_message(self.task_id, "inserting dataset name")
         self.__insert_dataset_name()
 
         # execution time measurement
         self.start_stopwatch()
 
+        report_progress_message(self.task_id, "parsing files")
         self.__parse_csv_files()
 
         # create purchase df from purchase files
+        report_progress_message(self.task_id, "creating purchase dataframe")
         self.__concatenate_purchase_files()
         self.__create_purchasedata_df()
 
         # create meta id dfs from purchase files
+        report_progress_message(self.task_id, "creating purchase metadata dataframes")
         self.__create_meta_id_df_purchase("article", self.df_article_id, self.df_article_id_table_list)
         self.__create_meta_id_df_purchase("customer", self.df_customer_id, self.df_customer_id_table_list)
 
@@ -139,17 +144,22 @@ class InsertDataset:
         self.__create_purchase_metadata_df("customer", self.df_customer_id, self.df_customer_attribute_table_list)
 
         # create meta dfs from metadata files
+        report_progress_message(self.task_id, "creating metadata dataframes")
         self.__create_metadata_df("article", self.df_article_id_table_list, self.df_article_attribute_table_list)
         self.__create_metadata_df("customer", self.df_customer_id_table_list, self.df_customer_attribute_table_list)
 
         # insert all data into database
+        report_progress_message(self.task_id, "inserting article data")
         self.__insert_metadata("article", self.df_article_id_table_list, self.df_article_attribute_table_list)
 
+        report_progress_message(self.task_id, "inserting customer data")
         self.__insert_metadata("customer", self.df_customer_id_table_list, self.df_customer_attribute_table_list)
 
+        report_progress_message(self.task_id, "inserting purchase data")
         self.__insert_purchase_data()
 
         # commit transaction to database
+        report_progress_message(self.task_id, "commiting to database")
         self.database_connection.session.commit()
         Logger.log(f"commited transaction to database in {self.get_stopwatch_time()} seconds")
 
@@ -305,6 +315,8 @@ class InsertDataset:
             current_segment_count += 1
             self.database_connection.session_insert_pd_dataframe(df_segment, table_name)
             Logger.log(f"inserted {table_name} segment {current_segment_count} of {total_segments}")
+            report_progress_message(self.task_id,
+                                    f"inserting {table_name} segment {current_segment_count} of {total_segments}")
 
     def __insert_dataset_name(self):
         query = f"""

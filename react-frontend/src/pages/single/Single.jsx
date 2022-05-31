@@ -10,8 +10,8 @@ const Single = () => {
                     <div className="left">
                         <h1 className="title">User information</h1>
                         <div className="item">
-                            <img src="https://m.media-amazon.com/images/I/81hH5vK-MCL._AC_UY327_FMwebp_QL65_.jpg" alt=""
-                                 className="itemImg"/>
+                            {/*<img src="https://m.media-amazon.com/images/I/81hH5vK-MCL._AC_UY327_FMwebp_QL65_.jpg" alt=""*/}
+                            {/*     className="itemImg"/>*/}
                             <div className="details">
                                 <h1 className="itemTitle">Jane Doe</h1>
                                 <div className="detailItem">

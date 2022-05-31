@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import AttributeList from "./AttributeList";
 import FileSelectList from "./FileSelectList";
-import SelectBox from "./SelectBox";
+import SelectBox from "../../components/SelectBox";
 
 
 export default function PurchaseSelect(props) {

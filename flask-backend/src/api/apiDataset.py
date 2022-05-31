@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 from flask import Blueprint, request, abort, current_app, session
 from werkzeug.utils import secure_filename
@@ -32,10 +33,7 @@ def upload_dataset():
         if file_ext not in Config.UPLOAD_EXTENSIONS and file_ext != '.csv':
             abort(400)
 
-        # todo: error handling (empty filename)
-
         # give file a secure name
-        # todo: maybe a function for path joining?
         new_filename = user_id + '_' + secure_filename(uploaded_file.filename)
         new_filepath = os.path.join(Config.UPLOAD_PATH, new_filename)
 
@@ -46,11 +44,10 @@ def upload_dataset():
         filenames[original_filename] = str(new_filepath)
 
     # start the dataset insert background process
-    print(json.dumps(filenames))
-    print(json.dumps(column_select_data))
-    task = insert_dataset.delay(filenames, column_select_data, user_id=user_id)
+    task = insert_dataset.delay(filenames, column_select_data, user_id=user_id, meta=column_select_data["dataset_name"])
 
-    return {"task_id": task.id}, 202
+    return {"id": task.id, "name": "insert_dataset", "time_start": time.time(), "progress": 0, "progress_message": "",
+            "meta": column_select_data["dataset_name"]}, 202
 
 
 @api_dataset.route("/api/get_dataset_information/<dataset_name>")

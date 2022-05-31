@@ -17,7 +17,6 @@ import ChangeInfo from "./pages/Account/ChangeInfo";
 import Home from "./pages/Home";
 import UserList from "./pages/list/List"
 import Single from './pages/single/Single';
-import Stats from './pages/stats/Stats';
 import TaskTest from "./pages/BackgroundTasks/TaskTest";
 import TaskProgress from "./pages/BackgroundTasks/TaskProgress";
 import DatasetPage from "./pages/Dataset";
@@ -35,8 +34,14 @@ function App() {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [socket, setSocket] = useState(null);
-    const [tasks, setTasks] = useState([]); // task: {id, name, time_start, progress}
+    const [tasks, setTasks] = useState([]); // task: {id, name, time_start, meta, progress, progress_message}
     const notify = (message) => toast.info(message);    // react-toastify
+
+    useEffect(() => {
+        var newDate = new Date();
+        newDate.setTime(1653960194 * 1000).toLocaleString();
+        console.log(newDate.toLocaleString());
+    }, [])
 
     function handleAddTask(task) {
         setTasks([...tasks, task]);
@@ -45,16 +50,23 @@ function App() {
 
     function handleAddTaskProgressEvent(task) {
         const event = "task:" + task.id + ":progress";
+        const event2 = "task:" + task.id + ":progress_message";
 
         socket.on(event, (data) => {
             setTasks(oldTasks => oldTasks.map(list_task => list_task.id === task.id ?
                 {...list_task, progress: data} : list_task))
 
             if (data === 100) {
-                notify(task.name + " has finished!")
+                notify(task.name + " " + task.meta + " has finished!")
                 handleRemoveTask(task);
             }
         })
+
+        socket.on(event2, (data) => {
+            setTasks(oldTasks => oldTasks.map(list_task => list_task.id === task.id ?
+                {...list_task, progress_message: data} : list_task))
+        })
+
     }
 
     function handleRemoveTask(task) {
@@ -80,7 +92,7 @@ function App() {
                         {...list_task, progress: data} : list_task))
 
                     if (data === 100) {
-                        notify(task.name + " has finished!")
+                        notify(task.name + " " + task.meta + " has finished!")
                         handleRemoveTask(task);
                     }
                 })
@@ -184,8 +196,6 @@ function App() {
                                                         exact path={"/ABTest/:abtest_id/Customer/:customer_id"}/>
                                         <ProtectedRoute component={ItemList}
                                                         exact path={"/ABTest/:abtest_id/Item/:item_id"}/>
-                                        <ProtectedRoute component={Stats}
-                                                        exact path={"/stats"}/>
                                         <ProtectedRoute component={Single}
                                                         exact path={"/users/:userId"}/>
                                         <ProtectedRoute component={Single}

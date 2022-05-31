@@ -1,12 +1,11 @@
 import json
+import time
 
 from flask import Blueprint, jsonify
 from flask import session, request
 
 from src.celeryTasks.tasks import dummy_task, dummy_task2, dummy_task3
 from src.extensions import celery_extension, redis_extension
-import time
-from src.utils.Logger import Logger
 
 api_task = Blueprint("api_task", __name__)
 
@@ -19,16 +18,17 @@ def run_task():
     name = ""
 
     if data["type"] == 1:
-        task = dummy_task.delay(data["duration"], user_id=session["user_id"])
+        task = dummy_task.delay(data["duration"], user_id=session["user_id"], meta="dummy")
         name = "dummy_task"
     elif data["type"] == 2:
-        task = dummy_task2.delay(data["duration"], user_id=session["user_id"])
+        task = dummy_task2.delay(data["duration"], user_id=session["user_id"], meta="dummy")
         name = "insert_dataset"
     elif data["type"] == 3:
-        task = dummy_task3.delay(data["duration"], user_id=session["user_id"])
+        task = dummy_task3.delay(data["duration"], user_id=session["user_id"], meta="dummy")
         name = "simulation"
 
-    return jsonify({"id": task.id, "name": name, "time_start": time.time(), "progress": 0}), 202
+    return jsonify({"id": task.id, "name": name, "time_start": time.time(), "progress": 0, "progress_message": "",
+                    "meta": "dummy"}), 202
 
 
 @api_task.route("/api/get_tasks")
@@ -43,11 +43,16 @@ def get_tasks():
         if "user_id" not in active_task["kwargs"] or user_id != active_task["kwargs"]["user_id"]:
             continue
 
+        meta = ""
+        if "meta" in active_task["kwargs"]:
+            meta = active_task["kwargs"]["meta"]
+
         user_tasks.append({
             "id": active_task["id"],
             "name": active_task["name"],
             "time_start": active_task["time_start"],
-            "progress": redis_extension.get(active_task["id"])
+            "progress": redis_extension.get(active_task["id"]),
+            "meta": meta
         })
 
     # sort user_tasks on start time

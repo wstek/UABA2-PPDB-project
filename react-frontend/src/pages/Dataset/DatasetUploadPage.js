@@ -11,6 +11,7 @@ export default function DatasetUploadPage(props) {
 
     return (
         <div className="DatasetUploadPage" style={{textAlign: "center"}}>
+            <h2>Dataset upload processes</h2>
             <TaskList
                 taskName={"insert_dataset"}
             />
@@ -19,7 +20,7 @@ export default function DatasetUploadPage(props) {
 
             <button onClick={() => {
                 setShowDatasetUpload(!showDatasetUpload)
-            }}>
+            }} className={"button-purple"}>
                 {showDatasetUpload ? "Cancel dataset upload" : "Upload dataset"}
             </button>
 
