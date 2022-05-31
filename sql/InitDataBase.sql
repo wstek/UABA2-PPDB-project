@@ -151,6 +151,7 @@ CREATE TABLE IF NOT EXISTS "statistics"
 CREATE TABLE IF NOT EXISTS "customer_specific_statistics"
 (
     "unique_customer_id" nat_int NOT NULL,
+    "clicked_through" bool NOT NULL default false,
 
     "statistics_id"      nat_int NOT NULL,
     foreign key (statistics_id) references statistics (statistics_id) on update cascade on delete cascade,
@@ -178,3 +179,12 @@ CREATE TABLE IF NOT EXISTS "dynamic_stepsize_var"
     parameter_value varchar,
     PRIMARY KEY (statistics_id, parameter_name)
 );
+
+create view named_algorithm(algorithm_id, abtest_id, algorithm_type, algorithm_name) as
+SELECT algorithm.algorithm_id,
+       algorithm.abtest_id,
+       algorithm.algorithm_type,
+       parameter.value AS algorithm_name
+FROM parameter
+         RIGHT JOIN algorithm ON parameter.algorithm_id::integer = algorithm.algorithm_id AND
+                                 parameter.parameter_name::text = 'AlgorithmName'::text;
