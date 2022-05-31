@@ -5,7 +5,7 @@ export default function InputSelector({
                                           inputs, header = null, onChange, onClick = () => {
     }, selected_input = 0
                                       }) {
-    const [personal_idtests_id_components, setPersonalABTestsElements] = useState([])
+    const [input_components, setInputComponents] = useState([])
     const _selected_input = useMemo(() => {
         if (inputs && inputs.includes(selected_input)){
             return selected_input
@@ -24,7 +24,7 @@ export default function InputSelector({
                 )
             }
         }
-        setPersonalABTestsElements(temp_personal_idtests_id_components)
+        setInputComponents(temp_personal_idtests_id_components)
     }
 
     useEffect(personalABTests, [inputs],);
@@ -41,7 +41,7 @@ export default function InputSelector({
                     className="custom-select bg-purple form-select-lg"
                     onChange={handleChange}>
                 <option disabled value={0}> -- select an option --</option>
-                {personal_idtests_id_components.length && personal_idtests_id_components}
+                {input_components.length && input_components}
             </select>
         </div>
     )
