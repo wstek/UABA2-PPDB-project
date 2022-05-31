@@ -198,9 +198,6 @@ class ABTestSimulation():
         start_active_users = 0
         start_active_users_next = 0
 
-        statistics_id = self.database_connection.session.execute(
-            f'SELECT last_value FROM statistics_statistics_id_seq').fetchone()[0]
-
         # SIMULATION LOOP MAIN
         for n_day in range(0, int(dayz) + 1, int(self.abtest["stepsize"])):
             print(f'Day: {n_day}/{dayz} Time since start:{time.time() - self.start_time}')
@@ -224,7 +221,9 @@ class ABTestSimulation():
                     "VALUES(:datetime, :algorithm_id)",
                     {"datetime": current_date, "algorithm_id": self.abtest["algorithms"][algo]["id"]})
 
-                statistics_id += 1
+                statistics_id = self.database_connection.session.execute(
+                    f'SELECT last_value FROM statistics_statistics_id_seq').fetchone()[0]
+                self.database_connection.session.commit()
 
                 idx = int(self.abtest["algorithms"][algo]["id"]) - \
                       int(self.abtest["algorithms"][0]["id"])
