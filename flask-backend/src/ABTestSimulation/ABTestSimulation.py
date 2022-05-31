@@ -287,7 +287,7 @@ class ABTestSimulation():
                         for cc in range(len(interactions)):
                             if interactions[cc][0] in user2purchasedItems:
                                 if interactions[cc][0] in user_histories:
-                                    user_histories[interactions[cc][0]].append([interactions[cc][1]])
+                                    user_histories[interactions[cc][0]].append(interactions[cc][1])
                                 else:
                                     user_histories[interactions[cc][0]] = [interactions[cc][1]]
 
