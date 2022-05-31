@@ -53,8 +53,8 @@ function ABTestOverview({abtest_information}) {
 ABTestOverview.propTypes = {input_algorithms: PropTypes.any};
 
 function GeneralABTestInformation({abtest_data, input_algorithms}) {
-    return <div className="row text-center align-content-center justify-content-center">
-        <div className={"col-auto my-auto"}>
+    return <>
+        <div className={"col-auto"}>
             <h1>ABTest Parameters</h1>
             <ABTestOverview abtest_information={abtest_data}/>
         </div>
@@ -62,7 +62,7 @@ function GeneralABTestInformation({abtest_data, input_algorithms}) {
             <h1>Used algorithms information</h1>
             <AlgorithmsOverview input_algorithms={input_algorithms}/>
         </div>
-    </div>;
+    </>;
 }
 
 function ABTestCharts({graphdata}) {
@@ -89,13 +89,13 @@ function ABTestCharts({graphdata}) {
                            xMax={end_date_index}
                            XFnY={click_through_rate_over_time} ex_options={{
                     vAxis: {
-                        format: '#.######%'
+                        format: '   ##.######%'
                     }
 
                 }}
                            formatters={[{
                                type: "NumberFormat", column: 1, options: {
-                                   pattern: '#.######%',
+                                   pattern: '  ##.######%',
                                }
                            }]}
                 />
@@ -122,7 +122,6 @@ function ABTestCharts({graphdata}) {
 
 function TopK() {
     const {abtest_id, start_date, end_date, start_date_index, end_date_index} = useContext(ABTestContext);
-    console.log(start_date, end_date)
     return (<>
         <div className="col-auto " style={{minHeight: "400px"}}>
             <TopKPerAlgorithmTable abtest_id={abtest_id}
@@ -153,21 +152,6 @@ function StatisticsInformation() {
         })
     }
     const setAttributionRate = (data) => {
-
-        // if (data) {
-        //     console.log(data)
-        //     data.graphdata[0][0]= { type:'date' , Date: data.graphdata[0][0]}
-        //     // for (let ent in data.graphdata) {
-        //     //
-        //     //     let d = new Date(data.graphdata[ent][0])
-        //     //     if ( !isNaN(d) ) {
-        //     //
-        //     //         data.graphdata[ent][0] = d
-        //     //     }
-        //     //     data.graphdata[ent].type = 'date'
-        //     // }
-        // }
-        // console.log(data)
         setState({field: 'attribution_rate_over_time', value: data})
     }
     const setSelectedStart = (data) => {
@@ -250,7 +234,7 @@ function StatisticsInformation() {
     }}>
         <DateSlider dates={state.abtest_data && state.abtest_data.dates} style={{minHeight: "200px"}}/>
 
-        <div className="row text-center align-content-center justify-content-center mx-auto mt-3">
+        <div className="row text-center align-content-center justify-content-center mx-auto mt-5">
 
             <Switch>
                 <Route exact path="/Statistics/ABTest/:abtest_id/GeneralInfo"
@@ -330,8 +314,8 @@ function Statistics() {
     }
 
     return (<div className="container-fluid g-0">
-        <div className="row text-center align-items-center">
-            <div className="col">
+        <div className="row justify-content-center mb-3 text-center center align-items-center">
+            <div className="col-auto">
 
                 <InputSelector inputs={personal_abtests}
                                onClick={fetchCurrentUserABTestIDs}
@@ -341,7 +325,7 @@ function Statistics() {
                 />
                 <Route path="/Statistics/ABTest/:abtest_id/" children={<DeleteABTestButton/>}/>
             </div>
-            {abtest_id && <div className="col">
+            {abtest_id && <div className="col-auto">
                 <InputTabs selected_input={statistics} inputs={["GeneralInfo", "Graphs", "TopK", "Customers"]}
                            header={"Select View"}
                            linkTo={(selected_stat) => `/Statistics/ABTest/${abtest_id}/${selected_stat}`}/>

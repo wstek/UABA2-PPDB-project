@@ -16,7 +16,7 @@ function LineChart({XFnY, title, xMin = 0, xMax = 10, ex_options ={}, formatters
                 hAxis: {
                     viewWindow: {
                         min: xMin,
-                        max: xMax
+                        max: xMax + 1
                     },
                 },
 
@@ -28,8 +28,6 @@ function LineChart({XFnY, title, xMin = 0, xMax = 10, ex_options ={}, formatters
 
     if (!XFnY) return <> <h3>{title}</h3><PurpleSpinner/></>
     else if (XFnY.graphdata.length <= 1) return <><h3>{title}</h3><h5>No Data Points Provided</h5></>
-
-    console.log(formatters)
     return (
         <>
             {XFnY && XFnY.graphdata.length > 1 && <Chart

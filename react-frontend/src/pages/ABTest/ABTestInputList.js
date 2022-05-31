@@ -93,7 +93,7 @@ const ABTestInputList = ({abs_algorithms}) => {
         for (let i = 0; i < con_algorithms.length; i++) {
             const algorithmParams = {name: con_algorithms[i].name, parameters: {}};
             for (let k = 0; k < con_algorithms[i].parameters.length; k++) {
-                console.log(con_algorithms[i].parameters[k] + con_algorithms[i].id)
+                // console.log(con_algorithms[i].parameters[k] + con_algorithms[i].id)
                 const val = document.getElementById(con_algorithms[i].parameters[k] + con_algorithms[i].id).value;
                 if (!val) {
                     window.alert("Please fill in all the fields");
@@ -117,8 +117,8 @@ const ABTestInputList = ({abs_algorithms}) => {
         } else {
             const abtest_setup = {start, end, topk, stepsize, dataset_name, algorithms};
             const jdata = JSON.stringify(abtest_setup);
-            console.log(algorithms)
-            console.log(jdata)
+            // console.log(algorithms)
+            // console.log(jdata)
             console.log("trying to fetch...")
 
             await fetch('/api/start_simulation', {

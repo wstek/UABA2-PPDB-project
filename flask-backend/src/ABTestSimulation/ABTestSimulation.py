@@ -7,6 +7,7 @@ import pandas as pd
 from psycopg2.extensions import register_adapter, AsIs
 
 from src.ABTestSimulation.Algorithms.iknn import ItemKNNIterative
+from src.DatabaseConnection.DatabaseConnection import DatabaseConnection
 
 
 def addapt_numpy_float64(numpy_float64):
@@ -39,13 +40,66 @@ def generateRandomTopK(listx, items):
 
 
 class ABTestSimulation(threading.Thread):
-    def __init__(self, database_connection, abtest):
+    def calculateAttributions(self, days: int):
+        print(f'Calculating attributions @{days}D {self.start_time} Time since start:{time.time()-self.start_time}' )
+        query = f'''
+            create materialized view attr_abtest_{self.abtest["abtest_id"]}_{days}d as (
+            select algorithm_id, bought_on, unique_customer_id, 
+                count(distinct (unique_article_id)) as attributions, 
+                sum(price)/count(distinct (unique_article_id)) revenue_per_attr    
+            from (select abtest_id, start_date, end_date
+                      from ab_test
+                      where abtest_id = {self.abtest["abtest_id"]}) ab_test
+                         natural join algorithm
+                         natural join statistics
+                         natural join recommendation
+                         natural join customer
+                         natural join article
+                         join purchase p on article.article_id = p.article_id and article.dataset_name = p.dataset_name and
+                                            customer.customer_id = p.customer_id and customer.dataset_name = p.dataset_name and
+                                            date_of between bought_on - interval '30 days' and bought_on
+            where bought_on between start_date and end_date
+            group by algorithm_id, bought_on, unique_customer_id
+                );
+            '''
+        self.database_connection.engine_execute(query)
+
+    def calculateClickedThrough(self):
+        print(f'Calculating ClickedThrough {self.start_time} Time since start:{time.time()-self.start_time}' )
+        query = f'''
+        update customer_specific_statistics css
+            set clicked_through = ctr.clicked_through
+        from (select algorithm_id, statistics_id, unique_customer_id, 
+                case when count(distinct (unique_article_id)) > 0 then true else false end as clicked_through
+            from (select abtest_id, start_date, end_date,stepsize
+                from ab_test where abtest_id = {self.abtest["abtest_id"]}) ab_test
+         natural join algorithm
+         natural join statistics
+         natural join recommendation
+         natural join customer
+         natural join article
+         join purchase p on article.article_id = p.article_id and article.dataset_name = p.dataset_name and
+                            customer.customer_id = p.customer_id and customer.dataset_name = p.dataset_name and
+                            bought_on between date_of and date_of + stepsize
+        where bought_on between start_date and end_date
+        group by algorithm_id, statistics_id, unique_customer_id ) ctr
+        where ctr.unique_customer_id = css.unique_customer_id and css.statistics_id = ctr.statistics_id
+        ;        
+        '''
+        self.database_connection.engine_execute(query)
+
+    def collectStatistics(self):
+        self.calculateAttributions(7)
+        self.calculateAttributions(30)
+        self.calculateClickedThrough()
+
+    def __init__(self, database_connection: DatabaseConnection, abtest):
         super().__init__()
         # self.sse = sse
         self.frontend_data = []
         self.done = False
         self.abtest = abtest
-        self.database_connection: database_connection = database_connection
+        self.database_connection: DatabaseConnection = database_connection
 
         self.prev_progress = 0
         self.current_progress = 0
@@ -79,6 +133,7 @@ class ABTestSimulation(threading.Thread):
         self.database_connection.session.commit()
 
     def run(self):
+        self.start_time = time.time()
         # Start Date
         dt_start = pd.to_datetime(self.abtest["start"], format='%Y-%m-%d')
         # Current Date = Start Date
@@ -99,7 +154,8 @@ class ABTestSimulation(threading.Thread):
         top_k_over_time_statistics = {'time': []}
         active_users_over_time_statistics = {'time': [], 'n_users': []}
         data_per_user_over_time_statistics = {'time': [],
-                                              'customer_id': {customer_id.unique_customer_id: [] for customer_id in all_customer_ids}}
+                                              'customer_id': {customer_id.unique_customer_id: [] for customer_id in
+                                                              all_customer_ids}}
 
         for i in range(len(self.abtest["algorithms"])):
             idx = int(self.abtest["algorithms"][i]["id"]) - \
@@ -130,7 +186,7 @@ class ABTestSimulation(threading.Thread):
 
         # SIMULATION LOOP MAIN
         for n_day in range(0, int(dayz) + 1, int(self.abtest["stepsize"])):
-            print(str(n_day) + "/" + str(int(dayz)))
+            print(f'Day: {n_day}/{dayz} Time since start:{time.time()-self.start_time}')
             if n_day:
                 dt_current_date = dt_current_date + \
                                   pd.DateOffset(days=int(self.abtest["stepsize"]))
@@ -649,5 +705,8 @@ class ABTestSimulation(threading.Thread):
         self.done = True
         # self.sse.publish(100, type='simulation_progress')
         self.prev_progress = 0
+
+        self.collectStatistics()
+
         self.current_progress = 100
         return

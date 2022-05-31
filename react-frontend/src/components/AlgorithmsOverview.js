@@ -24,7 +24,6 @@ function computeColumns(input_algorithms) {
         }
     ]
     let entry
-    console.log(input_algorithms)
     for (const [input_algorithm_key, input_algorithm_object] of Object.entries(input_algorithms)) {
         entry = {"algorithm-id": input_algorithm_key}
         for (const [field_key, field_value] of Object.entries(input_algorithm_object)) {

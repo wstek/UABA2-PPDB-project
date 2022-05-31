@@ -16,6 +16,8 @@ import TimelineIcon from '@mui/icons-material/Timeline';
 import logOut from '../../utils/logOut'
 import {UserContext} from '../../utils/UserContext'
 import {useContext} from "react";
+import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 
 const Sidebar = () => {
 // const queryParams = new URLSearchParams(window.location.search);
@@ -85,6 +87,26 @@ const Sidebar = () => {
                                     <span
                                         className="d-none d-sm-inline"> Graphs</span></Link>
                             </li>
+                            <li className="w-100">
+                                <Link to={() => {
+                                    if (abtest_id)
+                                        return `/Statistics/ABTest/${abtest_id}/TopK`
+                                    return `/Statistics/`
+                                }
+                                } className="nav-link px-4"> <MilitaryTechIcon/>
+                                    <span
+                                        className="d-none d-sm-inline"> TopK</span></Link>
+                            </li>
+                            <li className="w-100">
+                                <Link to={() => {
+                                    if (abtest_id)
+                                        return `/Statistics/ABTest/${abtest_id}/Customers`
+                                    return `/Statistics/`
+                                }
+                                } className="nav-link px-4"> <PersonSearchIcon/>
+                                    <span
+                                        className="d-none d-sm-inline"> Customers</span></Link>
+                            </li>
                         </ul>
                     </ul>
 
@@ -117,9 +139,9 @@ const Sidebar = () => {
                 </Link>
                 <ul className="dropdown-menu dropdown-menu-dark text-small shadow"
                     aria-labelledby="dropdownUser1">
-                    <li><Link className="dropdown-item" to="#">New project...</Link></li>
-                    <li><Link className="dropdown-item" to="#">Settings</Link></li>
-                    <li><Link className="dropdown-item" to="#">Profile</Link></li>
+                    <li><Link className="dropdown-item" to="/ABTest/setup">New AB-Test...</Link></li>
+                    {/*<li><Link className="dropdown-item" to="#">Settings</Link></li>*/}
+                    <li><Link className="dropdown-item" to="/Account">Profile</Link></li>
                     <li>
                         <hr className="dropdown-divider"/>
                     </li>

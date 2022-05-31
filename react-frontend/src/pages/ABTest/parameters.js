@@ -23,7 +23,6 @@ const BoolField = (id, label) => {
 };
 
 const TextField = (id, label,defaultname) => {
-    console.log(id)
     return (
         <div key={id} className="row text-center justify-content-center align-items-center mb-1">
             <div className="col-7 text-center">
