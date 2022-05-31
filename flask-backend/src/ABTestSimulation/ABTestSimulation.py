@@ -91,7 +91,7 @@ class ABTestSimulation():
          natural join article
          join purchase p on article.article_id = p.article_id and article.dataset_name = p.dataset_name and
                             customer.customer_id = p.customer_id and customer.dataset_name = p.dataset_name and
-                            bought_on between date_of and date_of + stepsize::integer
+                            bought_on between date_of and date_of + stepsize
         where bought_on between start_date and end_date
         group by algorithm_id, statistics_id, unique_customer_id ) ctr
         where ctr.unique_customer_id = css.unique_customer_id and css.statistics_id = ctr.statistics_id
@@ -361,10 +361,6 @@ class ABTestSimulation():
                             0]):
                             lylist.append([active_users[local_start_active_users][1], statistics_id])
                             for vv in range(k):
-                                # print(active_users[local_start_active_users])
-                                c = active_users[local_start_active_users]
-                                b = active_users[local_start_active_users][1]
-                                a = top_k_items[vv]
                                 lxlist.append(
                                     [vv + 1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
                             local_start_active_users += 1
@@ -552,3 +548,4 @@ class ABTestSimulation():
         self.current_progress = 100
         report_progress_percentage(self.test_id, 100)
         return
+
