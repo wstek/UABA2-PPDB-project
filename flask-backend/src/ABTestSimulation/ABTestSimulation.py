@@ -8,7 +8,7 @@ from psycopg2.extensions import register_adapter, AsIs
 from src.ABTestSimulation.Algorithms.iknn import ItemKNNIterative
 from src.DatabaseConnection.DatabaseConnection import DatabaseConnection
 
-from src.socketioEvents.reportProgress import report_progress_percentage
+from src.socketioEvents.reportProgress import report_progress_steps, report_progress_percentage
 
 
 def addapt_numpy_float64(numpy_float64):
@@ -204,6 +204,7 @@ class ABTestSimulation():
         # SIMULATION LOOP MAIN
         for n_day in range(0, int(dayz) + 1, int(self.abtest["stepsize"])):
             print(f'Day: {n_day}/{dayz} Time since start:{time.time() - self.start_time}')
+            report_progress_steps(self.test_id, n_day, int(dayz))
 
             start_active_users = start_active_users_next
 
@@ -329,7 +330,7 @@ class ABTestSimulation():
                         dynamic_info_algorithms[idx]["KNN"].train(
                             interactions, unique_item_ids=all_unique_item_ids)
 
-                
+
                 elif self.abtest["algorithms"][algo]["name"] == "Recency":
 
                     if n_day:
@@ -531,7 +532,7 @@ class ABTestSimulation():
 
                         # train Popularity algorithm to initialize it:
                         top_k = self.database_connection.session.execute(
-                                f"SELECT unique_article_id, count(*) times_bought FROM purchase natural join article WHERE bought_on BETWEEN ''{current_date}'::date - interval '7 days' AND '{current_date}'::date AND dataset_name = '{dataset_name}' GROUP BY unique_article_id ORDER BY times_bought DESC LIMIT {k}").fetchall()
+                                f'''SELECT unique_article_id, count(*) times_bought FROM purchase natural join article WHERE bought_on BETWEEN ''{current_date}'::date - interval '{7} days' AND '{current_date}'::date AND dataset_name = '{dataset_name}' GROUP BY unique_article_id ORDER BY times_bought DESC LIMIT {k}''').fetchall()
 
                         top_k_items = []
                         for i in range(len(top_k)):
@@ -540,12 +541,15 @@ class ABTestSimulation():
 
                 self.prev_progress = self.current_progress
                 self.current_progress = round(n_day / float(dayz), 2) * 100.0
-                report_progress_percentage(self.test_id, self.current_progress)
 
         self.done = True
         self.prev_progress = 0
+
+        self.database_connection.session.commit()
+
         self.collectStatistics()
         self.current_progress = 100
         report_progress_percentage(self.test_id, 100)
+
         return
 
