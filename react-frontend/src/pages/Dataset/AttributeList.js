@@ -29,35 +29,35 @@ export default function AttributeList(props) {
 
     return (
         <>
-                            <div className={"row justify-content-center align-items-center"}>
+            <div className={"row justify-content-center align-items-center"}>
                 <div className={"col-auto  p-1"}>
 
-            <button onClick={handleAddAttribute} className={"button-purple green-hover"}>
-                add attribute
-            </button>
-                            </div>
-                            </div>
-            {Object.keys(props.attributes).map((attributeId) => (
-                <div className={"row justify-content-center align-items-center pb-2"}>
-                <div className={"col-auto p-1"}>
-                    <Attribute
-                        key={attributeId}
-                        id={attributeId}
-                        attribute={props.attributes[attributeId]}
-                        onChange={handleAttributeChange}
-                        columnNames={props.columnNames ? props.columnNames : []}
-                    />
-                </div>
-                <div className={"col-auto  p-1"}>
-
-                    <button onClick={() => {
-                        removeAttribute(attributeId)
-                    }} className={"button-purple red-hover"}>
-                        remove
+                    <button onClick={handleAddAttribute} className={"button-purple green-hover"}>
+                        add attribute
                     </button>
                 </div>
+            </div>
+            {Object.keys(props.attributes).map((attributeId) => (
+                <div className={"row justify-content-center align-items-center pb-2"}>
+                    <div className={"col-auto p-1"}>
+                        <Attribute
+                            key={attributeId}
+                            id={attributeId}
+                            attribute={props.attributes[attributeId]}
+                            onChange={handleAttributeChange}
+                            columnNames={props.columnNames ? props.columnNames : []}
+                        />
+                    </div>
+                    <div className={"col-auto  p-1"}>
+
+                        <button onClick={() => {
+                            removeAttribute(attributeId)
+                        }} className={"button-purple red-hover"}>
+                            remove
+                        </button>
+                    </div>
                 </div>
-                ))}
+            ))}
 
         </>
     )
