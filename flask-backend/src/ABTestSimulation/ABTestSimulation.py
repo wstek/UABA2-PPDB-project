@@ -10,6 +10,7 @@ from src.DatabaseConnection.DatabaseConnection import DatabaseConnection
 
 from src.socketioEvents.reportProgress import report_progress_steps, report_progress_percentage
 
+#loop over de active users per step
 
 def addapt_numpy_float64(numpy_float64):
     return AsIs(numpy_float64)
@@ -188,7 +189,8 @@ class ABTestSimulation():
                     "prev_top_k": []}
 
         active_users = self.database_connection.session.execute(
-            f"select distinct bought_on, unique_customer_id from purchase natural join customer where bought_on between '{start_date}' and '{end_date}' order by bought_on,unique_customer_id").fetchall()  # end_date not included?
+            f"select distinct bought_on, unique_customer_id from purchase natural join customer where bought_on between \
+            '{start_date}' and '{end_date}' order by bought_on,unique_customer_id").fetchall()  # end_date not included?
 
         purchases = self.database_connection.session.execute(
             f"select distinct customer_id, article_id, unique_customer_id, unique_article_id, bought_on from purchase natural join customer natural join article where dataset_name = '{dataset_name}' and  bought_on between '{start_date}' and '{end_date}' order by bought_on, unique_customer_id").fetchall()  # end_date not included?
@@ -383,7 +385,6 @@ class ABTestSimulation():
                             top_k_items = []
                             for i in range(len(top_k)):
                                 top_k_items.append(top_k[i][0])
-                            # top_k_over_time_statistics[idx].append(top_k)
                             dynamic_info_algorithms[idx]["dt_start_RetrainInterval"] = dt_current_date - pd.DateOffset(
                                 days=(retrain - int(
                                     self.abtest["algorithms"][algo]["parameters"]['RetrainInterval']) - 1))
@@ -502,36 +503,36 @@ class ABTestSimulation():
                         else:
                             top_k_items = dynamic_info_algorithms[idx]["prev_top_k"]
 
-                            lxlist = []
-                            lylist = []
+                        lxlist = []
+                        lylist = []
 
-                            local_start_active_users = start_active_users
+                        local_start_active_users = start_active_users
 
-                            while (local_start_active_users + 1 < active_users_length) and (
-                                    active_users[local_start_active_users + 1][0] ==
-                                    active_users[local_start_active_users][0]):
-                                lylist.append([active_users[local_start_active_users][1], statistics_id])
-                                for vv in range(k):
-                                    lxlist.append([vv + 1, active_users[local_start_active_users][1], statistics_id,
-                                                   top_k_items[vv]])
-                                local_start_active_users += 1
+                        while (local_start_active_users + 1 < active_users_length) and (
+                                active_users[local_start_active_users + 1][0] ==
+                                active_users[local_start_active_users][0]):
                             lylist.append([active_users[local_start_active_users][1], statistics_id])
                             for vv in range(k):
-                                lxlist.append(
-                                    [vv + 1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
+                                lxlist.append([vv + 1, active_users[local_start_active_users][1], statistics_id,
+                                                top_k_items[vv]])
                             local_start_active_users += 1
-                            start_active_users_next = local_start_active_users
+                        lylist.append([active_users[local_start_active_users][1], statistics_id])
+                        for vv in range(k):
+                            lxlist.append(
+                                [vv + 1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
+                        local_start_active_users += 1
+                        start_active_users_next = local_start_active_users
 
-                            dfy = pd.DataFrame(lylist)
-                            dfx = pd.DataFrame(lxlist)
+                        dfy = pd.DataFrame(lylist)
+                        dfx = pd.DataFrame(lxlist)
 
-                            dfy.columns = ['unique_customer_id', 'statistics_id']
-                            dfx.columns = ['recommendation_id', 'unique_customer_id', 'statistics_id', 'unique_article_id']
+                        dfy.columns = ['unique_customer_id', 'statistics_id']
+                        dfx.columns = ['recommendation_id', 'unique_customer_id', 'statistics_id', 'unique_article_id']
 
-                            self.database_connection.session_insert_pd_dataframe(dfy, 'customer_specific_statistics')
-                            self.database_connection.session_insert_pd_dataframe(dfx, 'recommendation')
+                        self.database_connection.session_insert_pd_dataframe(dfy, 'customer_specific_statistics')
+                        self.database_connection.session_insert_pd_dataframe(dfx, 'recommendation')
 
-                            self.database_connection.session.commit()
+                        self.database_connection.session.commit()
 
                     else:
                         numz = int(self.abtest["algorithms"][algo]["parameters"]["LookBackWindow"])
