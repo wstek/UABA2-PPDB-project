@@ -7,7 +7,6 @@ import pandas as pd
 from psycopg2.extensions import register_adapter, AsIs
 
 import datetime
-from src.socketioEvents.reportProgress import report_progress_steps, report_progress_message
 
 from src.ABTestSimulation.Algorithms.iknn import ItemKNNIterative
 from src.DatabaseConnection.DatabaseConnection import DatabaseConnection
@@ -42,19 +41,7 @@ def generateRandomTopK(listx, items):
     return random.sample(listx, items)
 
 
-class ABTestSimulation:
-    def __init__(self, database_connection: DatabaseConnection, abtest, task_id):
-        self.task_id = task_id
-        self.frontend_data = []
-        self.done = False
-        self.abtest = abtest
-        self.database_connection: DatabaseConnection = database_connection
-
-        print(task_id)
-
-        self.prev_progress = 0
-        self.current_progress = 0
-
+class ABTestSimulation(threading.Thread):
     def calculateAttributions(self, days: int):
         print(f'Calculating attributions @{days}D {self.start_time} Time since start:{time.time()-self.start_time}' )
         query = f'''
@@ -107,6 +94,17 @@ class ABTestSimulation:
         self.calculateAttributions(7)
         self.calculateAttributions(30)
         self.calculateClickedThrough()
+
+    def __init__(self, database_connection: DatabaseConnection, abtest):
+        super().__init__()
+        # self.sse = sse
+        self.frontend_data = []
+        self.done = False
+        self.abtest = abtest
+        self.database_connection: DatabaseConnection = database_connection
+
+        self.prev_progress = 0
+        self.current_progress = 0
 
     def insertCustomer(self, unique_customer_id, statistics_id):
         self.database_connection.session.execute(
@@ -203,6 +201,7 @@ class ABTestSimulation:
 
         start_purchases = 0
         start_active_users = 0
+        start_active_users_next = 0
 
         # print(type(purchases[0][4]))
 
@@ -213,7 +212,7 @@ class ABTestSimulation:
         for n_day in range(0, int(dayz) + 1, int(self.abtest["stepsize"])):
             print(f'Day: {n_day}/{dayz} Time since start:{time.time()-self.start_time}')
 
-            report_progress_steps(self.task_id, n_day, int(dayz))
+            start_active_users = start_active_users_next
 
             if n_day:
                 dt_current_date = dt_current_date + \
@@ -477,83 +476,57 @@ class ABTestSimulation:
                         else:
                             top_k_items = dynamic_info_algorithms[idx]["prev_top_k"]
 
-                        # D_prev_recommendations[-1][idx] = top_k_items
+                        lxlist = []
+                        lylist = []
 
-                        # clicks = 0
-                        # recommended_purchases = 0
-                        dfx = pd.DataFrame([])
-                        while (start_active_users+1 < active_users_length) and (active_users[start_active_users+1][0] == active_users[start_active_users][0]):
-                            self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
+                        local_start_active_users = start_active_users
+
+                        while (local_start_active_users+1 < active_users_length) and (active_users[local_start_active_users+1][0] == active_users[local_start_active_users][0]):
+                            lylist.append([active_users[local_start_active_users][1], statistics_id])
+                            # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                             for vv in range(k):
-                                add_df = pd.DataFrame([vv+1, active_users[start_active_users][1], statistics_id, top_k_items[vv]])
-                                dfx = pd.concat([dfx, add_df], ignore_index=True)
+                                lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
                                 # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
-                            start_active_users += 1
-                        self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
+                            local_start_active_users += 1
+                        lylist.append([active_users[local_start_active_users][1], statistics_id])
+                        # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                         for vv in range(k):
-                                add_df = pd.DataFrame([vv+1, active_users[start_active_users][1], statistics_id, top_k_items[vv]])
-                                dfx = pd.concat([dfx, add_df], ignore_index=True)
+                                lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
                                 # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
-                        start_active_users += 1
+                        local_start_active_users += 1
+                        start_active_users_next = local_start_active_users
 
-                            # out = False
-                            # for purchased_item in range(len(user_purchased_items)):
-                            #     for recommended_item in range(len(top_k_items)):
-                            #         if user_purchased_items[purchased_item] == top_k_items[recommended_item]:
-                            #             out = True
-                            #             clicks += 1
-                            #             break
-                            #     if out:
-                            #         break
+                        dfy = pd.DataFrame(lylist)
+                        dfx = pd.DataFrame(lxlist)
 
-                            # for purchased_item in range(len(user_purchased_items)):
-                            #     out = False
-                            #     for dayzx in range(len(D_prev_recommendations)):
-                            #         prev_recommendations = D_prev_recommendations[
-                            #             dayzx][idx]
-                            #         for prev_recommended_item in range(len(prev_recommendations)):
-                            #             if prev_recommendations[prev_recommended_item] == user_purchased_items[
-                            #                 purchased_item]:
-                            #                 out = True
-                            #                 recommended_purchases += 1
-                            #                 break
-                            #         if out:
-                            #             break
-
-                        # CTR = float(clicks) / len(active_users)
-                        # ATTR_RATE = float(recommended_purchases) / len(purchases)
-
-                        # self.database_connection.session.execute(
-                        #     'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
-                        #     {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
-                        # self.database_connection.session.execute(
-                        #     'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
-                        #     {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE",
-                        #      "parametervalue": ATTR_RATE})
-
-                        # self.frontend_data.append(
-                        #     f"current_day: {current_date}, algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k (BETWEEN {start_date} AND {prev_day}): {top_k_items}")
 
                     else:
                         top_k_random = generateRandomTopK(
                             all_unique_item_ids, k)
 
-                        # D_prev_recommendations[-1][idx] = top_k_random
+                        lxlist = []
+                        lylist = []
 
-                        # clicks = 0
-                        # recommended_purchases = 0
+                        local_start_active_users = start_active_users
 
-
-                        while (start_active_users+1 < active_users_length) and (active_users[start_active_users+1][0] == active_users[start_active_users][0]):
-                            self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
+                        while (local_start_active_users+1 < active_users_length) and (active_users[local_start_active_users+1][0] == active_users[local_start_active_users][0]):
+                            lylist.append([active_users[local_start_active_users][1], statistics_id])
+                            # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                             for vv in range(k):
-                                self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_random[vv], statistics_id=statistics_id)
-                            
-                            start_active_users += 1
-                        self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
+                                lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_random[vv]])
+                                # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
+                            local_start_active_users += 1
+                        lylist.append([active_users[local_start_active_users][1], statistics_id])
+                        # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                         for vv in range(k):
-                                self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_random[vv], statistics_id=statistics_id)
-                        start_active_users += 1
+                                lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_random[vv]])
+                                # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
+                        local_start_active_users += 1
+                        start_active_users_next = local_start_active_users
+
+                        dfy = pd.DataFrame(lylist)
+                        dfx = pd.DataFrame(lxlist)
+
                             # for vv in range(k):
                             #     self.database_connection.session.execute(
                             #         "INSERT INTO recommendation(recommendation_id, unique_customer_id, statistics_id, unique_article_id) VALUES(:recommendation_id, :unique_customer_id, :statistics_id, :unique_article_id)",
@@ -561,31 +534,6 @@ class ABTestSimulation:
                             #             "recommendation_id": vv + 1, "unique_customer_id": unique_customer_id,
                             #             "statistics_id": statistics_id, "unique_article_id": top_k_random[vv]})
 
-
-                            # out = False
-                            # for purchased_item in range(len(user_purchased_items)):
-                            #     for recommended_item in range(len(top_k_random)):
-                            #         if user_purchased_items[purchased_item] == top_k_random[recommended_item]:
-                            #             if not out:
-                            #                 out = True
-                            #                 clicks += 1
-                            #             recommended_purchases += 1
-                            #             break
-
-                        # CTR = float(clicks) / len(active_users)
-                        # ATTR_RATE = float(recommended_purchases) / len(purchases)
-
-                        # self.database_connection.session.execute(
-                        #     'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
-                        #     {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
-                        # self.database_connection.session.execute(
-                        #     'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
-                        #     {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE",
-                        #      "parametervalue": ATTR_RATE})
-
-                        # # top_k_over_time_statistics[idx].append(top_k_random)
-                        # self.frontend_data.append(
-                        #     f"current_day: {current_date}, algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k random: {top_k_random}")
 
                         # train Recency algoritme to initialize it:
 
@@ -632,108 +580,66 @@ class ABTestSimulation:
                             dynamic_info_algorithms[idx]["prev_top_k"] = top_k_items
                         else:
                             top_k_items = dynamic_info_algorithms[idx]["prev_top_k"]
-                            # top_k_over_time_statistics[idx].append(copy.deepcopy(top_k_over_time_statistics[idx][-1]))
 
-                #         D_prev_recommendations[-1][idx] = top_k_items
+                            lxlist = []
+                            lylist = []
 
-                #         clicks = 0
-                #         recommended_purchases = 0
-                #         for i in range(len(active_users)):
-                #             self.insertCustomer(
-                #                 unique_customer_id=active_users[i], statistics_id=statistics_id)
-                #             for vv in range(k):
-                #                 self.insertRecommendation(
-                #                     recommendation_id=vv + 1, unique_customer_id=active_users[i],
-                #                     statistics_id=statistics_id, unique_article_id=top_k_items[vv])
-                #             out = False
-                #             user_purchased_items = user2purchasedItems[active_users[i]]
-                #             for purchased_item in range(len(user_purchased_items)):
-                #                 for recommended_item in range(len(top_k_items)):
-                #                     if user_purchased_items[purchased_item] == top_k_items[recommended_item]:
-                #                         out = True
-                #                         clicks += 1
-                #                         break
-                #                 if out:
-                #                     break
-                #             for purchased_item in range(len(user_purchased_items)):
-                #                 out = False
-                #                 for dayzx in range(len(D_prev_recommendations)):
-                #                     prev_recommendations = D_prev_recommendations[
-                #                         dayzx][idx]
-                #                     for prev_recommended_item in range(len(prev_recommendations)):
-                #                         if prev_recommendations[prev_recommended_item] == user_purchased_items[
-                #                             purchased_item]:
-                #                             out = True
-                #                             recommended_purchases += 1
-                #                             break
-                #                     if out:
-                #                         break
+                            local_start_active_users = start_active_users
 
-                #         CTR = float(clicks) / len(active_users)
-                #         ATTR_RATE = float(recommended_purchases) / len(purchases)
+                            while (local_start_active_users+1 < active_users_length) and (active_users[local_start_active_users+1][0] == active_users[local_start_active_users][0]):
+                                lylist.append([active_users[local_start_active_users][1], statistics_id])
+                                # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
+                                for vv in range(k):
+                                    lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
+                                    # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
+                                local_start_active_users += 1
+                            lylist.append([active_users[local_start_active_users][1], statistics_id])
+                            # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
+                            for vv in range(k):
+                                    lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
+                                    # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
+                            local_start_active_users += 1
+                            start_active_users_next = local_start_active_users
 
-                #         self.database_connection.session.execute(
-                #             'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
-                #             {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
-                #         self.database_connection.session.execute(
-                #             'INSERT INTO dynamic_stepsize_var(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
-                #             {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE",
-                #              "parametervalue": ATTR_RATE})
-                #         self.database_connection.session.commit()
+                            dfy = pd.DataFrame(lylist)
+                            dfx = pd.DataFrame(lxlist)
 
-                #         self.frontend_data.append(
-                #             f"algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k (BETWEEN {start_date} AND {prev_day}): {top_k_items}")
+                    else:
+                        top_k_random = generateRandomTopK(
+                            all_unique_item_ids, k)
+                        
+                        lxlist = []
+                        lylist = []
 
-                #     else:
-                #         top_k_random = generateRandomTopK(
-                #             all_unique_item_ids, k)
+                        local_start_active_users = start_active_users
 
-                #         D_prev_recommendations[-1][idx] = top_k_random
+                        while (local_start_active_users+1 < active_users_length) and (active_users[local_start_active_users+1][0] == active_users[local_start_active_users][0]):
+                            lylist.append([active_users[local_start_active_users][1], statistics_id])
+                            # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
+                            for vv in range(k):
+                                lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_random[vv]])
+                                # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
+                            local_start_active_users += 1
+                        lylist.append([active_users[local_start_active_users][1], statistics_id])
+                        # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
+                        for vv in range(k):
+                                lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_random[vv]])
+                                # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
+                        local_start_active_users += 1
+                        start_active_users_next = local_start_active_users
 
-                #         clicks = 0
-                #         recommended_purchases = 0
+                        dfy = pd.DataFrame(lylist)
+                        dfx = pd.DataFrame(lxlist)
 
-                #         for unique_customer_id, user_purchased_items in user2purchasedItems.items():
-                #             self.insertCustomer(unique_customer_id=unique_customer_id, statistics_id=statistics_id)
-                #             for vv in range(k):
-                #                 self.insertRecommendation(recommendation_id=vv + 1,
-                #                                           unique_customer_id=unique_customer_id,
-                #                                           statistics_id=statistics_id, unique_article_id=top_k_random[
-                #                         vv])
-                #             out = False
-                #             for purchased_item in range(len(user_purchased_items)):
-                #                 for recommended_item in range(len(top_k_random)):
-                #                     if user_purchased_items[purchased_item] == top_k_random[recommended_item]:
-                #                         if not (out):
-                #                             out = True
-                #                             clicks += 1
-                #                         recommended_purchases += 1
-                #                         break
+                        # train Popularity algorithm to initialize it:
+                        top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.unique_article_id, count(*) AS popular_items FROM \
+                                (SELECT * FROM purchase natural join article WHERE bought_on = '{start_date}' AND dataset_name = '{dataset_name}') AS SUBQUERY GROUP \
+                                    BY SUBQUERY.unique_article_id ORDER BY popular_items DESC LIMIT {k}").fetchall()
 
-                #         CTR = float(clicks) / len(active_users)
-                #         ATTR_RATE = float(recommended_purchases) / len(purchases)
-
-                #         self.database_connection.session.execute(
-                #             'INSERT INTO "dynamic_stepsize_var"(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
-                #             {"statistics_id": statistics_id, "parameter_name": "CTR", "parametervalue": CTR})
-                #         self.database_connection.session.execute(
-                #             'INSERT INTO "dynamic_stepsize_var"(statistics_id, parameter_name, parameter_value) VALUES(:statistics_id, :parameter_name, :parametervalue)',
-                #             {"statistics_id": statistics_id, "parameter_name": "ATTR_RATE",
-                #              "parametervalue": ATTR_RATE})
-                #         self.database_connection.session.commit()
-
-                #         self.frontend_data.append(
-                #             f"algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k random: {top_k_random}")
-
-                #         # train Popularity algorithm to initialize it:
-                #         top_k = self.database_connection.session.execute(f"SELECT SUBQUERY.unique_article_id, count(*) AS popular_items FROM \
-                #                 (SELECT * FROM purchase natural join article WHERE bought_on = '{start_date}' AND dataset_name = '{dataset_name}') AS SUBQUERY GROUP \
-                #                     BY SUBQUERY.unique_article_id ORDER BY popular_items DESC LIMIT {k}").fetchall()
-
-                #         top_k_items = []
-                #         for i in range(len(top_k)):
-                #             top_k_items.append(top_k[i][0])
-                #         dynamic_info_algorithms[idx]["prev_top_k"] = top_k_items
+                        top_k_items = []
+                        for i in range(len(top_k)):
+                            top_k_items.append(top_k[i][0])
+                        dynamic_info_algorithms[idx]["prev_top_k"] = top_k_items
 
                 self.prev_progress = self.current_progress
                 self.current_progress = round(n_day / float(dayz), 2) * 100.0
