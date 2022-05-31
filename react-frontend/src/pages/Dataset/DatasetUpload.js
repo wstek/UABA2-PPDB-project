@@ -133,7 +133,6 @@ export default function DatasetUpload(props) {
         }
         return true;
     }
-
     const checkSelectData = () => {
         // check dataset name
         if (datasetNameRef.current === "") {

@@ -19,7 +19,7 @@ import Single from './pages/single/Single';
 import TaskTest from "./pages/BackgroundTasks/TaskTest";
 import TaskProgress from "./pages/BackgroundTasks/TaskProgress";
 import DatasetPage from "./pages/DatasetView/Dataset";
-import Dashboard from "./pages/dashboard/Dashboard";
+import Dashboard from "./pages/Dashboard/Dashboard";
 import Sidebar from "./components/sidebar/Sidebar";
 import {UserContext} from "./utils/UserContext.js";
 import {SocketContext} from "./utils/SocketContext"
@@ -146,7 +146,7 @@ function App() {
         <UserContext.Provider value={{user, updateUser, isLoading}}>
             <SocketContext.Provider value={tasksValue}>
                 <Router>
-                    <div className="App ">
+                    <div className="App">
                         <Navbar/>
                         <div className="max-100vw ">
                             <div className="row flex-nowrap">

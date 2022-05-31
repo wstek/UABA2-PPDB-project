@@ -8,7 +8,6 @@ export default function DatasetUploadPage(props) {
 
     const [showUploadProgress, setShowUploadProgress] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
-
     return (
         <div className="DatasetUploadPage" style={{textAlign: "center"}}>
             <h2>Dataset upload processes</h2>

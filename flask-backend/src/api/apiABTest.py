@@ -8,6 +8,7 @@ api_abtest = Blueprint("api_abtest", __name__)
 
 @api_abtest.route("/api/abtest/<int:abtest_id>/delete/", methods=["DELETE"])
 def del_abtest(abtest_id):
+    print("hi")
     username = session.get("user_id")
     if not username:
         return {"error": "unauthorized"}, 401

@@ -282,7 +282,7 @@ class DatabaseConnection:
     def getATR30(self, abtest_id: int):
         return self.getAttributionRateOverTime(abtest_id, 30)
 
-    def getAttributionRateOverTime(self, abtest_id: int,days):
+    def getAttributionRateOverTime(self, abtest_id: int, days):
         query = f'''
         select * from
                 (select algorithm_id, bought_on, to_char(sum(attributions) / (
@@ -297,7 +297,7 @@ class DatabaseConnection:
             '''
         return self.engine_execute_and_fetch(query)
 
-    def getARPUOverTime(self, abtest_id: int,days):
+    def getARPUOverTime(self, abtest_id: int, days):
         query = f'''
         select * from
                 (select algorithm_id, bought_on, to_char(sum(attributions*revenue_per_attr) / (
@@ -420,11 +420,13 @@ class DatabaseConnection:
     def CTR_PerUser(self, abtest_id, start, end):
         query = f'''
             select algorithm_id,unique_customer_id, algorithm_name, 
-            sum(case when clicked_through then 1 else 0 end)::float8/count(distinct customer_specific_statistics) as CTR
-            from customer_specific_statistics natural join statistics natural join named_algorithm natural join ab_test
-            where abtest_id = {abtest_id} and date_of between '{start}' and '{end}'
+                sum(case when clicked_through then 1 else 0 end)::float8/count(distinct customer_specific_statistics) as CTR
+            from customer_specific_statistics natural join statistics natural join named_algorithm natural join ab_test 
+                natural join customer
+            where abtest_id = {abtest_id} and date_of between '{start}' and '{end}' 
             group by algorithm_id,unique_customer_id,algorithm_name
             order by unique_customer_id, algorithm_id
+            
             ;
             '''
         return self.engine_execute_and_fetch(query, fetchall=True)
