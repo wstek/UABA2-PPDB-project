@@ -2,9 +2,11 @@ import "./datatable.css"
 import {DataGrid} from '@mui/x-data-grid';
 import React, {useEffect, useState} from "react";
 import LineChart from "../chart/LineChart";
+import {useContext} from "@types/react";
+import {ABTestContext} from "../../utils/Contexts";
 
 
-function ItemDatatable({abtest_id, algorithm_id}) {
+function ItemDatatable({algorithm_id}) {
 
     const [maxDays, setMaxDays] = useState(0);
     const [loaded, setLoaded] = useState(false);
@@ -238,19 +240,19 @@ function ItemDatatable({abtest_id, algorithm_id}) {
                 <div>
                     <div className="row text-center align-content-center justify-content-center">
                         <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
-                            <LineChart chart_id={1} title="Amount Of Purchases" xMin={0}
-                                       xMax={maxDays}
+                            <LineChart chart_id={1} title="Amount Of Purchases" xMin={start_date}
+                                       xMax={end_date}
                                        XFnY={amountOfPurchases}/>
                         </div>
                         <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
-                            <LineChart chart_id={2} title={"Recommendations"} xMin={0}
-                                       xMax={maxDays} XFnY={amountOfRecommendations}/>
+                            <LineChart chart_id={2} title={"Recommendations"} xMin={start_date}
+                                       xMax={end_date} XFnY={amountOfRecommendations}/>
                         </div>
                     </div>
                     <div className="row text-center align-content-center justify-content-center">
                         <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
-                            <LineChart chart_id={2} title="Amount Of Succesfull reccomendations" xMin={0}
-                                       xMax={maxDays}
+                            <LineChart chart_id={2} title="Amount Of Succesfull reccomendations" xMin={start_date}
+                                       xMax={end_date}
                                        XFnY={amountOfSuccesfullRecommendations}/>
                         </div>
                     </div>

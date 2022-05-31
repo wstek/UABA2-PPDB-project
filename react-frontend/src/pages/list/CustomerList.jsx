@@ -1,10 +1,11 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useContext} from "react";
 import "./list.css"
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
 import InputSelector from "../../components/InputSelector";
-import {useParams} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
 import ReactTable from "../../components/table/ReactTable";
 import styled from 'styled-components'
+import {ABTestContext} from "../../utils/Contexts";
 
 
 const Styles = styled.div`
@@ -34,7 +35,7 @@ const Styles = styled.div`
   }
 `
 
-const UserList = () => {
+const CustomerList = () => {
     let {abtest_id, customer_id} = useParams();
     const [top_k_per_algorithm, setTopKPerAlgorithm] = useState(null)
     const [dates, setDates] = useState(null)
@@ -56,7 +57,13 @@ const UserList = () => {
             for (let algorithm_id = 0; algorithm_id < keys.length; algorithm_id++) {
                 columns1[0].columns.push({
                     Header: keys[algorithm_id].toString(), columns: [{
-                        Header: 'Article ID', accessor: keys[algorithm_id] + '.article'
+                        Header: 'Article ID', accessor: keys[algorithm_id] + '.article',
+                        Cell: (params) => {
+                            let article_id = params.value
+                            return <Link style={{textDecoration: 'inherit'}}
+                                         to={`/Statistics/ABTest/${abtest_id}/Item/${article_id}`}>{article_id}</Link>
+
+                        },
                     }]
                 })
             }
@@ -102,4 +109,4 @@ const UserList = () => {
     );
 }
 
-export default UserList;
+export default CustomerList;

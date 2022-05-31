@@ -12,6 +12,9 @@ import {PurpleSpinner} from "../../components/PurpleSpinner";
 import CustomerOverview from "../../components/table/StatisticsCustomerTable";
 import {ABTestContext} from "../../utils/Contexts.js";
 import {TopKPerAlgorithmTable, TopKPurchasedTable} from "../../components/table/ReactTable";
+import ProtectedRoute from "../../utils/ProtectedRoute";
+import CustomerList from "../list/CustomerList";
+import ItemList from "../list/ItemList";
 
 const reducer = (state, action) => {
     return {...state, [action.field]: action.value};
@@ -70,23 +73,23 @@ function ABTestCharts({graphdata}) {
         active_user_over_time, purchases_over_time, click_through_rate_over_time, attribution_rate_over_time
     } = graphdata
 
-    const {end_date_index, start_date_index} = useContext(ABTestContext);
+    const {end_date, start_date} = useContext(ABTestContext);
     return (<>
         <div className="row text-center align-content-center justify-content-center g-0 ">
             <div className="col-12 col-lg-12 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
-                <LineChart chart_id={1} title="Active Users" xMin={start_date_index}
-                           xMax={end_date_index}
+                <LineChart chart_id={1} title="Active Users" xMin={start_date}
+                           xMax={end_date}
                            XFnY={active_user_over_time}/>
             </div>
             <div className="col-12 col-lg-12 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
-                <LineChart chart_id={2} title={"Purchases"} xMin={start_date_index}
-                           xMax={end_date_index} XFnY={purchases_over_time}/>
+                <LineChart chart_id={2} title={"Purchases"} xMin={start_date}
+                           xMax={end_date} XFnY={purchases_over_time}/>
             </div>
         </div>
         <div className="row text-center align-content-center justify-content-center g-0">
             <div className="col-12 col-lg-12 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
-                <LineChart chart_id={3} title="Click Through Rate" xMin={start_date_index}
-                           xMax={end_date_index}
+                <LineChart chart_id={3} title="Click Through Rate" xMin={start_date}
+                           xMax={end_date}
                            XFnY={click_through_rate_over_time} ex_options={{
                     vAxis: {
                         format: '   ##.######%'
@@ -105,8 +108,8 @@ function ABTestCharts({graphdata}) {
                     vAxis: {
                         format: '#.######%'
                     }
-                }} xMin={start_date_index}
-                           xMax={end_date_index}
+                }} xMin={start_date}
+                           xMax={end_date}
                            XFnY={attribution_rate_over_time}
                            formatters={[{
                                type: "NumberFormat", column: 1, options: {
@@ -144,7 +147,9 @@ function StatisticsInformation() {
     const setInputAlgorithms = (data) => setState({field: 'input_algorithms', value: data})
     // const setSelectedABTest = (data) => setState({field: 'selected_abtest', value: data})
     const setActiveUsersOverTime = (data) => setState({field: 'active_user_over_time', value: data})
-    const setPurchasesOverTime = (data) => setState({field: 'purchases_over_time', value: data})
+    const setPurchasesOverTime = (data) =>{
+      setState({field: 'purchases_over_time', value: data})
+    }
     const setClickThroughRate = (data) => setState({field: 'click_through_rate_over_time', value: data})
     const setABTestData = (data) => {
         setState({
@@ -187,22 +192,18 @@ function StatisticsInformation() {
     }
 
     function fetchInputActiveUsersOverTime(abortCont) {
-        setActiveUsersOverTime(null)
         fetchData(`/api/statistics/abtest/${abtest_id}/active_users_over_time`, setActiveUsersOverTime, abortCont, {}, onNotFound)
     }
 
     function fetchInputPurchasesOverTime(abortCont) {
-        setPurchasesOverTime(null)
         fetchData(`/api/statistics/abtest/${abtest_id}/purchases_over_time`, setPurchasesOverTime, abortCont, {}, onNotFound)
     }
 
     function fetchCTROverTime(abortCont) {
-        setClickThroughRate(null)
         fetchData(`/api/statistics/abtest/${abtest_id}/CTR_over_time`, setClickThroughRate, abortCont, {}, onNotFound)
     }
 
     function fetchAttRateOverTime(abortCont) {
-        setAttributionRate(null)
         fetchData(`/api/statistics/abtest/${abtest_id}/AttrRate_over_time`, setAttributionRate, abortCont, {}, onNotFound)
     }
 
@@ -246,6 +247,10 @@ function StatisticsInformation() {
                        children={<TopK/>}/>
                 <Route exact path="/Statistics/ABTest/:abtest_id/Customers"
                        children={<CustomerOverview/>}/>
+                <Route children={<CustomerList/>}
+                                exact path={"/Statistics/ABTest/:abtest_id/Customer/:customer_id"}/>
+                <Route children={<ItemList/>}
+                                exact path={"/Statistics/ABTest/:abtest_id/Item/:item_id"}/>
 
             </Switch>
         </div>
