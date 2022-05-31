@@ -459,7 +459,7 @@ class ABTestSimulation():
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme                     x natural JOIN purchase t natural join article a ORDER BY bought_on
                             top_k = self.database_connection.session.execute(
-                                f"SELECT unique_article_id, MIN(bought_on) FROM purchase natural join article WHERE bought_on <= '{prev_day}' and dataset_name = 'H_M' GROUP BY unique_article_id ORDER BY MIN(bought_on) DESC LIMIT {k}").fetchall()
+                                f"SELECT unique_article_id, MIN(bought_on) FROM purchase natural join article WHERE bought_on <= '{prev_day}' and dataset_name = '{dataset_name}' GROUP BY unique_article_id ORDER BY MIN(bought_on) DESC LIMIT {k}").fetchall()
                             top_k_items = []
                             for i in range(len(top_k)):
                                 top_k_items.append(top_k[i][0])
@@ -482,6 +482,10 @@ class ABTestSimulation():
                             lylist.append([active_users[local_start_active_users][1], statistics_id])
                             # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                             for vv in range(k):
+                                # print(active_users[local_start_active_users])
+                                c = active_users[local_start_active_users]
+                                b = active_users[local_start_active_users][1]
+                                a = top_k_items[vv]
                                 lxlist.append(
                                     [vv + 1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
                                 # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
