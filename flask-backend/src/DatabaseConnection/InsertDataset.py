@@ -166,13 +166,13 @@ class InsertDataset:
         report_progress_steps(self.task_id, 13, 13)
 
     def cleanup(self):
-        self.database_connection.engine_execute(f'''DELETE FROM "dataset" WHERE name='{self.dataset_name}';''')
         for original_filename in self.filenames:
             filepath = self.filenames[original_filename]
             os.remove(filepath)
 
     def abort(self):
         self.database_connection.session.rollback()
+        self.database_connection.engine_execute(f'''DELETE FROM "dataset" WHERE name='{self.dataset_name}';''')
 
     def __parse_csv_files(self):
         for original_filename in self.filenames:
@@ -217,6 +217,7 @@ class InsertDataset:
                     if len(self.df_files[original_filename][date_column][0].split()) > 1:
                         report_progress_message(self.task_id, "converting timestamps to dates")
                         Logger.log("Converting timestamp to date")
+
                         self.df_files[original_filename][date_column] = pd.to_datetime(
                             self.df_files[original_filename][date_column]).dt.date
 

@@ -15,14 +15,11 @@ import {handleLoggedIn} from './utils/handleLoggedIn'
 import Simulation from "./pages/Account/Simulation";
 import ChangeInfo from "./pages/Account/ChangeInfo";
 import Home from "./pages/Home";
-import CustomerList from "./pages/list/CustomerList"
 import Single from './pages/single/Single';
 import TaskTest from "./pages/BackgroundTasks/TaskTest";
 import TaskProgress from "./pages/BackgroundTasks/TaskProgress";
 import DatasetPage from "./pages/Dataset";
 import Dashboard from "./pages/Dashboard/Dashboard";
-
-import ItemList from "./pages/list/ItemList";
 import Sidebar from "./components/sidebar/Sidebar";
 import {UserContext} from "./utils/UserContext.js";
 import {SocketContext} from "./utils/SocketContext"

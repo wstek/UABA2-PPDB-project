@@ -1,6 +1,6 @@
 #!/bin/bash
 
-drop_database_script_path="./../sql/DropDataBase.sql"
+drop_database_script_path="./../sql/DropDatabase.sql"
 init_database_script_path="./../sql/InitDataBase.sql"
 index_database_script_path="./../sql/Indexes.sql"
 account_database_script_path="./../sql/CreateTestAccount.sql"
