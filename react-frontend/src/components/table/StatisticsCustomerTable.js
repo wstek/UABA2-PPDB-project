@@ -9,25 +9,26 @@ import {Link, useHistory} from "react-router-dom";
 import {ABTestContext} from "../../utils/Contexts";
 
 
-function GeneralUserOverview({abtest_id, date_start_index, date_end_index}) {
+function GeneralUserOverview() {
     const columns1 = [{Header: 'Active User Count', accessor: 'user_count'}, {
         Header: 'Revenue Over Period', accessor: 'revenue'
     }]
     // const [activeUserCount,setActiveUserCount] = useState(null)
     const [revenue_per_day, setRevenuePerDay] = useState(null)
     const [activeUserCount, setActiveUserCount] = useState(null)
+    const {abtest_id, start_date, end_date,start_date_index, end_date_index} = useContext(ABTestContext);
 
     const revenue = useMemo(() => {
         let revenue = null
-        if (revenue_per_day) {
-            revenue = revenue_per_day.slice(date_start_index, date_end_index + 1).reduce((partialSum, a) => partialSum + a[1], 0).toFixed(2)
+        if (revenue_per_day && start_date_index !== null && end_date_index !== null) {
+            revenue = revenue_per_day.slice(start_date_index, end_date_index + 1).reduce((partialSum, a) => partialSum + a[1], 0).toFixed(2)
         }
         return revenue
-    }, [revenue_per_day, date_start_index, date_end_index]);
+    }, [revenue_per_day, start_date_index, end_date_index]);
 
     function fetchActiveUserCount() {
         const abortCont = new AbortController()
-        let api = `/api/abtest/${abtest_id}/get_active_usercount/${date_start_index}/${date_end_index}`
+        let api = `/api/statistics/abtest/${abtest_id}/get_active_usercount/${start_date}/${end_date}`
         fetchData(api, (data) => {
             setActiveUserCount(data.returnvalue)
         }, abortCont)
@@ -45,10 +46,10 @@ function GeneralUserOverview({abtest_id, date_start_index, date_end_index}) {
     }
 
     useEffect(() => {
-        fetchActiveUserCount()
-    }, [abtest_id, date_start_index, date_end_index])
+        if (abtest_id && start_date && end_date ) fetchActiveUserCount()
+    }, [abtest_id, start_date, end_date])
     useEffect(() => {
-        fetchRevenuePerDay()
+        if (abtest_id) fetchRevenuePerDay()
     }, [abtest_id])
     if (activeUserCount == null || revenue_per_day == null) return <PurpleSpinner/>
 
@@ -58,36 +59,49 @@ function GeneralUserOverview({abtest_id, date_start_index, date_end_index}) {
     }]}/>)
 }
 
-function CustomerList({abtest_id, date_start_index, date_end_index}) {
+function CustomerList() {
     const history = useHistory()
-    const columns = [{
-        headerName: 'Customer', field: 'Customer', width: '150', headerAlign: 'center',
-        renderCell: (cellValues) => {
-            let customer_id = cellValues.row.Customer
-            return <Link style={{textDecoration: 'inherit'}}
-                         to={`/ABTest/${abtest_id}/Customer/${customer_id}`}> {customer_id} </Link>
-        }
-    },
-        {
-            headerName: 'Purchases', field: 'Purchases', width: '150', headerAlign: 'center',
-        }, {headerName: 'Revenue', field: 'Revenue', width: '150', headerAlign: 'center',}, {
+    const [customerData, setCustomerData] = useState(null)
+    const {abtest_id, start_date,end_date} = useContext(ABTestContext)
+    const columns = useMemo( () => {
+        let temp = [{
+            headerName: 'Customer', field: 'Customer', width: '150', headerAlign: 'center',
+            renderCell: (cellValues) => {
+                let customer_id = cellValues.row.Customer
+                return <Link style={{textDecoration: 'inherit'}}
+                             to={`/ABTest/${abtest_id}/Customer/${customer_id}`}> {customer_id} </Link>
+            }
+        },
+            {
+                headerName: 'Purchases', field: 'Purchases', headerAlign: 'center',
+            }, {headerName: 'Revenue', field: 'Revenue', headerAlign: 'center',}, {
             headerName: 'Days Active',
             field: 'Days Active',
-            width: '150',
             headerAlign: 'center',
         }]
-    const [customerData, setCustomerData] = useState(null)
+        if (customerData) {
+            let fields = temp.map((field) => field.headerName)
+            for (const [field, value] of Object.entries(customerData[0])) {
+                if (!fields.includes(field))
+                    temp.push({headerName: field, field: field, headerAlign: value,})
+            }
+        }
+        return temp
+    }, [abtest_id,customerData])
+
 
     function fetchCustomerData() {
-        const abortCont = new AbortController()
-        const api = `/api/statistics/abtest/${abtest_id}/get_unique_customer_stats/${date_start_index}/${date_end_index}`
-        fetchData(api, (data) => {
-            setCustomerData(data.returnvalue)
-        }, abortCont)
-        return () => abortCont.abort()
+        if (abtest_id && start_date && end_date) {
+            const abortCont = new AbortController()
+            const api = `/api/statistics/abtest/${abtest_id}/get_unique_customer_stats/${start_date}/${end_date}`
+            fetchData(api, (data) => {
+                setCustomerData(data.returnvalue)
+            }, abortCont)
+            return () => abortCont.abort()
+        }
     }
 
-    useEffect(fetchCustomerData, [abtest_id, date_start_index, date_end_index])
+    useEffect(fetchCustomerData, [abtest_id, start_date,end_date])
     if (customerData == null) return <PurpleSpinner/>
     return (
         <div style={{height: '80vh', width: '100%'}}>
@@ -115,18 +129,14 @@ function CustomerList({abtest_id, date_start_index, date_end_index}) {
 
 
 function CustomerOverview() {
-    const {abtest_id, start_date_index, end_date_index} = useContext(ABTestContext);
 
-    if (!(abtest_id != null && start_date_index != null && end_date_index != null)) return <PurpleSpinner/>
     return (<>
         <div className={"row text-center align-content-center justify-content-center mx-auto"}>
             <GeneralUserOverview
-                abtest_id={abtest_id} date_start_index={start_date_index}
-                date_end_index={end_date_index}/>
+                />
         </div>
         <div className={"row text-center align-content-center justify-content-center mx-auto"}>
-            <CustomerList abtest_id={abtest_id} date_start_index={start_date_index}
-                          date_end_index={end_date_index}/>
+            <CustomerList />
 
         </div>
     </>)

@@ -1,6 +1,5 @@
 import AlgorithmsOverview from "../../components/AlgorithmsOverview";
 import LineChart from "../../components/chart/LineChart";
-import {ColoredLine} from '../../components/ColoredLine';
 import React, {useContext, useEffect, useReducer, useState} from "react";
 import InputSelector from "../../components/InputSelector";
 import {fetchData} from "../../utils/fetchAndExecuteWithData";
@@ -73,7 +72,7 @@ function ABTestCharts({graphdata}) {
 
     const {end_date_index, start_date_index} = useContext(ABTestContext);
     return (<>
-        <div className="row text-center align-content-center justify-content-center g-0">
+        <div className="row text-center align-content-center justify-content-center g-0 ">
             <div className="col-12 col-lg-12 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
                 <LineChart chart_id={1} title="Active Users" xMin={start_date_index}
                            xMax={end_date_index}
@@ -90,18 +89,31 @@ function ABTestCharts({graphdata}) {
                            xMax={end_date_index}
                            XFnY={click_through_rate_over_time} ex_options={{
                     vAxis: {
-                        format:'#.###%'
+                        format: '#.######%'
                     }
-                }}/>
+
+                }}
+                           formatters={[{
+                               type: "NumberFormat", column: 1, options: {
+                                   pattern: '#.######%',
+                               }
+                           }]}
+                />
             </div>
-            <div className="col-12 col-lg-12 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
+            <div className="col-12 col-lg-12 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
                 <LineChart chart_id={2} title={"Attribution Rate"} ex_options={{
                     vAxis: {
-                        format:'#.###%'
+                        format: '#.######%'
                     }
                 }} xMin={start_date_index}
                            xMax={end_date_index}
-                           XFnY={attribution_rate_over_time}/>
+                           XFnY={attribution_rate_over_time}
+                           formatters={[{
+                               type: "NumberFormat", column: 1, options: {
+                                   pattern: '#.######%',
+                               }
+                           }]}
+                />
             </div>
         </div>
     </>);

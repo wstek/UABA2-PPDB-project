@@ -186,9 +186,10 @@ class DatabaseConnection:
 
     def getAlgorithms(self, abtest_id):
         query = f''' 
-            select algorithm_id
-            from algorithm 
-            where abtest_id = {abtest_id};
+            select *
+            from named_algorithm 
+            where abtest_id = {abtest_id}
+            order by abtest_id;
             '''
         return self.session_execute_and_fetch(query)
 
@@ -203,7 +204,7 @@ class DatabaseConnection:
     def getAlgorithmsInformation(self, abtest_id):
         query = f'''
             select algorithm_id, parameter_name, value, algorithm_type
-            from algorithm natural join parameter 
+            from named_algorithm natural join parameter 
             where abtest_id = {abtest_id};
             '''
         return self.session_execute_and_fetch(query)
@@ -243,7 +244,17 @@ class DatabaseConnection:
         return self.session_execute_and_fetch(query, fetchall=False)
 
     def getCRTOverTime(self, abtest_id):
-        return self.getDynamicStepsizeVar(abtest_id, parameter_name="CTR")
+        query = f'''
+        select algorithm_id,algorithm_name,date_of, 
+            sum(case when clicked_through then 1 else 0 end)::float8/count(distinct customer_specific_statistics) as CTR
+        from customer_specific_statistics natural join statistics natural join named_algorithm natural join ab_test
+        where abtest_id = {abtest_id} and date_of between start_date and end_date
+        group by algorithm_id,date_of,algorithm_name
+        order by date_of, algorithm_id
+        ;       
+            '''
+
+        return self.session_execute_and_fetch(query)
 
     def getRevenueOverTime(self, abtest_id):
         abtest = self.getABTestInfo(abtest_id)
@@ -255,8 +266,20 @@ class DatabaseConnection:
             '''
         return self.session_execute_and_fetch(query)
 
-    def getAttributionRateOverTime(self, abtest_id):
-        return self.getDynamicStepsizeVar(abtest_id, parameter_name="ATTR_RATE")
+    def getAttributionRateOverTime(self, abtest_id: int):
+        query = f'''
+        select * from
+                (select algorithm_id, bought_on, to_char(sum(attributions) / (
+                                    select count(*)
+                                    from purchase natural join customer natural join ab_test
+                                    where bought_on between start_date and end_date and abtest_id = {abtest_id}
+                                    )::float8,'FM999999999.0000' ) ATR
+                from "attr_abtest_{abtest_id}_30d" natural join algorithm natural join ab_test 
+                where bought_on between start_date and end_date and abtest_id = {abtest_id}
+                group by algorithm_id, bought_on
+                order by algorithm_id, bought_on) result natural join named_algorithm;
+            '''
+        return self.session_execute_and_fetch(query)
 
     def getDynamicStepsizeVar(self, abtest_id, parameter_name):
         query = f'''
@@ -347,8 +370,15 @@ class DatabaseConnection:
             '''
         return self.session_execute_and_fetch(query, fetchall=True)
 
+    def getAllDates(self, abtest_id):
+        query = f'''
+                select generate_series(start_date::date,end_date::date,'1 day'::interval)::date date from ab_test where abtest_id = {abtest_id}
+            '''
+        return self.session_execute_and_fetch(query, fetchall=True)
+
     def getUniqueCustomerStats(self, abtest_id, start_date, end_date):
         query = f'''
+--         purchases, revenue 
             select unique_customer_id, count(*) as purchases, to_char(sum(price), '99999999990.999') as revenue, 
                     count(distinct (bought_on)) as days_active
             from customer
@@ -358,6 +388,18 @@ class DatabaseConnection:
                                    where bought_on between '{start_date}' and '{end_date}') purchase
             group by unique_customer_id 
             order by days_active desc;
+            '''
+        return self.session_execute_and_fetch(query, fetchall=True)
+
+    def CTR_PerUser(self, abtest_id, start, end):
+        query = f'''
+            select algorithm_id,unique_customer_id, algorithm_name, 
+            sum(case when clicked_through then 1 else 0 end)::float8/count(distinct customer_specific_statistics) as CTR
+            from customer_specific_statistics natural join statistics natural join named_algorithm natural join ab_test
+            where abtest_id = {abtest_id} and date_of between '{start}' and '{end}'
+            group by algorithm_id,unique_customer_id,algorithm_name
+            order by unique_customer_id, algorithm_id
+            ;
             '''
         return self.session_execute_and_fetch(query, fetchall=True)
 

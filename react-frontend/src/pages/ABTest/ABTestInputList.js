@@ -86,6 +86,10 @@ const ABTestInputList = ({abs_algorithms}) => {
     const handleStart = async () => {
         setIsPending(true);
         const algorithms = [];
+        if (! con_algorithms.length){
+            window.alert("Please select at least one algorithm");
+            throw Error('Please select at least one algorithm')
+        }
         for (let i = 0; i < con_algorithms.length; i++) {
             const algorithmParams = {name: con_algorithms[i].name, parameters: {}};
             for (let k = 0; k < con_algorithms[i].parameters.length; k++) {
