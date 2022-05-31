@@ -50,7 +50,7 @@ def register_user():
          "username": username, "password": hashed_password})
     database_connection.session.commit()
     session["user_id"] = username
-    return {"username": username, "email": email}
+    return {"username": username, "email": email, "first_name": firstname, "last_name": lastname, "admin":False}
 
 
 @api_account.route("/api/make_admin")

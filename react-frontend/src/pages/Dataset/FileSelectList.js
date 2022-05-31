@@ -67,7 +67,7 @@ export default function FileSelectList(props) {
             }
 
             {!parseProgress && props.files.map((file, index) => (
-                <div>
+                <div key={index}>
                     <FileSeperatorEditor
                         key={index}
                         fileName={file.file.name}

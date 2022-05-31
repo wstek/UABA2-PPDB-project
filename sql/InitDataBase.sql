@@ -1,4 +1,3 @@
-CREATE SCHEMA public;
 GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO public;
 
@@ -47,7 +46,7 @@ CREATE TABLE IF NOT EXISTS "customer"
 
 );
 
-CREATE TABLE IF NOT EXISTS "ab_test"
+CREATE TABLE "ab_test"
 (
     "abtest_id"    bigserial primary key,
     "top_k"        nat_int NOT NULL,
@@ -188,3 +187,4 @@ SELECT algorithm.algorithm_id,
 FROM parameter
          RIGHT JOIN algorithm ON parameter.algorithm_id::integer = algorithm.algorithm_id AND
                                  parameter.parameter_name::text = 'AlgorithmName'::text;
+

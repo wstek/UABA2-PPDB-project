@@ -329,7 +329,9 @@ class InsertDataset:
             self.database_connection.engine_execute(query)
 
         except Exception as error:
+            print(error)
             raise ValueError(f"dataset {self.dataset_name} already exists")
+
 
     def __insert_purchase_data(self):
         Logger.log(

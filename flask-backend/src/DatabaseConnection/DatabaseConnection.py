@@ -325,14 +325,9 @@ class DatabaseConnection:
 
     def getPriceDistribution(self, dataset_name, intervals):
         priceExtrema = self.getPriceExtrema(dataset_name)
-        diff = (priceExtrema.max - priceExtrema.min) / intervals
-        zeroes = ""
-        while diff < 10:
-            diff *= 10
-            zeroes += '0'
         query = f'''
-                select width_bucket(price, 0, 0.5, {intervals}) as buckets,
-                         count(price), to_char(avg(price)::float8,'FM999999999.{zeroes}') as average
+                select width_bucket(price, {priceExtrema.min}, {priceExtrema.max}, {intervals}) as buckets,
+                         count(price), to_char(avg(price)::float8,'FM9999999990.99999999') as average
                     from purchase where dataset_name='{dataset_name}'
                 group by buckets
                 order by buckets;
