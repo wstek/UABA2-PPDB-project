@@ -7,6 +7,7 @@ import pandas as pd
 from psycopg2.extensions import register_adapter, AsIs
 
 import datetime
+from src.socketioEvents.reportProgress import report_progress_steps, report_progress_message
 
 from src.ABTestSimulation.Algorithms.iknn import ItemKNNIterative
 from src.DatabaseConnection.DatabaseConnection import DatabaseConnection
@@ -41,7 +42,19 @@ def generateRandomTopK(listx, items):
     return random.sample(listx, items)
 
 
-class ABTestSimulation(threading.Thread):
+class ABTestSimulation:
+    def __init__(self, database_connection: DatabaseConnection, abtest, task_id):
+        self.task_id = task_id
+        self.frontend_data = []
+        self.done = False
+        self.abtest = abtest
+        self.database_connection: DatabaseConnection = database_connection
+
+        print(task_id)
+
+        self.prev_progress = 0
+        self.current_progress = 0
+
     def calculateAttributions(self, days: int):
         print(f'Calculating attributions @{days}D {self.start_time} Time since start:{time.time()-self.start_time}' )
         query = f'''
@@ -94,17 +107,6 @@ class ABTestSimulation(threading.Thread):
         self.calculateAttributions(7)
         self.calculateAttributions(30)
         self.calculateClickedThrough()
-
-    def __init__(self, database_connection: DatabaseConnection, abtest):
-        super().__init__()
-        # self.sse = sse
-        self.frontend_data = []
-        self.done = False
-        self.abtest = abtest
-        self.database_connection: DatabaseConnection = database_connection
-
-        self.prev_progress = 0
-        self.current_progress = 0
 
     def insertCustomer(self, unique_customer_id, statistics_id):
         self.database_connection.session.execute(
@@ -210,6 +212,9 @@ class ABTestSimulation(threading.Thread):
         # SIMULATION LOOP MAIN
         for n_day in range(0, int(dayz) + 1, int(self.abtest["stepsize"])):
             print(f'Day: {n_day}/{dayz} Time since start:{time.time()-self.start_time}')
+
+            report_progress_steps(self.task_id, n_day, int(dayz))
+
             if n_day:
                 dt_current_date = dt_current_date + \
                                   pd.DateOffset(days=int(self.abtest["stepsize"]))

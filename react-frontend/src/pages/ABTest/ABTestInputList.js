@@ -1,6 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {useHistory} from 'react-router-dom';
 import {ColoredLine} from "../../components/ColoredLine";
+import {SocketContext} from "../../utils/SocketContext";
 
 
 const ABTestInputList = ({abs_algorithms}) => {
@@ -11,6 +12,8 @@ const ABTestInputList = ({abs_algorithms}) => {
     const [con_algorithms, setConAlgorithm] = useState(
         []
     )
+
+    const {addTask} = useContext(SocketContext);
 
     const handleAddAlgorithm = () => {
         const algorithmname = document.getElementById('algorithmname').value;
@@ -86,7 +89,7 @@ const ABTestInputList = ({abs_algorithms}) => {
     const handleStart = async () => {
         setIsPending(true);
         const algorithms = [];
-        if (! con_algorithms.length){
+        if (!con_algorithms.length) {
             window.alert("Please select at least one algorithm");
             throw Error('Please select at least one algorithm')
         }
@@ -131,13 +134,10 @@ const ABTestInputList = ({abs_algorithms}) => {
                 if (res.status === 409) {
                     history.push("/sign_in")
                 }
+
                 return res.json()
             }).then((data) => {
-                // if (data.error) {
-                //     throw Error(data.error);
-                // }
-                // history.go(-1);
-                // setError(null);
+                addTask(data);
                 history.push('/dashboard');
             })
                 .catch((err) => {

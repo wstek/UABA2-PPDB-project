@@ -84,9 +84,9 @@ def insert_dataset(self, filenames: Dict[str, str], column_select_data: dict, us
     return "started dataset insert"
 
 
-@celery_extension.task(name="start_simulation")
-def start_simulation(simulation_input: dict, user_id: str = "", meta=""):
-    simulation = ABTestSimulation(database_connection, simulation_input)
+@celery_extension.task(name="start_simulation", bind=True)
+def start_simulation(self, simulation_input: dict, user_id: str = "", meta=""):
+    simulation = ABTestSimulation(database_connection, simulation_input, task_id=self.request.id)
     simulation.run()
 
     return "started simulation"
