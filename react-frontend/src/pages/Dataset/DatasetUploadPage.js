@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import DatasetUpload from "./DatasetUpload";
 import ProgressBar from "@ramonak/react-progress-bar";
+import TaskList from "../../components/TaskList";
 
 export default function DatasetUploadPage(props) {
     const [showDatasetUpload, setShowDatasetUpload] = useState(false)
@@ -10,6 +11,11 @@ export default function DatasetUploadPage(props) {
 
     return (
         <div className="DatasetUploadPage" style={{textAlign: "center"}}>
+            <TaskList
+                taskName={"insert_dataset"}
+            />
+
+            <br/>
 
             <button onClick={() => {
                 setShowDatasetUpload(!showDatasetUpload)

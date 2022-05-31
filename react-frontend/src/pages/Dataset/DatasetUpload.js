@@ -2,7 +2,6 @@ import PurchaseSelect from "./PurchaseSelect";
 import MetaSelect from "./MetaSelect";
 import React, {useRef, useState} from "react";
 import axios from "axios";
-import ProgressBar from "@ramonak/react-progress-bar";
 
 export default function DatasetUpload(props) {
     const datasetNameRef = useRef("")
