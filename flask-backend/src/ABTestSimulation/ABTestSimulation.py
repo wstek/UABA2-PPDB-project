@@ -481,20 +481,20 @@ class ABTestSimulation:
 
                         # clicks = 0
                         # recommended_purchases = 0
-
+                        dfx = pd.DataFrame([])
                         while (start_active_users+1 < active_users_length) and (active_users[start_active_users+1][0] == active_users[start_active_users][0]):
                             self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
+                            for vv in range(k):
+                                add_df = pd.DataFrame([vv+1, active_users[start_active_users][1], statistics_id, top_k_items[vv]])
+                                dfx = pd.concat([dfx, add_df], ignore_index=True)
+                                # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
                             start_active_users += 1
                         self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
+                        for vv in range(k):
+                                add_df = pd.DataFrame([vv+1, active_users[start_active_users][1], statistics_id, top_k_items[vv]])
+                                dfx = pd.concat([dfx, add_df], ignore_index=True)
+                                # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
                         start_active_users += 1
-
-                            # self.insertCustomer(statistics_id=statistics_id, unique_customer_id=unique_customer_id)
-                            # for vv in range(k):
-                            #     self.insertRecommendation(recommendation_id=vv + 1,
-                            #                               unique_customer_id=unique_customer_id,
-                            #                               unique_article_id=top_k_items[vv],
-                            #                               statistics_id=statistics_id)
-
 
                             # out = False
                             # for purchased_item in range(len(user_purchased_items)):
@@ -546,8 +546,13 @@ class ABTestSimulation:
 
                         while (start_active_users+1 < active_users_length) and (active_users[start_active_users+1][0] == active_users[start_active_users][0]):
                             self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
+                            for vv in range(k):
+                                self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_random[vv], statistics_id=statistics_id)
+                            
                             start_active_users += 1
                         self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
+                        for vv in range(k):
+                                self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_random[vv], statistics_id=statistics_id)
                         start_active_users += 1
                             # for vv in range(k):
                             #     self.database_connection.session.execute(
