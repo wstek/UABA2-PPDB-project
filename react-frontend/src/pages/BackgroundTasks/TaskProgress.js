@@ -21,13 +21,13 @@ function TaskProgress() {
         <div className="TaskTest" style={{textAlign: "center"}}>
             <h4>seconds:</h4>
             <input type="number" id="duration" name="duration1" defaultValue={10}/>
-            <button onClick={() => handleStartDummyTask(1)}>
+            <button onClick={() => handleStartDummyTask(1)} className={"button-purple"}>
                 run dummy task
             </button>
-            <button onClick={() => handleStartDummyTask(2)}>
+            <button onClick={() => handleStartDummyTask(2)} className={"button-purple"}>
                 run dummy insert dataset
             </button>
-            <button onClick={() => handleStartDummyTask(3)}>
+            <button onClick={() => handleStartDummyTask(3)} className={"button-purple"}>
                 run dummy simulation
             </button>
 

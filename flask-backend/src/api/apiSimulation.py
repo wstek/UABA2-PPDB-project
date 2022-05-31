@@ -1,3 +1,5 @@
+import time
+
 from flask import Blueprint, request, session
 
 from src.celeryTasks.tasks import start_simulation as background_start_simulation
@@ -56,6 +58,8 @@ def start_simulation():
         "algorithms": algorithms
     }
 
-    task = background_start_simulation.delay(user_id=session["user_id"], simulation_input=simulation_input)
+    task = background_start_simulation.delay(user_id=session["user_id"], simulation_input=simulation_input,
+                                             meta=abtest_id)
 
-    return {"task_id": task.id}, 202
+    return {"id": task.id, "name": "simulation", "time_start": time.time(), "progress": 0, "progress_message": "",
+            "meta": abtest_id}, 202

@@ -1,8 +1,0 @@
-.stats {
-    display: flex;
-    width: 100%;
-}
-
-.stats .statsContainer {
-    flex: 6;
-}

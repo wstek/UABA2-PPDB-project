@@ -1,5 +1,5 @@
 import React from "react";
-import SelectBox from "./SelectBox";
+import SelectBox from "../../components/SelectBox";
 
 let TYPES = ["string", "int", "float", "image"];
 

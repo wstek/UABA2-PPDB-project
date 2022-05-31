@@ -29,7 +29,7 @@ export default function AttributeList(props) {
 
     return (
         <div>
-            <button onClick={handleAddAttribute}>
+            <button onClick={handleAddAttribute} className={"button-purple"}>
                 add attribute
             </button>
             {Object.keys(props.attributes).map((attributeId) => (
@@ -44,7 +44,7 @@ export default function AttributeList(props) {
 
                     <button onClick={() => {
                         removeAttribute(attributeId)
-                    }}>
+                    }} className={"button-purple"}>
                         remove
                     </button>
                 </div>

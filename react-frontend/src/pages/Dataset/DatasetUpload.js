@@ -1,7 +1,8 @@
 import PurchaseSelect from "./PurchaseSelect";
 import MetaSelect from "./MetaSelect";
-import React, {useRef, useState} from "react";
+import React, {useContext, useRef, useState} from "react";
 import axios from "axios";
+import {SocketContext} from "../../utils/SocketContext";
 
 export default function DatasetUpload(props) {
     const datasetNameRef = useRef("")
@@ -27,6 +28,8 @@ export default function DatasetUpload(props) {
     const [customerMetaFiles, setCustomerMetaFiles] = useState([]);
     const [customerMetaIdColumnName, setCustomerMetaIdColumnName] = useState("")
     const [customerMetaAttributes, setCustomerMetaAttributes] = useState({});
+
+    const {addTask} = useContext(SocketContext);
 
     const getFileSeperatorsData = () => {
         let fileSeperatorData = {};
@@ -263,7 +266,7 @@ export default function DatasetUpload(props) {
                 }
             }
         }).then((response) => {
-            // console.log(response.data);
+            addTask(response.data);
         });
     }
 
@@ -300,11 +303,11 @@ export default function DatasetUpload(props) {
                     datasetNameRef.current = event.target.value;
                 }} placeholder={"Dataset name"} style={{width: "150px"}}/>
 
-                <button onClick={handleUpload}>
+                <button onClick={handleUpload} className={"button-purple"}>
                     Upload
                 </button>
 
-                <button onClick={handleReset}>
+                <button onClick={handleReset} className={"button-purple"}>
                     Reset
                 </button>
             </div>
@@ -332,7 +335,7 @@ export default function DatasetUpload(props) {
             <div>
                 <button onClick={() => {
                     setAddArticleMetaDataFile(!addArticleMetaDataFile)
-                }}>
+                }} className={"button-purple"}>
                     {addArticleMetaDataFile ? "Remove article metadata file" : "Add article metadata file"}
                 </button>
 
@@ -357,7 +360,7 @@ export default function DatasetUpload(props) {
             <div>
                 <button onClick={() => {
                     setAddCustomerMetaDataFile(!addCustomerMetaDataFile)
-                }}>
+                }} className={"button-purple"}>
                     {addCustomerMetaDataFile ? "Remove customer metadata file" : "Add customer metadata file"}
                 </button>
 
