@@ -217,32 +217,6 @@ class ABTestSimulation():
             # statistics per step per algorithm customer_specific_statistics per active user (als n = active_users
             # dan is er n customer_specific_statistics rows) k recommendations per active user
 
-            # active_users = self.database_connection.session.execute(f"SELECT DISTINCT SUBQUERY.unique_customer_id FROM (SELECT * FROM purchase natural join customer WHERE bought_on = '{current_date}' AND dataset_name = '{dataset_name}') AS SUBQUERY").fetchall()
-
-            # purchases = self.database_connection.session.execute(f"SELECT customer_id, article_id, unique_customer_id, unique_article_id  FROM purchase natural join customer natural join article WHERE bought_on = '{current_date}' AND dataset_name = '{dataset_name}'").fetchall()
-
-            user2purchasedItems = dict()
-
-            while (start_purchases + 1 < purchases_length) and (
-                    purchases[start_purchases + 1][4] == purchases[start_purchases][4]):
-                if purchases[start_purchases][2] not in user2purchasedItems:
-                    user2purchasedItems[purchases[start_purchases][2]] = []
-                else:
-                    user2purchasedItems[purchases[start_purchases][2]].append(purchases[start_purchases][3])
-                start_purchases += 1
-
-            if purchases[start_purchases][2] not in user2purchasedItems:
-                user2purchasedItems[purchases[start_purchases][2]] = []
-            else:
-                user2purchasedItems[purchases[start_purchases][2]].append(purchases[start_purchases][3])
-
-            start_purchases += 1
-
-            user_histories = dict()
-
-            for i in range(len(active_users)):
-                user_histories[active_users[i]] = []
-
             for algo in range(len(self.abtest["algorithms"])):
 
                 self.database_connection.session.execute(
@@ -271,10 +245,10 @@ class ABTestSimulation():
                     if n_day:
                         dt_prev_day = dt_current_date - pd.DateOffset(days=1)
                         prev_day = dt_prev_day.strftime('%Y-%m-%d')
+                        numz = int(self.abtest["algorithms"][algo]["parameters"]["LookBackWindow"])
                         retrain = (
                                 dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
-                        interactions = self.database_connection.session.execute(f"SELECT unique_customer_id, unique_article_id from purchase natural join article natural join customer WHERE \
-                            bought_on BETWEEN '{start_date}' AND '{prev_day}' AND dataset_name = '{dataset_name}'").fetchall()
+                        interactions = self.database_connection.session.execute(f'''SELECT unique_customer_id, unique_article_id from purchase natural join article natural join customer WHERE dataset_name = '{dataset_name}' AND bought_on BETWEEN '{current_date}'::date - interval '{numz} days' AND '{current_date}'::date''').fetchall()
                         self.database_connection.session.commit()
 
                         for i in range(len(interactions)):
@@ -289,10 +263,33 @@ class ABTestSimulation():
                                 days=(retrain - int(
                                     self.abtest["algorithms"][algo]["parameters"]['RetrainInterval']) - 1))
                             # 2020-01-01 - 2020-01-05 = 4 -> 2 keer trainen?   momenten waarop getrain moet worden: 2020-01-01, 2020-01-03, 2020-01-05
+
+
+                        user2purchasedItems = dict()
+
+                        while (start_purchases + 1 < purchases_length) and (
+                                purchases[start_purchases + 1][4] == purchases[start_purchases][4]):
+                            if purchases[start_purchases][2] not in user2purchasedItems:
+                                user2purchasedItems[purchases[start_purchases][2]] = []
+                            else:
+                                user2purchasedItems[purchases[start_purchases][2]].append(purchases[start_purchases][3])
+                            start_purchases += 1
+
+                        if purchases[start_purchases][2] not in user2purchasedItems:
+                            user2purchasedItems[purchases[start_purchases][2]] = []
+                        else:
+                            user2purchasedItems[purchases[start_purchases][2]].append(purchases[start_purchases][3])
+
+                        start_purchases += 1
+
+                        user_histories = dict()
+                
                         for cc in range(len(interactions)):
-                            if interactions[cc][0] in user_histories:
-                                user_histories[interactions[cc][0]].append(
-                                    interactions[cc][1])
+                            if interactions[cc][0] in user2purchasedItems:
+                                if interactions[cc][0] in user_histories:
+                                    user_histories[interactions[cc][0]].append([interactions[cc][1]])
+                                else:
+                                    user_histories[interactions[cc][0]] = [interactions[cc][1]]
 
                         index2customer_id = {index: customer_id for index,
                                                                     customer_id in enumerate(user_histories)}
@@ -303,27 +300,66 @@ class ABTestSimulation():
                         # print(histories)
                         recommendations = dynamic_info_algorithms[idx]["KNN"].recommend_all(
                             histories, k)
+                        
+                        lxlist = []
+                        lylist = []
 
                         for cc in range(len(recommendations)):
-                            # print(cc)
-                            recommendations[cc] += generateRandomTopK(
-                                all_unique_item_ids, k - len(recommendations[cc]))
-                            self.insertRecommendations(recommendations=recommendations[cc], statistics_id=statistics_id,
-                                                       unique_customer_id=index2customer_id[cc])
+                            recommendations[cc] += generateRandomTopK(all_unique_item_ids, k - len(recommendations[cc]))
+                            lylist.append([index2customer_id[cc], statistics_id])
+                            for vv in recommendations[cc]:
+                                lxlist.append([vv+1, index2customer_id[cc], statistics_id, vv])
+                        
+                        dfy = pd.DataFrame(lylist)
+                        dfx = pd.DataFrame(lxlist)
+
+                        dfy.columns = ['unique_customer_id', 'statistics_id']
+                        dfx.columns = ['recommendation_id', 'unique_customer_id', 'statistics_id', 'unique_article_id']
+
+                        self.database_connection.session_insert_pd_dataframe(dfy, 'customer_specific_statistics')
+                        self.database_connection.session_insert_pd_dataframe(dfx, 'recommendation')
+
+                        self.database_connection.session.commit()
+
 
                     else:
                         top_k_random = generateRandomTopK(
                             all_unique_item_ids, k)
+                        
+                        lxlist = []
+                        lylist = []
 
-                        # random moet gedaan worden in loop om unieke topk voor elke use te maken maar is trager
-                        for i in range(len(active_users)):
-                            self.insertRecommendations(recommendations=top_k_random, statistics_id=statistics_id,
-                                                       unique_customer_id=active_users[i])
+                        local_start_active_users = start_active_users
+
+                        while (local_start_active_users + 1 < active_users_length) and (
+                                active_users[local_start_active_users + 1][0] == active_users[local_start_active_users][
+                            0]):
+                            lylist.append([active_users[local_start_active_users][1], statistics_id])
+                            for vv in range(k):
+                                lxlist.append([vv + 1, active_users[local_start_active_users][1], statistics_id,
+                                               top_k_random[vv]])
+                            local_start_active_users += 1
+                        lylist.append([active_users[local_start_active_users][1], statistics_id])
+                        for vv in range(k):
+                            lxlist.append(
+                                [vv + 1, active_users[local_start_active_users][1], statistics_id, top_k_random[vv]])
+                        local_start_active_users += 1
+                        start_active_users_next = local_start_active_users
+
+                        dfy = pd.DataFrame(lylist)
+                        dfx = pd.DataFrame(lxlist)
+
+                        dfy.columns = ['unique_customer_id', 'statistics_id']
+                        dfx.columns = ['recommendation_id', 'unique_customer_id', 'statistics_id', 'unique_article_id']
+
+                        self.database_connection.session_insert_pd_dataframe(dfy, 'customer_specific_statistics')
+                        self.database_connection.session_insert_pd_dataframe(dfx, 'recommendation')
+
+                        self.database_connection.session.commit()
 
                         # train KNN algoritme to initialize it:
-                        interactions = self.database_connection.session.execute(
-                            f"SELECT SUBQUERY.unique_customer_id, SUBQUERY.unique_article_id FROM (SELECT * FROM \
-                    purchase natural join article natural join customer WHERE bought_on = '{start_date}' AND dataset_name = '{dataset_name}') AS SUBQUERY").fetchall()  # BETWEEN zetten
+                        numz = int(self.abtest["algorithms"][algo]["parameters"]["LookBackWindow"])
+                        interactions = self.database_connection.session.execute(f'''SELECT SUBQUERY.unique_customer_id, SUBQUERY.unique_article_id FROM (SELECT * FROM purchase natural join article natural join customer WHERE bought_on BETWEEN '{current_date}'::date - interval '{numz} days' AND '{current_date}'::date AND dataset_name = '{dataset_name}') AS SUBQUERY''').fetchall()  # BETWEEN zetten
                         for i in range(len(interactions)):
                             interactions[i] = (
                                 interactions[i][0], interactions[i][1])
@@ -341,7 +377,7 @@ class ABTestSimulation():
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme                     x natural JOIN purchase t natural join article a ORDER BY bought_on
                             top_k = self.database_connection.session.execute(
-                                f"SELECT unique_article_id, MIN(bought_on) FROM purchase natural join article WHERE bought_on <= '{prev_day}' and dataset_name = '{dataset_name}' GROUP BY unique_article_id ORDER BY MIN(bought_on) DESC LIMIT {k}").fetchall()
+                                f"SELECT unique_article_id, MIN(bought_on) FROM purchase natural join article WHERE bought_on < '{current_date}' and dataset_name = '{dataset_name}' GROUP BY unique_article_id ORDER BY MIN(bought_on) DESC LIMIT {k}").fetchall()
                             top_k_items = []
                             for i in range(len(top_k)):
                                 top_k_items.append(top_k[i][0])
