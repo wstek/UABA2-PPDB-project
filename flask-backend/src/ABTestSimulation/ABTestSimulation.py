@@ -91,7 +91,7 @@ class ABTestSimulation():
          natural join article
          join purchase p on article.article_id = p.article_id and article.dataset_name = p.dataset_name and
                             customer.customer_id = p.customer_id and customer.dataset_name = p.dataset_name and
-                            bought_on between date_of and date_of + stepsize
+                            bought_on between date_of and date_of + stepsize::integer
         where bought_on between start_date and end_date
         group by algorithm_id, statistics_id, unique_customer_id ) ctr
         where ctr.unique_customer_id = css.unique_customer_id and css.statistics_id = ctr.statistics_id
@@ -386,7 +386,7 @@ class ABTestSimulation():
 
                     else:
                         top_k = self.database_connection.session.execute(f"SELECT a.unique_article_id, t.bought_on FROM(SELECT article_id,MIN(bought_on) AS bought_on \
-                                FROM purchase WHERE bought_on < '{start_date}'  AND dataset_name = '{dataset_name}' GROUP BY article_id) x natural JOIN purchase t natural join article a ORDER BY bought_on DESC LIMIT {k}").fetchall()
+                                FROM purchase WHERE bought_on < '{current_date}'  AND dataset_name = '{dataset_name}' GROUP BY article_id) x natural JOIN purchase t natural join article a ORDER BY bought_on DESC LIMIT {k}").fetchall()
                         top_k_items = []
                         for i in range(len(top_k)):
                             top_k_items.append(top_k[i][0])
@@ -449,9 +449,9 @@ class ABTestSimulation():
                         retrain = (
                                 dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
-
+                            numz = int(self.abtest["algorithms"][algo]["parameters"]["LookBackWindow"])
                             top_k = self.database_connection.session.execute(
-                                f"SELECT unique_article_id, count(*) times_bought FROM purchase natural join article WHERE bought_on BETWEEN '{start_date}' AND '{current_date}'::date AND dataset_name = '{dataset_name}' GROUP BY unique_article_id ORDER BY times_bought DESC LIMIT {k}").fetchall()
+                                f"SELECT unique_article_id, count(*) times_bought FROM purchase natural join article WHERE bought_on BETWEEN '{current_date}'::date - interval '{numz} days' AND '{current_date}'::date AND dataset_name = '{dataset_name}' GROUP BY unique_article_id ORDER BY times_bought DESC LIMIT {k}").fetchall()
 
                             top_k_items = []
                             for i in range(len(top_k)):
@@ -496,9 +496,18 @@ class ABTestSimulation():
                             self.database_connection.session.commit()
 
                     else:
-                        top_k_random = generateRandomTopK(
-                            all_unique_item_ids, k)
-
+                        numz = int(self.abtest["algorithms"][algo]["parameters"]["LookBackWindow"])
+                        top_k = self.database_connection.session.execute(
+                                f'''SELECT unique_article_id, count(*) times_bought FROM purchase natural join article WHERE bought_on BETWEEN '{current_date}'::date - interval '{numz} days' AND '{current_date}'::date AND dataset_name = '{dataset_name}' GROUP BY unique_article_id ORDER BY times_bought DESC LIMIT {k}''').fetchall()
+                        top_k_items = []
+                        for i in range(len(top_k)):
+                            top_k_items.append(top_k[i][0])
+                        if len(top_k_items) < k:
+                            top_k_random = generateRandomTopK(
+                                all_unique_item_ids, k)
+                        else:
+                            top_k_random = top_k_items
+                        
                         lxlist = []
                         lylist = []
 
@@ -530,14 +539,7 @@ class ABTestSimulation():
 
                         self.database_connection.session.commit()
 
-                        # train Popularity algorithm to initialize it:
-                        top_k = self.database_connection.session.execute(
-                                f'''SELECT unique_article_id, count(*) times_bought FROM purchase natural join article WHERE bought_on BETWEEN ''{current_date}'::date - interval '{7} days' AND '{current_date}'::date AND dataset_name = '{dataset_name}' GROUP BY unique_article_id ORDER BY times_bought DESC LIMIT {k}''').fetchall()
-
-                        top_k_items = []
-                        for i in range(len(top_k)):
-                            top_k_items.append(top_k[i][0])
-                        dynamic_info_algorithms[idx]["prev_top_k"] = top_k_items
+                        dynamic_info_algorithms[idx]["prev_top_k"] = top_k_random
 
                 self.prev_progress = self.current_progress
                 self.current_progress = round(n_day / float(dayz), 2) * 100.0
