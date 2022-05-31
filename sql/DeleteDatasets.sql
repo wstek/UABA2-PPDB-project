@@ -1,1 +1,1 @@
-DELETE FROM "dataset" cascade;
+DELETE FROM "dataset" WHERE name='hamodi';

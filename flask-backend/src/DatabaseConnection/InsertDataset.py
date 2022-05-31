@@ -120,7 +120,6 @@ class InsertDataset:
         self.database_connection.session_execute("SET LOCAL synchronous_commit = 'off'")
         self.database_connection.session_execute("SET session_replication_role = replica;")
 
-        report_progress_message(self.task_id, "inserting dataset name")
         self.__insert_dataset_name()
 
         # execution time measurement
@@ -167,6 +166,7 @@ class InsertDataset:
         report_progress_steps(self.task_id, 13, 13)
 
     def cleanup(self):
+        self.database_connection.engine_execute(f'''DELETE FROM "dataset" WHERE name='{self.dataset_name}';''')
         for original_filename in self.filenames:
             filepath = self.filenames[original_filename]
             os.remove(filepath)
@@ -212,8 +212,10 @@ class InsertDataset:
 
             # if date column contains a timestamp, remove it (expensive operation)
             if check_date:
+
                 for date_column in date_columns:
                     if len(self.df_files[original_filename][date_column][0].split()) > 1:
+                        report_progress_message(self.task_id, "converting timestamps to dates")
                         Logger.log("Converting timestamp to date")
                         self.df_files[original_filename][date_column] = pd.to_datetime(
                             self.df_files[original_filename][date_column]).dt.date
@@ -247,8 +249,6 @@ class InsertDataset:
 
     def __create_purchasedata_df(self):
         purchase_select_data = self.dataset_selection_data["purchase_data"]
-
-        print(self.df_purchase_files.head(100))
 
         shallow_copy_df_column(self.df_purchase_files, purchase_select_data["column_name_bought_on"],
                                self.df_purchase_data, "bought_on", ignore_empty=True)
@@ -324,7 +324,11 @@ class InsertDataset:
         VALUES ('{self.dataset_name}', '{self.uploader_name}')
         """
 
-        self.database_connection.engine_execute(query)
+        try:
+            self.database_connection.engine_execute(query)
+
+        except Exception as error:
+            raise ValueError(f"dataset {self.dataset_name} already exists")
 
     def __insert_purchase_data(self):
         Logger.log(

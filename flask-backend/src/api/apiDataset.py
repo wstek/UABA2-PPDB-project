@@ -46,7 +46,8 @@ def upload_dataset():
     # start the dataset insert background process
     task = insert_dataset.delay(filenames, column_select_data, user_id=user_id, meta=column_select_data["dataset_name"])
 
-    return {"id": task.id, "name": "insert_dataset", "time_start": time.time(), "progress": 0, "progress_message": "",
+    return {"id": task.id, "name": "insert_dataset", "time_start": time.time(), "progress": 0,
+            "progress_message": "parsing files",
             "meta": column_select_data["dataset_name"]}, 202
 
 
