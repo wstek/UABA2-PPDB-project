@@ -130,7 +130,6 @@ const ABTestInputList = ({abs_algorithms}) => {
                 credentials: 'include',
                 body: jdata
             }).then((res) => {
-                console.log("hi")
                 setIsPending(false);
                 if (res.status === 409) {
                     history.push("/sign_in")
