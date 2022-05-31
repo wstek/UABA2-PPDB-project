@@ -15,7 +15,7 @@ import {handleLoggedIn} from './utils/handleLoggedIn'
 import Simulation from "./pages/Account/Simulation";
 import ChangeInfo from "./pages/Account/ChangeInfo";
 import Home from "./pages/Home";
-import UserList from "./pages/list/List"
+import CustomerList from "./pages/list/CustomerList"
 import Single from './pages/single/Single';
 import TaskTest from "./pages/BackgroundTasks/TaskTest";
 import TaskProgress from "./pages/BackgroundTasks/TaskProgress";
@@ -30,12 +30,23 @@ import {toast, ToastContainer} from "react-toastify";
 import axios from "axios";
 
 
+function getTaskEvents(taskId) {
+    return ([
+        "task:" + taskId + ":progress",
+        "task:" + taskId + ":progress_message",
+        "task:" + taskId + ":error_message"
+    ])
+}
+
+
 function App() {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [socket, setSocket] = useState(null);
     const [tasks, setTasks] = useState([]); // task: {id, name, time_start, meta, progress, progress_message}
-    const notify = (message) => toast.info(message);    // react-toastify
+    const infoPopup = (message) => toast.info(message);    // react-toastify
+    const successPopup = (message) => toast.success(message);
+    const errorPopup = (message) => toast.error(message);
 
     useEffect(() => {
         var newDate = new Date();
@@ -48,25 +59,32 @@ function App() {
         handleAddTaskProgressEvent(task);
     }
 
-    function handleAddTaskProgressEvent(task) {
-        const event = "task:" + task.id + ":progress";
-        const event2 = "task:" + task.id + ":progress_message";
+    const addTaskProgressEvents = (task, socketClient) => {
+        let taskEvents = getTaskEvents(task.id);
 
-        socket.on(event, (data) => {
+        socketClient.on(taskEvents[0], (data) => {
             setTasks(oldTasks => oldTasks.map(list_task => list_task.id === task.id ?
                 {...list_task, progress: data} : list_task))
 
             if (data === 100) {
-                notify(task.name + " " + task.meta + " has finished!")
+                successPopup(task.name + " " + task.meta + " has finished!")
                 handleRemoveTask(task);
             }
-        })
+        });
 
-        socket.on(event2, (data) => {
+        socketClient.on(taskEvents[1], (data) => {
             setTasks(oldTasks => oldTasks.map(list_task => list_task.id === task.id ?
                 {...list_task, progress_message: data} : list_task))
         })
 
+        socketClient.on(taskEvents[2], (data) => {
+            errorPopup(data);
+            handleRemoveTask(task);
+        })
+    }
+
+    function handleAddTaskProgressEvent(task) {
+        addTaskProgressEvents(task, socket);
     }
 
     function handleRemoveTask(task) {
@@ -75,9 +93,9 @@ function App() {
     }
 
     function handleRemoveTaskProgressEvent(task) {
-        const event = "task:" + task.id + ":progress";
-
-        socket.off(event);
+        getTaskEvents(task.id).forEach((event) => {
+            socket.off(event);
+        })
     }
 
     function getAllUserTasks(socketClient) {
@@ -85,17 +103,7 @@ function App() {
             setTasks(response.data);
 
             response.data.forEach(task => {
-                const event = "task:" + task.id + ":progress";
-
-                socketClient.on(event, (data) => {
-                    setTasks(oldTasks => oldTasks.map(list_task => list_task.id === task.id ?
-                        {...list_task, progress: data} : list_task))
-
-                    if (data === 100) {
-                        notify(task.name + " " + task.meta + " has finished!")
-                        handleRemoveTask(task);
-                    }
-                })
+                addTaskProgressEvents(task, socketClient);
             })
         })
     }
@@ -191,11 +199,8 @@ function App() {
 
                                         {/*statistics / information*/}
                                         <ProtectedRoute component={Statistics}
-                                                        exact path={"/Statistics/(ABTest)?/:abtest_id?/:statistics?"}/>
-                                        <ProtectedRoute component={UserList}
-                                                        exact path={"/ABTest/:abtest_id/Customer/:customer_id"}/>
-                                        <ProtectedRoute component={ItemList}
-                                                        exact path={"/ABTest/:abtest_id/Item/:item_id"}/>
+                                                        path={"/Statistics/(ABTest)?/:abtest_id?/:statistics?"}/>
+
                                         <ProtectedRoute component={Single}
                                                         exact path={"/users/:userId"}/>
                                         <ProtectedRoute component={Single}
@@ -209,7 +214,7 @@ function App() {
                                     <div className={"clear"}/>
                                     <ToastContainer
                                         position="bottom-right"
-                                        autoClose={2000}
+                                        autoClose={4000}
                                         hideProgressBar={false}
                                         newestOnTop
                                         closeOnClick

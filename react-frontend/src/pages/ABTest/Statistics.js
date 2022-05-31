@@ -12,6 +12,9 @@ import {PurpleSpinner} from "../../components/PurpleSpinner";
 import CustomerOverview from "../../components/table/StatisticsCustomerTable";
 import {ABTestContext} from "../../utils/Contexts.js";
 import {TopKPerAlgorithmTable, TopKPurchasedTable} from "../../components/table/ReactTable";
+import ProtectedRoute from "../../utils/ProtectedRoute";
+import CustomerList from "../list/CustomerList";
+import ItemList from "../list/ItemList";
 
 const reducer = (state, action) => {
     return {...state, [action.field]: action.value};
@@ -53,8 +56,8 @@ function ABTestOverview({abtest_information}) {
 ABTestOverview.propTypes = {input_algorithms: PropTypes.any};
 
 function GeneralABTestInformation({abtest_data, input_algorithms}) {
-    return <div className="row text-center align-content-center justify-content-center">
-        <div className={"col-auto my-auto"}>
+    return <>
+        <div className={"col-auto"}>
             <h1>ABTest Parameters</h1>
             <ABTestOverview abtest_information={abtest_data}/>
         </div>
@@ -62,7 +65,7 @@ function GeneralABTestInformation({abtest_data, input_algorithms}) {
             <h1>Used algorithms information</h1>
             <AlgorithmsOverview input_algorithms={input_algorithms}/>
         </div>
-    </div>;
+    </>;
 }
 
 function ABTestCharts({graphdata}) {
@@ -70,32 +73,32 @@ function ABTestCharts({graphdata}) {
         active_user_over_time, purchases_over_time, click_through_rate_over_time, attribution_rate_over_time
     } = graphdata
 
-    const {end_date_index, start_date_index} = useContext(ABTestContext);
+    const {end_date, start_date} = useContext(ABTestContext);
     return (<>
         <div className="row text-center align-content-center justify-content-center g-0 ">
             <div className="col-12 col-lg-12 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
-                <LineChart chart_id={1} title="Active Users" xMin={start_date_index}
-                           xMax={end_date_index}
+                <LineChart chart_id={1} title="Active Users" xMin={start_date}
+                           xMax={end_date}
                            XFnY={active_user_over_time}/>
             </div>
             <div className="col-12 col-lg-12 col-xl-6 col-xxl-6" style={{minHeight: "400px"}}>
-                <LineChart chart_id={2} title={"Purchases"} xMin={start_date_index}
-                           xMax={end_date_index} XFnY={purchases_over_time}/>
+                <LineChart chart_id={2} title={"Purchases"} xMin={start_date}
+                           xMax={end_date} XFnY={purchases_over_time}/>
             </div>
         </div>
         <div className="row text-center align-content-center justify-content-center g-0">
             <div className="col-12 col-lg-12 col-xl-6 col-xxl-6 " style={{minHeight: "400px"}}>
-                <LineChart chart_id={3} title="Click Through Rate" xMin={start_date_index}
-                           xMax={end_date_index}
+                <LineChart chart_id={3} title="Click Through Rate" xMin={start_date}
+                           xMax={end_date}
                            XFnY={click_through_rate_over_time} ex_options={{
                     vAxis: {
-                        format: '#.######%'
+                        format: '   ##.######%'
                     }
 
                 }}
                            formatters={[{
                                type: "NumberFormat", column: 1, options: {
-                                   pattern: '#.######%',
+                                   pattern: '  ##.######%',
                                }
                            }]}
                 />
@@ -105,8 +108,8 @@ function ABTestCharts({graphdata}) {
                     vAxis: {
                         format: '#.######%'
                     }
-                }} xMin={start_date_index}
-                           xMax={end_date_index}
+                }} xMin={start_date}
+                           xMax={end_date}
                            XFnY={attribution_rate_over_time}
                            formatters={[{
                                type: "NumberFormat", column: 1, options: {
@@ -122,7 +125,6 @@ function ABTestCharts({graphdata}) {
 
 function TopK() {
     const {abtest_id, start_date, end_date, start_date_index, end_date_index} = useContext(ABTestContext);
-    console.log(start_date, end_date)
     return (<>
         <div className="col-auto " style={{minHeight: "400px"}}>
             <TopKPerAlgorithmTable abtest_id={abtest_id}
@@ -145,7 +147,9 @@ function StatisticsInformation() {
     const setInputAlgorithms = (data) => setState({field: 'input_algorithms', value: data})
     // const setSelectedABTest = (data) => setState({field: 'selected_abtest', value: data})
     const setActiveUsersOverTime = (data) => setState({field: 'active_user_over_time', value: data})
-    const setPurchasesOverTime = (data) => setState({field: 'purchases_over_time', value: data})
+    const setPurchasesOverTime = (data) =>{
+      setState({field: 'purchases_over_time', value: data})
+    }
     const setClickThroughRate = (data) => setState({field: 'click_through_rate_over_time', value: data})
     const setABTestData = (data) => {
         setState({
@@ -153,21 +157,6 @@ function StatisticsInformation() {
         })
     }
     const setAttributionRate = (data) => {
-
-        // if (data) {
-        //     console.log(data)
-        //     data.graphdata[0][0]= { type:'date' , Date: data.graphdata[0][0]}
-        //     // for (let ent in data.graphdata) {
-        //     //
-        //     //     let d = new Date(data.graphdata[ent][0])
-        //     //     if ( !isNaN(d) ) {
-        //     //
-        //     //         data.graphdata[ent][0] = d
-        //     //     }
-        //     //     data.graphdata[ent].type = 'date'
-        //     // }
-        // }
-        // console.log(data)
         setState({field: 'attribution_rate_over_time', value: data})
     }
     const setSelectedStart = (data) => {
@@ -203,22 +192,18 @@ function StatisticsInformation() {
     }
 
     function fetchInputActiveUsersOverTime(abortCont) {
-        setActiveUsersOverTime(null)
         fetchData(`/api/statistics/abtest/${abtest_id}/active_users_over_time`, setActiveUsersOverTime, abortCont, {}, onNotFound)
     }
 
     function fetchInputPurchasesOverTime(abortCont) {
-        setPurchasesOverTime(null)
         fetchData(`/api/statistics/abtest/${abtest_id}/purchases_over_time`, setPurchasesOverTime, abortCont, {}, onNotFound)
     }
 
     function fetchCTROverTime(abortCont) {
-        setClickThroughRate(null)
         fetchData(`/api/statistics/abtest/${abtest_id}/CTR_over_time`, setClickThroughRate, abortCont, {}, onNotFound)
     }
 
     function fetchAttRateOverTime(abortCont) {
-        setAttributionRate(null)
         fetchData(`/api/statistics/abtest/${abtest_id}/AttrRate_over_time`, setAttributionRate, abortCont, {}, onNotFound)
     }
 
@@ -250,7 +235,7 @@ function StatisticsInformation() {
     }}>
         <DateSlider dates={state.abtest_data && state.abtest_data.dates} style={{minHeight: "200px"}}/>
 
-        <div className="row text-center align-content-center justify-content-center mx-auto mt-3">
+        <div className="row text-center align-content-center justify-content-center mx-auto mt-5">
 
             <Switch>
                 <Route exact path="/Statistics/ABTest/:abtest_id/GeneralInfo"
@@ -262,6 +247,10 @@ function StatisticsInformation() {
                        children={<TopK/>}/>
                 <Route exact path="/Statistics/ABTest/:abtest_id/Customers"
                        children={<CustomerOverview/>}/>
+                <Route children={<CustomerList/>}
+                                exact path={"/Statistics/ABTest/:abtest_id/Customer/:customer_id"}/>
+                <Route children={<ItemList/>}
+                                exact path={"/Statistics/ABTest/:abtest_id/Item/:item_id"}/>
 
             </Switch>
         </div>
@@ -330,8 +319,8 @@ function Statistics() {
     }
 
     return (<div className="container-fluid g-0">
-        <div className="row text-center align-items-center">
-            <div className="col">
+        <div className="row justify-content-center mb-3 text-center center align-items-center">
+            <div className="col-auto">
 
                 <InputSelector inputs={personal_abtests}
                                onClick={fetchCurrentUserABTestIDs}
@@ -341,7 +330,7 @@ function Statistics() {
                 />
                 <Route path="/Statistics/ABTest/:abtest_id/" children={<DeleteABTestButton/>}/>
             </div>
-            {abtest_id && <div className="col">
+            {abtest_id && <div className="col-auto">
                 <InputTabs selected_input={statistics} inputs={["GeneralInfo", "Graphs", "TopK", "Customers"]}
                            header={"Select View"}
                            linkTo={(selected_stat) => `/Statistics/ABTest/${abtest_id}/${selected_stat}`}/>

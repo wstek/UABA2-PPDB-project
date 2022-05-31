@@ -13,7 +13,9 @@ class Config(object):
     SESSION_REDIS = redis.from_url('redis://localhost:6379')
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = "None"
-    PERMANENT_SESSION_LIFETIME = timedelta(minutes=60)
+    SESSION_COOKIE_HTTPONLY = False
+    # PERMANENT_SESSION_LIFETIME = timedelta(minutes=1)
+    # SESSION_REFRESH_EACH_REQUEST = False
 
     # server side event
     REDIS_URL = "redis://localhost:6379"

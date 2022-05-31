@@ -51,7 +51,8 @@ def get_tasks():
             "id": active_task["id"],
             "name": active_task["name"],
             "time_start": active_task["time_start"],
-            "progress": redis_extension.get(active_task["id"]),
+            "progress": redis_extension.get(f"task:{active_task['id']}:progress"),
+            "progress_message": redis_extension.get(f"task:{active_task['id']}:progress_message"),
             "meta": meta
         })
 

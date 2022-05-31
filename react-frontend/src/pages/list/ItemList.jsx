@@ -1,18 +1,21 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import "./list.css"
 import {useParams} from "react-router-dom";
 import LineChart from "../../components/chart/LineChart";
+import {ABTestContext} from "../../utils/Contexts";
 
 const ItemList = () => {
     let {abtest_id, item_id} = useParams();
     const [loadedImage, setLoadedImage] = useState(false)
     const [image, setImage] = useState(null)
     const [amountOfPurchases, setAmountOfPurchases] = useState(null)
-    const [maxDays, setMaxDays] = useState(null)
     const [graphsLoaded, setGraphsLoaded] = useState(false)
     const [amountOfReccommendations, setAmountOfReccommendations] = useState(null)
     const [amountOfSuccesfullReccommendation, setAmountOfSuccesfullRecommendations] = useState(null)
 
+    const {start_date, end_date} = useContext(ABTestContext);
+
+    console.log(abtest_id, start_date, end_date)
     useEffect(() => {
         fetch('/api/items/' + abtest_id, {
             method: 'GET',
@@ -23,7 +26,6 @@ const ItemList = () => {
                 if (data.error) {
                     throw Error(data.error);
                 }
-                setMaxDays(data.max_days)
 
             }).catch((err) => {
             console.log(err);
@@ -65,7 +67,7 @@ const ItemList = () => {
                 let l = ["Date"]
                 let alg_ids = Object.keys(data.resp).length > 0 && Object.keys(data.resp[Object.keys(data.resp)[0]])
 
-                if (! alg_ids) return setAmountOfReccommendations(map)
+                if (!alg_ids) return setAmountOfReccommendations(map)
                 alg_ids.forEach((alg_id) => l.push(alg_id))
                 map["graphdata"].push(l)
 
@@ -158,21 +160,21 @@ const ItemList = () => {
 
                 </div>
                 <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
-                    <LineChart chart_id={1} title="Amount Of Purchases" xMin={0}
-                               xMax={maxDays}
+                    <LineChart chart_id={1} title="Amount Of Purchases" xMin={start_date}
+                               xMax={end_date}
                                XFnY={amountOfPurchases}/>
 
                 </div>
             </div>
             <div className="row text-center align-content-center justify-content-center">
                 <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
-                    <LineChart chart_id={2} title={"Recommendations"} xMin={0}
-                               xMax={maxDays} XFnY={amountOfReccommendations}/>
+                    <LineChart chart_id={2} title={"Recommendations"} xMin={start_date}
+                               xMax={end_date} XFnY={amountOfReccommendations}/>
 
                 </div>
                 <div className="col-12 col-lg-6 col-xl-6 col-xxl-6" style={{height: "400px"}}>
-                    <LineChart chart_id={3} title="Amount Of Succesfull reccomendations" xMin={0}
-                               xMax={maxDays}
+                    <LineChart chart_id={3} title="Amount Of Succesfull reccomendations" xMin={start_date}
+                               xMax={end_date}
                                XFnY={amountOfSuccesfullReccommendation}/>
                 </div>
             </div>

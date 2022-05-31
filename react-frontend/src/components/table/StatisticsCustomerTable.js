@@ -69,7 +69,7 @@ function CustomerList() {
             renderCell: (cellValues) => {
                 let customer_id = cellValues.row.Customer
                 return <Link style={{textDecoration: 'inherit'}}
-                             to={`/ABTest/${abtest_id}/Customer/${customer_id}`}> {customer_id} </Link>
+                             to={`/Statistics/ABTest/${abtest_id}/Customer/${customer_id}`}> {customer_id} </Link>
             }
         },
             {
@@ -109,7 +109,7 @@ function CustomerList() {
                 onCellClick={(params, event) => {
                     if (params.colDef.field === 'Customer') {
                         let customer_id = params.row.Customer
-                        history.push(`/ABTest/${abtest_id}/Customer/${customer_id}`)
+                        history.push(`/Statistics/ABTest/${abtest_id}/Customer/${customer_id}`)
                     }
                 }}
                 className={''}

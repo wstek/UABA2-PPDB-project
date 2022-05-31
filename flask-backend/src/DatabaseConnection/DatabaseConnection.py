@@ -125,7 +125,7 @@ class DatabaseConnection:
             where created_by = '{username}'
             order by abtest_id;
             '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getUserCount(self, dataset_name):
         query = f'''
@@ -133,7 +133,7 @@ class DatabaseConnection:
             from customer 
             where dataset_name = '{dataset_name}';
             '''
-        return self.session_execute_and_fetch(query, fetchall=False)
+        return self.engine_execute_and_fetch(query, fetchall=False)
 
     def getItemCount(self, dataset_name):
         query = f'''
@@ -141,7 +141,7 @@ class DatabaseConnection:
             from article 
             where dataset_name = '{dataset_name}';
             '''
-        return self.session_execute_and_fetch(query, fetchall=False)
+        return self.engine_execute_and_fetch(query, fetchall=False)
 
     def getPurchaseCount(self, dataset_name):
         query = f'''
@@ -149,7 +149,7 @@ class DatabaseConnection:
             from purchase 
             where dataset_name = '{dataset_name}';
             '''
-        return self.session_execute_and_fetch(query, fetchall=False)
+        return self.engine_execute_and_fetch(query, fetchall=False)
 
     def getTimesRecommended(self, abtest_id):
         query = f''' 
@@ -158,7 +158,7 @@ class DatabaseConnection:
                 natural join statistics natural join ab_test natural join purchase
             where date_of >= start_date and date_of <= end_date and abtest_id = {abtest_id} and  unique_article_id = 100;
             '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getTopkRecommended(self, abtest_id, start_date, end_date, top_k):
         query = f''' 
@@ -182,7 +182,7 @@ class DatabaseConnection:
             where ranked_table.rank <= {top_k}
             order by rank, algorithm_id;
             '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getAlgorithms(self, abtest_id):
         query = f''' 
@@ -191,7 +191,7 @@ class DatabaseConnection:
             where abtest_id = {abtest_id}
             order by abtest_id;
             '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getABTestInfo(self, abtest_id):
         query = f'''
@@ -199,7 +199,7 @@ class DatabaseConnection:
             from ab_test 
             where abtest_id = {abtest_id};
             '''
-        return self.session_execute_and_fetch(query, fetchall=False)
+        return self.engine_execute_and_fetch(query, fetchall=False)
 
     def getAlgorithmsInformation(self, abtest_id):
         query = f'''
@@ -207,7 +207,7 @@ class DatabaseConnection:
             from named_algorithm natural join parameter 
             where abtest_id = {abtest_id};
             '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getActiveUsers(self, start, end, dataset_name):
         query = f'''
@@ -215,7 +215,7 @@ class DatabaseConnection:
             FROM purchase natural join customer
             WHERE '{start}' <= bought_on and bought_on <= '{end}' and dataset_name = '{dataset_name}'; 
         '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getActiveUsersOverTime(self, start, end, dataset_name):
         query = f'''
@@ -224,7 +224,7 @@ class DatabaseConnection:
             WHERE bought_on between '{start}' and '{end}' and dataset_name = '{dataset_name}' 
             group by bought_on;
         '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getPurchasesOverTime(self, start, end, dataset_name):
         query = f'''
@@ -233,7 +233,7 @@ class DatabaseConnection:
             WHERE bought_on between '{start}' and '{end}' and dataset_name = '{dataset_name}' 
             group by bought_on;
         '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getPriceExtrema(self, dataset_name):
         query = f'''
@@ -241,7 +241,7 @@ class DatabaseConnection:
             FROM purchase
             WHERE dataset_name = '{dataset_name}' 
         '''
-        return self.session_execute_and_fetch(query, fetchall=False)
+        return self.engine_execute_and_fetch(query, fetchall=False)
 
     def getCRTOverTime(self, abtest_id):
         query = f'''
@@ -254,7 +254,7 @@ class DatabaseConnection:
         ;       
             '''
 
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getRevenueOverTime(self, abtest_id):
         abtest = self.getABTestInfo(abtest_id)
@@ -264,7 +264,7 @@ class DatabaseConnection:
                 where bought_on between '{abtest.start_date}' and '{abtest.end_date}' and dataset_name = '{abtest.dataset_name}'
                 group by bought_on;
             '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getAttributionRateOverTime(self, abtest_id: int):
         query = f'''
@@ -279,7 +279,7 @@ class DatabaseConnection:
                 group by algorithm_id, bought_on
                 order by algorithm_id, bought_on) result natural join named_algorithm;
             '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getDynamicStepsizeVar(self, abtest_id, parameter_name):
         query = f'''
@@ -287,7 +287,7 @@ class DatabaseConnection:
             FROM statistics NATURAL JOIN dynamic_stepsize_var NATURAL JOIN named_algorithm NATURAL JOIN ab_test 
             WHERE abtest_id = {abtest_id} AND parameter_name = '{parameter_name}' ORDER BY date_of;
         '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getPriceCount(self, price_interval_min, price_interval_max, dataset_name):
         query = f'''
@@ -295,7 +295,7 @@ class DatabaseConnection:
             FROM purchase
             WHERE dataset_name = '{dataset_name}' and {price_interval_min} <= price and price < {price_interval_max}  
         '''
-        return self.session_execute_and_fetch(query, fetchall=False)
+        return self.engine_execute_and_fetch(query, fetchall=False)
 
     def makeAdmin(self, username):
         query = f'''
@@ -321,7 +321,7 @@ class DatabaseConnection:
             order by count(*) desc
             limit {top_k};
         '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getPriceDistribution(self, dataset_name, intervals):
         priceExtrema = self.getPriceExtrema(dataset_name)
@@ -343,13 +343,13 @@ class DatabaseConnection:
         query = f'''
                     SELECT unique_customer_id FROM customer where dataset_name='{dataset_name}'
             '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getAllUniqueArticleIDs(self, dataset_name):
         query = f'''
                     SELECT unique_article_id FROM article where dataset_name='{dataset_name}'
             '''
-        return self.session_execute_and_fetch(query)
+        return self.engine_execute_and_fetch(query)
 
     def getActiveUsersBetween(self, abtest_id, start_date, end_date):
         query = f'''
@@ -359,7 +359,7 @@ class DatabaseConnection:
                      natural join (select dataset_name from ab_test where abtest_id = {abtest_id} ) ab_test
             where bought_on between '{start_date}' and '{end_date}';
             '''
-        return self.session_execute_and_fetch(query, fetchall=False)
+        return self.engine_execute_and_fetch(query, fetchall=False)
 
     def getDates(self, abtest_id):
         query = f'''
@@ -368,13 +368,13 @@ class DatabaseConnection:
                 where abtest_id = {abtest_id}
                 order by date_of
             '''
-        return self.session_execute_and_fetch(query, fetchall=True)
+        return self.engine_execute_and_fetch(query, fetchall=True)
 
     def getAllDates(self, abtest_id):
         query = f'''
                 select generate_series(start_date::date,end_date::date,'1 day'::interval)::date date from ab_test where abtest_id = {abtest_id}
             '''
-        return self.session_execute_and_fetch(query, fetchall=True)
+        return self.engine_execute_and_fetch(query, fetchall=True)
 
     def getUniqueCustomerStats(self, abtest_id, start_date, end_date):
         query = f'''
@@ -389,7 +389,7 @@ class DatabaseConnection:
             group by unique_customer_id 
             order by days_active desc;
             '''
-        return self.session_execute_and_fetch(query, fetchall=True)
+        return self.engine_execute_and_fetch(query, fetchall=True)
 
     def CTR_PerUser(self, abtest_id, start, end):
         query = f'''
@@ -401,7 +401,7 @@ class DatabaseConnection:
             order by unique_customer_id, algorithm_id
             ;
             '''
-        return self.session_execute_and_fetch(query, fetchall=True)
+        return self.engine_execute_and_fetch(query, fetchall=True)
 
 
 if __name__ == '__main__':

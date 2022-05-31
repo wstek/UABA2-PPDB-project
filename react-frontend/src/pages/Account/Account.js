@@ -4,8 +4,11 @@ import React, {useContext} from "react";
 import logOut from '../../utils/logOut'
 import {UserContext} from "../../utils/UserContext";
 
+import { useCookies } from "react-cookie";
+
 function Account() {
     const {user, updateUser} = useContext(UserContext);
+    const [cookies, setCookie] = useCookies();
     return (
         <div className="row h-100 ">
             <div className="col text-center mt-2">
