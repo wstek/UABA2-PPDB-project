@@ -20,7 +20,7 @@ export default function MetaSelect(props) {
 
             <div>
                 <label style={{display: "block"}}>{props.type.charAt(0).toUpperCase() + props.type.slice(1) + " id"}</label>
-                <SelectBox placeholder={props.type + "_id"} onChange={event => props.onChangeIdColumn(event.target.value)}
+                <SelectBox placeholder={"Select column"} onChange={event => props.onChangeIdColumn(event.target.value)}
                            options={fileColumnNames}
                            width={"150px"}/>
             </div>

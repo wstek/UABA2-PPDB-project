@@ -57,15 +57,17 @@ export default function FileSelectList(props) {
 
     return (
         <>
-            <input type="file" name="csv_file" className={"bg-purple green-hover w-100"} multiple
-                   onChange={handleFileselect} accept=".csv"/>
+            <div style={{width: '250px', margin: "auto", textAlign: "center"}}>
+                <input type="file" name="csv_file" className={"bg-purple green-hover w-100"} multiple
+                       onChange={handleFileselect} accept=".csv"/>
+            </div>
 
             {parseProgress &&
                 <PurpleSpinner/>
             }
 
             {!parseProgress && props.files.map((file, index) => (
-                <div>
+                <div key={index}>
                     <FileSeperatorEditor
                         key={index}
                         fileName={file.file.name}

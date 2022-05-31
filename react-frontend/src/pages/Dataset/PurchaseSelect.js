@@ -21,21 +21,21 @@ export default function PurchaseSelect(props) {
 
             <div>
                 <label style={{display: "block"}}>Time</label>
-                <SelectBox placeholder={"Time"} onChange={event => props.onChangeTimeColumn(event.target.value)}
+                <SelectBox placeholder={"Select column"} onChange={event => props.onChangeTimeColumn(event.target.value)}
                            options={fileColumnNames}
                            width={"150px"}/>
             </div>
 
             <div>
                 <label style={{display: "block"}}>Price</label>
-                <SelectBox placeholder={"Price"} onChange={event => props.onChangePriceColumn(event.target.value)}
+                <SelectBox placeholder={"Select column"} onChange={event => props.onChangePriceColumn(event.target.value)}
                            options={fileColumnNames}
                            width={"150px"}/>
             </div>
 
             <div>
                 <label style={{display: "block"}}>Article id</label>
-                <SelectBox placeholder={"Article id"}
+                <SelectBox placeholder={"Select column"}
                            onChange={event => props.onChangeArticleIdColumn(event.target.value)}
                            options={fileColumnNames}
                            width={"150px"}/>
@@ -43,7 +43,7 @@ export default function PurchaseSelect(props) {
 
             <div>
                 <label style={{display: "block"}}>Customer id</label>
-                <SelectBox placeholder={"Customer id"}
+                <SelectBox placeholder={"Select column"}
                            onChange={event => props.onChangeCustomerIdColumn(event.target.value)}
                            options={fileColumnNames}
                            width={"150px"}/>

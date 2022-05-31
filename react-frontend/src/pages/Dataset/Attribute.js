@@ -20,7 +20,7 @@ export default function Attribute(props) {
         <div className="Attribute" style={{display: "inline-block"}}>
             <input required onChange={handleUpdateName} placeholder={"Attribute name"} style={{width: "150px", maxWidth:"100%"}}/>
 
-            <SelectBox placeholder={"Column name"} onChange={handleUpdateColumnName} options={props.columnNames}
+            <SelectBox placeholder={"Select column"} onChange={handleUpdateColumnName} options={props.columnNames}
                        width={"150px"}/>
 
             <SelectBox placeholder={"Type"} onChange={handleUpdateType} options={TYPES}
