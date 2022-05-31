@@ -14,7 +14,7 @@ CREATE DOMAIN nat_int bigint check ( value >= 0 );
 CREATE TABLE IF NOT EXISTS "datascientist"
 (
     "username"       varchar PRIMARY KEY,
-    datascientist_id serial unique not null,
+    datascientist_id bigserial unique not null,
 
     "first_name"     varchar       NOT NULL,
     "last_name"      varchar       NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS "dataset"
 
 CREATE TABLE IF NOT EXISTS "customer"
 (
-    "unique_customer_id" serial,
+    "unique_customer_id" bigserial,
     "customer_id"        nat_int not null,
     "dataset_name"       varchar NOT NULL references dataset (name) on update cascade on delete cascade,
     unique (customer_id, dataset_name),
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS "customer"
 
 CREATE TABLE IF NOT EXISTS "ab_test"
 (
-    "abtest_id"    serial primary key,
+    "abtest_id"    bigserial primary key,
     "top_k"        nat_int NOT NULL,
     "stepsize"     nat_int NOT NULL,
     "start_date"   date    NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS "article"
 
     "article_id"        nat_int not null,
     "dataset_name"      varchar NOT NULL references dataset (name) on update cascade on delete cascade,
-    "unique_article_id" serial,
+    "unique_article_id" bigserial,
     unique (article_id, dataset_name),
     primary key (unique_article_id)
 
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS "purchase"
 
 CREATE TABLE IF NOT EXISTS "algorithm"
 (
-    "algorithm_id"   serial        not null,
+    "algorithm_id"   bigserial        not null,
     "abtest_id"      nat_int       not null,
     foreign key (abtest_id) references ab_test (abtest_id) on update cascade on delete cascade,
     "algorithm_type" algorithmname not null,
@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS "parameter"
 
 CREATE TABLE IF NOT EXISTS "statistics"
 (
-    "statistics_id" serial PRIMARY KEY,
+    "statistics_id" bigserial PRIMARY KEY,
     "date_of"       date    not null,
     "algorithm_id"  nat_int not null,
 
@@ -174,7 +174,7 @@ CREATE TABLE IF NOT EXISTS "recommendation"
 
 CREATE TABLE IF NOT EXISTS "dynamic_stepsize_var"
 (
-    statistics_id   int references statistics (statistics_id) on update cascade on delete cascade,
+    statistics_id   nat_int references statistics (statistics_id) on update cascade on delete cascade,
     parameter_name  varchar,
     parameter_value varchar,
     PRIMARY KEY (statistics_id, parameter_name)
