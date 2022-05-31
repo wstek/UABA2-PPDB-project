@@ -307,8 +307,8 @@ class ABTestSimulation():
                         for cc in range(len(recommendations)):
                             recommendations[cc] += generateRandomTopK(all_unique_item_ids, k - len(recommendations[cc]))
                             lylist.append([index2customer_id[cc], statistics_id])
-                            for vv in recommendations[cc]:
-                                lxlist.append([vv+1, index2customer_id[cc], statistics_id, vv])
+                            for vv in range(len(recommendations[cc])):
+                                lxlist.append([vv+1, index2customer_id[cc], statistics_id, recommendations[cc][vv]])
                         
                         dfy = pd.DataFrame(lylist)
                         dfx = pd.DataFrame(lxlist)
