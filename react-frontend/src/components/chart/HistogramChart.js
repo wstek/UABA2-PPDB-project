@@ -16,8 +16,7 @@ const options = {
 export default function HistogramChart({data, title}) {
     if (!data) return <> <h3>{title}</h3><PurpleSpinner/></>
     else if (data.length <= 1) return <><h3>{title}</h3><h5>No Data Points Provided</h5></>
-
-    let graphdata = [["Value", "Purchases"]]
+    let graphdata = [[{label:"Value", type:'number'}, "Purchases"]]
     for (const [key, value] of Object.entries(data)) {
         graphdata.push([key, value])
     }

@@ -25,8 +25,8 @@ export default function TaskList(props) {
                 props.taskName ? task.name === props.taskName : task
             ).slice(0).reverse().map((task) => {
                 return (
-                    <div>
-                        <p key={task.id} style={{display: "inline-block"}}>
+                    <div key={task.id}>
+                        <p style={{display: "inline-block"}}>
                             {task.meta + "\t" + unixTimeToLocale(task.time_start)}
                         </p>
                         <div style={{width: 50, height: 50, display: "inline-block"}}>
