@@ -33,6 +33,30 @@ def dummy_task(self, duration: int, user_id: str = ""):
 
 
 @celery_extension.task(name="insert_dataset", bind=True)
+def dummy_task2(self, duration: int, user_id: str = ""):
+    print(type(self.request.id))
+
+    try:
+        dummy_task_func(duration, self.request.id)
+    except SoftTimeLimitExceeded:
+        return "aborted"
+
+    return f"slept {duration} seconds"
+
+
+@celery_extension.task(name="simulation", bind=True)
+def dummy_task3(self, duration: int, user_id: str = ""):
+    print(type(self.request.id))
+
+    try:
+        dummy_task_func(duration, self.request.id)
+    except SoftTimeLimitExceeded:
+        return "aborted"
+
+    return f"slept {duration} seconds"
+
+
+@celery_extension.task(name="insert_dataset", bind=True)
 def insert_dataset(self, filenames: Dict[str, str], column_select_data: dict, user_id: str = ""):
     print(user_id, filenames, column_select_data)
     insert_dataset_obj = InsertDataset(database_connection, user_id, filenames, column_select_data, self.request.id)

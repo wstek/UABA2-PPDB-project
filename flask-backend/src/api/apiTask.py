@@ -3,9 +3,10 @@ import json
 from flask import Blueprint, jsonify
 from flask import session, request
 
-from src.celeryTasks.tasks import dummy_task
+from src.celeryTasks.tasks import dummy_task, dummy_task2, dummy_task3
 from src.extensions import celery_extension, redis_extension
 import time
+from src.utils.Logger import Logger
 
 api_task = Blueprint("api_task", __name__)
 
@@ -13,9 +14,21 @@ api_task = Blueprint("api_task", __name__)
 @api_task.route("/api/tasks", methods=["POST"])
 def run_task():
     data = json.loads(request.data)
-    task = dummy_task.delay(data["duration"], user_id=session["user_id"])
 
-    return jsonify({"id": task.id, "name": "dummy_task", "time_start": time.time(), "progress": 0}), 202
+    task = None
+    name = ""
+
+    if data["type"] == 1:
+        task = dummy_task.delay(data["duration"], user_id=session["user_id"])
+        name = "dummy_task"
+    elif data["type"] == 2:
+        task = dummy_task2.delay(data["duration"], user_id=session["user_id"])
+        name = "insert_dataset"
+    elif data["type"] == 3:
+        task = dummy_task3.delay(data["duration"], user_id=session["user_id"])
+        name = "simulation"
+
+    return jsonify({"id": task.id, "name": name, "time_start": time.time(), "progress": 0}), 202
 
 
 @api_task.route("/api/get_tasks")

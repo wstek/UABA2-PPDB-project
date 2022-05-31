@@ -1,127 +1,39 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useContext} from "react";
 import axios from "axios";
-import socketIOClient from "socket.io-client"
-
-import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {SocketContext} from "../../utils/SocketContext";
+import TaskList from "../../components/TaskList";
 
 
 function TaskProgress() {
-    const socketRef = useRef(null);
-    const [tasks, setTasks] = useState([])  // task: {id, name, time_start, progress}
+    const {addTask} = useContext(SocketContext)
 
-    const notify = (message) => toast.info(message);    // react-toastify
-
-    useEffect(() => {
-        if (socketRef.current == null) {
-            socketRef.current = socketIOClient({path: "/api/socket.io"});
-        }
-
-        socketRef.current.on("server_response", (data) => {
-            console.log("server response: ", data)
-        });
-
-        getAllUserTasks();
-
-        return () => {
-            socketRef.current.disconnect();
-        };
-    }, []);
-
-    function getAllUserTasks() {
-        axios.get("/api/get_tasks").then((response) => {
-            setTasks(response.data);
-
-            response.data.forEach(task => {
-                addTaskProgressEvent(task);
-            })
-        })
-    }
-
-    function addTask(task) {
-        setTasks([...tasks, task]);
-        addTaskProgressEvent(task);
-    }
-
-    function removeTask(task) {
-        setTasks(tasks => (tasks.filter(list_task => list_task.id !== task.id)))
-        removeTaskProgressEvent(task);
-    }
-
-    function addTaskProgressEvent(task) {
-        const event = "task:" + task.id + ":progress";
-
-        socketRef.current.on(event, (data) => {
-            setTasks(oldTasks => oldTasks.map(list_task => list_task.id === task.id ?
-                {...list_task, progress: data} : list_task))
-
-            if (data === 100) {
-                notify(task.name + " has finished!")
-                removeTask(task);
-            }
-        })
-    }
-
-    function removeTaskProgressEvent(task) {
-        const event = "task:" + task.id + ":progress";
-
-        socketRef.current.off(event);
-    }
-
-    const handleStartDummyTask = () => {
+    const handleStartDummyTask = (type) => {
         const task_duration = document.getElementById("duration").value;
         console.log("starting task with " + task_duration + " seconds duration");
 
-        axios.post("/api/tasks", {duration: Number(task_duration)}).then((response) => {
+        axios.post("/api/tasks", {duration: Number(task_duration), type: type}).then((response) => {
             addTask(response.data);
         });
-    }
-
-    const handleAbortTask = (task) => {
-        axios.post("/api/abort_task", {task_id: task.id}).then((response) => {
-        });
-        removeTask(task);
-    }
-
-    const renderTasks = () => {
-        return (
-            <div>
-                {tasks.slice(0).reverse().map((task) => {
-                    return (
-                        <div>
-                            <p key={task.id}>
-                                {task.name + "\t" + task.time_start + "\t" + Math.round(task.progress) + "%"}
-                            </p>
-                            <button style={{display: "block", margin: "10px auto"}}
-                                    onClick={() => handleAbortTask(task)}>
-                                abort task
-                            </button>
-                        </div>
-                    )
-                })}
-            </div>
-        )
     }
 
     return (
         <div className="TaskTest" style={{textAlign: "center"}}>
             <h4>seconds:</h4>
-            <input type="number" id="duration" name="duration" defaultValue={10}/>
-            <button style={{display: "block", margin: "10px auto"}} onClick={handleStartDummyTask}>
+            <input type="number" id="duration" name="duration1" defaultValue={10}/>
+            <button onClick={() => handleStartDummyTask(1)}>
                 run dummy task
             </button>
-            {renderTasks()}
-            <ToastContainer
-                position="bottom-right"
-                autoClose={2000}
-                hideProgressBar={false}
-                newestOnTop
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-            />
+            <button onClick={() => handleStartDummyTask(2)}>
+                run dummy insert dataset
+            </button>
+            <button onClick={() => handleStartDummyTask(3)}>
+                run dummy simulation
+            </button>
+
+            <br/>
+
+            <TaskList/>
         </div>
     );
 }
