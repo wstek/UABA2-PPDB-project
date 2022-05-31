@@ -426,7 +426,7 @@ class ABTestSimulation():
 
                         self.database_connection.session.commit()
 
-                        dynamic_info_algorithms[idx]["prev_top_k"] = top_k_items
+                        dynamic_info_algorithms[idx]["prev_top_k"] = top_k_random
 
 
 
