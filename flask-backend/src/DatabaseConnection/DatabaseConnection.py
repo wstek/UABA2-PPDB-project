@@ -29,6 +29,16 @@ class DatabaseConnection:
         self.session = None
         self.meta_data = None
 
+    def __del__(self):
+        self.disconnect()
+
+    def disconnect(self):
+        if self.session:
+            self.session.close()
+        self.engine = None
+        self.session = None
+        self.meta_data = None
+
     def connect(self, filename='database.ini', section='postgresql'):
         # connection parameters
         params = configDatabase(filename, section)
@@ -395,7 +405,7 @@ class DatabaseConnection:
     def getUniqueCustomerStats(self, abtest_id, start_date, end_date):
         query = f'''
 --         purchases, revenue 
-            select unique_customer_id, count(*) as purchases, to_char(sum(price), '99999999990.999') as revenue, 
+            select unique_customer_id, count(*) as purchases, to_char(sum(price), '99999999990.99999') as revenue, 
                     count(distinct (bought_on)) as days_active
             from customer
                      natural join (select dataset_name from ab_test where abtest_id = {abtest_id}) ab_test
