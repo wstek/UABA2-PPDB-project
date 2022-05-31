@@ -332,7 +332,6 @@ class InsertDataset:
             print(error)
             raise ValueError(f"dataset {self.dataset_name} already exists")
 
-
     def __insert_purchase_data(self):
         Logger.log(
             "purchase dataframe memory usage: " + str(
