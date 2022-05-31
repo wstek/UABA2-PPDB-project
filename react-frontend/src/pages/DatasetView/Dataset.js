@@ -17,7 +17,7 @@ export function DatasetStatistics() {
             setDatasetInformation(data)
         })
     }
-    useEffect(fetchDatasetInformation, [],)
+    useEffect(fetchDatasetInformation, [dataset_name],)
 
     if (!dataset_information) return <PurpleSpinner/>
     // console.log(dataset_information)
@@ -79,7 +79,8 @@ export default function DatasetPage() {
                            onChange={(selected_dataset) => history.push('/dataset/' + selected_dataset)}
                 // setSelectedInput={setSelectedDataset}
                            selected_input={dataset_name}
-                           header={"Select Dataset"}
+                           header={"" +
+                               "Select Dataset"}
             />
         </div>
         {/*{selected_dataset && <Redirect to={'dataset/'+selected_dataset}></Redirect> }*/}
