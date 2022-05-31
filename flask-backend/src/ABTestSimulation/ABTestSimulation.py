@@ -1,15 +1,14 @@
 import random
-import threading
 import time
 
 import numpy
 import pandas as pd
 from psycopg2.extensions import register_adapter, AsIs
 
-import datetime
-
 from src.ABTestSimulation.Algorithms.iknn import ItemKNNIterative
 from src.DatabaseConnection.DatabaseConnection import DatabaseConnection
+
+from src.socketioEvents.reportProgress import report_progress_percentage
 
 
 def addapt_numpy_float64(numpy_float64):
@@ -41,9 +40,19 @@ def generateRandomTopK(listx, items):
     return random.sample(listx, items)
 
 
-class ABTestSimulation(threading.Thread):
+class ABTestSimulation():
+    def __init__(self, database_connection: DatabaseConnection, abtest, task_id=""):
+        self.frontend_data = []
+        self.done = False
+        self.abtest = abtest
+        self.database_connection: DatabaseConnection = database_connection
+
+        self.prev_progress = 0
+        self.current_progress = 0
+        self.test_id = task_id
+
     def calculateAttributions(self, days: int):
-        print(f'Calculating attributions @{days}D {self.start_time} Time since start:{time.time()-self.start_time}' )
+        print(f'Calculating attributions @{days}D {self.start_time} Time since start:{time.time() - self.start_time}')
         query = f'''
             create materialized view attr_abtest_{self.abtest["abtest_id"]}_{days}d as (
             select algorithm_id, bought_on, unique_customer_id, 
@@ -67,7 +76,7 @@ class ABTestSimulation(threading.Thread):
         self.database_connection.engine_execute(query)
 
     def calculateClickedThrough(self):
-        print(f'Calculating ClickedThrough {self.start_time} Time since start:{time.time()-self.start_time}' )
+        print(f'Calculating ClickedThrough {self.start_time} Time since start:{time.time() - self.start_time}')
         query = f'''
         update customer_specific_statistics css
             set clicked_through = ctr.clicked_through
@@ -94,17 +103,6 @@ class ABTestSimulation(threading.Thread):
         self.calculateAttributions(7)
         self.calculateAttributions(30)
         self.calculateClickedThrough()
-
-    def __init__(self, database_connection: DatabaseConnection, abtest):
-        super().__init__()
-        # self.sse = sse
-        self.frontend_data = []
-        self.done = False
-        self.abtest = abtest
-        self.database_connection: DatabaseConnection = database_connection
-
-        self.prev_progress = 0
-        self.current_progress = 0
 
     def insertCustomer(self, unique_customer_id, statistics_id):
         self.database_connection.session.execute(
@@ -191,9 +189,11 @@ class ABTestSimulation(threading.Thread):
 
         D_prev_recommendations = []
 
-        active_users = self.database_connection.session.execute(f"select distinct bought_on, unique_customer_id from purchase natural join customer where bought_on between '{start_date}' and '{end_date}' order by bought_on,unique_customer_id").fetchall() #end_date not included?
+        active_users = self.database_connection.session.execute(
+            f"select distinct bought_on, unique_customer_id from purchase natural join customer where bought_on between '{start_date}' and '{end_date}' order by bought_on,unique_customer_id").fetchall()  # end_date not included?
 
-        purchases = self.database_connection.session.execute(f"select distinct customer_id, article_id, unique_customer_id, unique_article_id, bought_on from purchase natural join customer natural join article where dataset_name = '{dataset_name}' and  bought_on between '{start_date}' and '{end_date}' order by bought_on, unique_customer_id").fetchall() #end_date not included?
+        purchases = self.database_connection.session.execute(
+            f"select distinct customer_id, article_id, unique_customer_id, unique_article_id, bought_on from purchase natural join customer natural join article where dataset_name = '{dataset_name}' and  bought_on between '{start_date}' and '{end_date}' order by bought_on, unique_customer_id").fetchall()  # end_date not included?
 
         purchases_length = len(purchases)
 
@@ -206,11 +206,11 @@ class ABTestSimulation(threading.Thread):
         # print(type(purchases[0][4]))
 
         statistics_id = self.database_connection.session.execute(
-                    f'SELECT last_value FROM statistics_statistics_id_seq').fetchone()[0]
+            f'SELECT last_value FROM statistics_statistics_id_seq').fetchone()[0]
 
         # SIMULATION LOOP MAIN
         for n_day in range(0, int(dayz) + 1, int(self.abtest["stepsize"])):
-            print(f'Day: {n_day}/{dayz} Time since start:{time.time()-self.start_time}')
+            print(f'Day: {n_day}/{dayz} Time since start:{time.time() - self.start_time}')
 
             start_active_users = start_active_users_next
 
@@ -231,7 +231,8 @@ class ABTestSimulation(threading.Thread):
 
             print(2)
 
-            while (start_purchases+1 < purchases_length) and (purchases[start_purchases+1][4] == purchases[start_purchases][4]):
+            while (start_purchases + 1 < purchases_length) and (
+                    purchases[start_purchases + 1][4] == purchases[start_purchases][4]):
                 if purchases[start_purchases][2] not in user2purchasedItems:
                     user2purchasedItems[purchases[start_purchases][2]] = []
                 else:
@@ -255,11 +256,9 @@ class ABTestSimulation(threading.Thread):
             for i in range(len(active_users)):
                 user_histories[active_users[i]] = []
 
-
             if len(D_prev_recommendations) == D + 1:
                 D_prev_recommendations.pop(0)
             D_prev_recommendations.append({})
-
 
             for algo in range(len(self.abtest["algorithms"])):
 
@@ -270,7 +269,7 @@ class ABTestSimulation(threading.Thread):
 
                 statistics_id += 1
 
-                #increment statistics_id by one when done
+                # increment statistics_id by one when done
 
                 idx = int(self.abtest["algorithms"][algo]["id"]) - \
                       int(self.abtest["algorithms"][0]["id"])
@@ -389,7 +388,6 @@ class ABTestSimulation(threading.Thread):
                 #             f"current_day: {current_date}, algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k recommendations (BETWEEN {start_date} AND {prev_day}): {recommendations}")
                 #         D_prev_recommendations[-1][idx]
 
-
                 #         # top_k_over_time_statistics[idx].append(copy.deepcopy(top_k_over_time_statistics[idx][-1]))
 
                 #         # SELECT customer_id, array_to_string(array_agg(article_id), ' ') FROM test3 WHERE CAST(timestamp as DATE) BETWEEN '2020-01-01' and '2020-01-03' GROUP BY customer_id;
@@ -431,7 +429,6 @@ class ABTestSimulation(threading.Thread):
                 #              "parametervalue": ATTR_RATE})
                 #         self.database_connection.session.commit()
 
-
                 #         self.frontend_data.append(
                 #             f"algorithm {algo}: CTR: {CTR}, ATTR_RATE: {ATTR_RATE}, top_k random: {top_k_random}")
 
@@ -452,9 +449,6 @@ class ABTestSimulation(threading.Thread):
 
                 # # -> degene die dan overeenkomen tellen we mee (COUNT)
 
-
-
-
                 elif self.abtest["algorithms"][algo]["name"] == "Recency":
 
                     if n_day:
@@ -464,7 +458,8 @@ class ABTestSimulation(threading.Thread):
                                 dt_current_date - dynamic_info_algorithms[idx]["dt_start_RetrainInterval"]).days
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme                     x natural JOIN purchase t natural join article a ORDER BY bought_on
-                            top_k = self.database_connection.session.execute(f"SELECT unique_article_id, MIN(bought_on) FROM purchase natural join article WHERE bought_on <= '{prev_day}' and dataset_name = 'H_M' GROUP BY unique_article_id ORDER BY MIN(bought_on) DESC LIMIT {k}").fetchall()
+                            top_k = self.database_connection.session.execute(
+                                f"SELECT unique_article_id, MIN(bought_on) FROM purchase natural join article WHERE bought_on <= '{prev_day}' and dataset_name = 'H_M' GROUP BY unique_article_id ORDER BY MIN(bought_on) DESC LIMIT {k}").fetchall()
                             top_k_items = []
                             for i in range(len(top_k)):
                                 top_k_items.append(top_k[i][0])
@@ -481,18 +476,22 @@ class ABTestSimulation(threading.Thread):
 
                         local_start_active_users = start_active_users
 
-                        while (local_start_active_users+1 < active_users_length) and (active_users[local_start_active_users+1][0] == active_users[local_start_active_users][0]):
+                        while (local_start_active_users + 1 < active_users_length) and (
+                                active_users[local_start_active_users + 1][0] == active_users[local_start_active_users][
+                            0]):
                             lylist.append([active_users[local_start_active_users][1], statistics_id])
                             # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                             for vv in range(k):
-                                lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
+                                lxlist.append(
+                                    [vv + 1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
                                 # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
                             local_start_active_users += 1
                         lylist.append([active_users[local_start_active_users][1], statistics_id])
                         # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                         for vv in range(k):
-                                lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
-                                # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
+                            lxlist.append(
+                                [vv + 1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
+                            # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
                         local_start_active_users += 1
                         start_active_users_next = local_start_active_users
 
@@ -509,31 +508,34 @@ class ABTestSimulation(threading.Thread):
 
                         local_start_active_users = start_active_users
 
-                        while (local_start_active_users+1 < active_users_length) and (active_users[local_start_active_users+1][0] == active_users[local_start_active_users][0]):
+                        while (local_start_active_users + 1 < active_users_length) and (
+                                active_users[local_start_active_users + 1][0] == active_users[local_start_active_users][
+                            0]):
                             lylist.append([active_users[local_start_active_users][1], statistics_id])
                             # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                             for vv in range(k):
-                                lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_random[vv]])
+                                lxlist.append([vv + 1, active_users[local_start_active_users][1], statistics_id,
+                                               top_k_random[vv]])
                                 # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
                             local_start_active_users += 1
                         lylist.append([active_users[local_start_active_users][1], statistics_id])
                         # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                         for vv in range(k):
-                                lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_random[vv]])
-                                # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
+                            lxlist.append(
+                                [vv + 1, active_users[local_start_active_users][1], statistics_id, top_k_random[vv]])
+                            # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
                         local_start_active_users += 1
                         start_active_users_next = local_start_active_users
 
                         dfy = pd.DataFrame(lylist)
                         dfx = pd.DataFrame(lxlist)
 
-                            # for vv in range(k):
-                            #     self.database_connection.session.execute(
-                            #         "INSERT INTO recommendation(recommendation_id, unique_customer_id, statistics_id, unique_article_id) VALUES(:recommendation_id, :unique_customer_id, :statistics_id, :unique_article_id)",
-                            #         {
-                            #             "recommendation_id": vv + 1, "unique_customer_id": unique_customer_id,
-                            #             "statistics_id": statistics_id, "unique_article_id": top_k_random[vv]})
-
+                        # for vv in range(k):
+                        #     self.database_connection.session.execute(
+                        #         "INSERT INTO recommendation(recommendation_id, unique_customer_id, statistics_id, unique_article_id) VALUES(:recommendation_id, :unique_customer_id, :statistics_id, :unique_article_id)",
+                        #         {
+                        #             "recommendation_id": vv + 1, "unique_customer_id": unique_customer_id,
+                        #             "statistics_id": statistics_id, "unique_article_id": top_k_random[vv]})
 
                         # train Recency algoritme to initialize it:
 
@@ -567,7 +569,8 @@ class ABTestSimulation(threading.Thread):
                         if (retrain > int(self.abtest["algorithms"][algo]["parameters"]['RetrainInterval'])):
                             # retrain interval bereikt => bereken nieuwe topk voor specifieke algoritme
 
-                            top_k = self.database_connection.session.execute(f"SELECT unique_article_id, count(*) times_bought FROM purchase natural join article WHERE bought_on BETWEEN '{start_date}' AND '{current_date}'::date AND dataset_name = '{dataset_name}' GROUP BY unique_article_id ORDER BY times_bought DESC LIMIT {k}").fetchall()
+                            top_k = self.database_connection.session.execute(
+                                f"SELECT unique_article_id, count(*) times_bought FROM purchase natural join article WHERE bought_on BETWEEN '{start_date}' AND '{current_date}'::date AND dataset_name = '{dataset_name}' GROUP BY unique_article_id ORDER BY times_bought DESC LIMIT {k}").fetchall()
 
                             top_k_items = []
                             for i in range(len(top_k)):
@@ -586,18 +589,22 @@ class ABTestSimulation(threading.Thread):
 
                             local_start_active_users = start_active_users
 
-                            while (local_start_active_users+1 < active_users_length) and (active_users[local_start_active_users+1][0] == active_users[local_start_active_users][0]):
+                            while (local_start_active_users + 1 < active_users_length) and (
+                                    active_users[local_start_active_users + 1][0] ==
+                                    active_users[local_start_active_users][0]):
                                 lylist.append([active_users[local_start_active_users][1], statistics_id])
                                 # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                                 for vv in range(k):
-                                    lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
+                                    lxlist.append([vv + 1, active_users[local_start_active_users][1], statistics_id,
+                                                   top_k_items[vv]])
                                     # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
                                 local_start_active_users += 1
                             lylist.append([active_users[local_start_active_users][1], statistics_id])
                             # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                             for vv in range(k):
-                                    lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
-                                    # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
+                                lxlist.append(
+                                    [vv + 1, active_users[local_start_active_users][1], statistics_id, top_k_items[vv]])
+                                # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
                             local_start_active_users += 1
                             start_active_users_next = local_start_active_users
 
@@ -607,24 +614,28 @@ class ABTestSimulation(threading.Thread):
                     else:
                         top_k_random = generateRandomTopK(
                             all_unique_item_ids, k)
-                        
+
                         lxlist = []
                         lylist = []
 
                         local_start_active_users = start_active_users
 
-                        while (local_start_active_users+1 < active_users_length) and (active_users[local_start_active_users+1][0] == active_users[local_start_active_users][0]):
+                        while (local_start_active_users + 1 < active_users_length) and (
+                                active_users[local_start_active_users + 1][0] == active_users[local_start_active_users][
+                            0]):
                             lylist.append([active_users[local_start_active_users][1], statistics_id])
                             # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                             for vv in range(k):
-                                lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_random[vv]])
+                                lxlist.append([vv + 1, active_users[local_start_active_users][1], statistics_id,
+                                               top_k_random[vv]])
                                 # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
                             local_start_active_users += 1
                         lylist.append([active_users[local_start_active_users][1], statistics_id])
                         # self.database_connection.session.execute("INSERT INTO customer_specific_statistics(unique_customer_id, statistics_id) VALUES(:unique_customer_id, :statistics_id)",{"unique_customer_id": active_users[start_active_users][1], "statistics_id": statistics_id})
                         for vv in range(k):
-                                lxlist.append([vv+1, active_users[local_start_active_users][1], statistics_id, top_k_random[vv]])
-                                # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
+                            lxlist.append(
+                                [vv + 1, active_users[local_start_active_users][1], statistics_id, top_k_random[vv]])
+                            # self.insertRecommendation(recommendation_id=vv+1, unique_customer_id=active_users[start_active_users][1], unique_article_id=top_k_items[vv], statistics_id=statistics_id)
                         local_start_active_users += 1
                         start_active_users_next = local_start_active_users
 
@@ -643,6 +654,7 @@ class ABTestSimulation(threading.Thread):
 
                 self.prev_progress = self.current_progress
                 self.current_progress = round(n_day / float(dayz), 2) * 100.0
+                report_progress_percentage(self.test_id, self.current_progress)
                 # self.sse.publish(self.current_progress, type='simulation_progress')
 
         self.done = True
@@ -652,4 +664,5 @@ class ABTestSimulation(threading.Thread):
         self.collectStatistics()
 
         self.current_progress = 100
+        report_progress_percentage(self.test_id, 100)
         return
